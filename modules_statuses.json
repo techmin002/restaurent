@@ -1,0 +1,16 @@
+{
+    "Setting": true,
+    "Blog": true,
+    "Api": true,
+    "Advertisement": true,
+    "Faq": true,
+    "Slider": true,
+    "Team": true,
+    "Testimonial": true,
+    "User": true,
+    "Vacancy": true,
+    "Expenses": true,
+    "Branch": true,
+    "Product": true,
+    "Restaurent": true
+}
