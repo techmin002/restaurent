@@ -36,10 +36,10 @@ class Order extends Model
     ];
     public function items()
 {
-    return $this->hasMany(OrderMenu::class);
+    return $this->hasMany(OrderMenu::class, 'order_id');
 }
 public function table() {
-    return $this->belongsTo(RestaurentTable::class);
+    return $this->belongsTo(RestaurentTable::class, 'table_id');
 }
 
 public function office() {

@@ -60,7 +60,7 @@
                                     <tbody>
                                         @foreach ($offices as $key => $office)
                                             @php
-                                                $url = url("office/order/{$office['id']}");
+                                                $url = route("office.order", $office->id);
 
                                             @endphp
                                             <tr>

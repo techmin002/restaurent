@@ -19,8 +19,7 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::with('items', 'table', 'office','customer')->get();
-        // dd($orders);
+        $orders = Order::with('items', 'table', 'office', 'customer')->get();
         return view('restaurent::orders.index', compact('orders'));
     }
 
@@ -37,7 +36,6 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'orderType' => 'required|in:dinein,takeaway,office',
             'menu_id' => 'required|array',
@@ -68,6 +66,7 @@ class OrderController extends Controller
                 'qty'          => $request->qty[$index] ?? 1,
             ]);
         }
+
         // $office = $order->office['name'];
         // $customer = $order->customer['name'];
         // $table = $order->table['name'];
@@ -82,6 +81,111 @@ class OrderController extends Controller
         // return redirect()->route('orders.index')->with('success', 'Order placed successfully!');
         return redirect()->back()->with('success', 'Order placed successfully!');
     }
+
+    public function office_orders_submit(Request $request)
+    {
+        $request->validate([
+            'orderType' => 'required|in:dinein,takeaway,office',
+            'menu_id' => 'required|array',
+            'qty' => 'required|array',
+        ]);
+        $order = Order::create([
+            'customer_id'    => $request->customer_id,
+            'order_type'     => $request->orderType,
+            'restaurent_id'     => auth()->user()->restaurent_id,
+            'created_by'     => auth()->user()->id,
+            'table_id'       => $request->table_id,
+            'office_id'      => $request->office_id,
+            'order_time'      => now(),
+            'discount_type'  => $request->discountType,
+            'discount_value' => $request->discountValue,
+            'discount_amount' => $request->discount_amount,
+            'sub_total' => $request->sub_total,
+            'grand_total' => $request->sub_total,
+            'delivery_charge' => $request->deliveryCharge,
+            'remarks'        => $request->remarks,
+            'status'         => 'pending', // or default
+        ]);
+        foreach ($request->menu_id as $index => $menuId) {
+            OrderMenu::create([
+                'order_id'     => $order->id,
+                'menu_id'      => $menuId,
+                'variation_id' => $request->variation_id[$index] ?? null,
+                'qty'          => $request->qty[$index] ?? 1,
+            ]);
+        }
+
+        // $office = $order->office['name'];
+        // $customer = $order->customer['name'];
+        // $table = $order->table['name'];
+        // $data = [
+        //     'office' => $office,
+        //     'customer' => $customer,
+        //     'table' => $table,
+        // ];
+        // broadcast(new OrderCreated($data))->toOthers();
+
+        // return response()->json(['success' => true]);
+        // return redirect()->route('orders.index')->with('success', 'Order placed successfully!');
+        return redirect()->back()->with('success', 'Order placed successfully!');
+    }
+
+    public function table_orders_submit(Request $request)
+    {
+        $restaurant_id = auth()->user()->restaurent_id;
+        $request->validate([
+            'orderType' => 'required|in:dinein,takeaway,office',
+            'menu_id' => 'required|array',
+            'qty' => 'required|array',
+            'customer_phone' => 'required',
+            'customer_name' => 'required',
+        ]);
+
+        // Handle customer creation/retrieval
+        $customer = Customer::where('phone', $request->customer_phone)
+            ->where('restaurent_id', $restaurant_id)
+            ->first();
+
+        if (!$customer) {
+            // Create new customer for this restaurant
+            $customer = Customer::create([
+                'name' => $request->customer_name,
+                'phone' => $request->customer_phone,
+                'email' => $request->customer_email,
+                'restaurent_id' => auth()->user()->restaurent_id,
+            ]);
+        }
+
+        $order = Order::create([
+            'customer_id'    => $customer->id, // Use the customer ID from above
+            'order_type'     => $request->orderType,
+            'restaurent_id'  => $request->restaurent_id,
+            'created_by'     => auth()->user()->id,
+            'table_id'       => $request->table_id,
+            'office_id'      => $request->office_id,
+            'order_time'     => now(),
+            'discount_type'  => $request->discountType,
+            'discount_value' => $request->discountValue,
+            'discount_amount' => $request->discount_amount,
+            'sub_total' => $request->sub_total,
+            'grand_total' => $request->sub_total,
+            'delivery_charge' => $request->deliveryCharge,
+            'remarks'        => $request->remarks,
+            'status'         => 'pending',
+        ]);
+
+        foreach ($request->menu_id as $index => $menuId) {
+            OrderMenu::create([
+                'order_id'     => $order->id,
+                'menu_id'      => $menuId,
+                'variation_id' => $request->variation_id[$index] ?? null,
+                'qty'          => $request->qty[$index] ?? 1,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Order placed successfully!');
+    }
+
 
     /**
      * Show the specified resource.
@@ -123,15 +227,38 @@ class OrderController extends Controller
     }
     public function getCustomers()
     {
-        // Fetch all offices from DB
-        $customers = Customer::select('id', 'name')->get();
+        // Fetch customers for the current user's restaurant
+        $restaurantId = auth()->user()->restaurent_id;
+        $customers = Customer::where('restaurent_id', $restaurantId)
+            ->select('id', 'name', 'phone')
+            ->get();
+
         return response()->json($customers);
     }
-    public function getProducts(Request $request)
+    public function getProducts(Request $request, $id)
     {
+        $table = RestaurentTable::find($id);
         $query = $request->get('query', '');
         $products = Menu::where('name', 'LIKE', "%$query%")
+            ->where('restaurent_id', $table->restaurent_id)
             ->with('variations:id,menu_id,name,price')
+            ->get(['id', 'name', 'price']);
+
+        return response()->json($products);
+    }
+
+    public function getProductsByRestaurant(Request $request, $id)
+    {
+        $query = Menu::where('restaurent_id', $id);
+
+        // If table_id is provided, verify it belongs to the same restaurant
+        if ($request->has('table_id') && $request->table_id != 0) {
+            $table = RestaurentTable::find($request->table_id);
+            if ($table && $table->restaurent_id == $id) {
+            }
+        }
+
+        $products = $query->with('variations:id,menu_id,name,price')
             ->get(['id', 'name', 'price']);
 
         return response()->json($products);
@@ -155,32 +282,47 @@ class OrderController extends Controller
         $customer->save();
         return response()->json($customer);
     }
-    public function checkLatestOrder()
+    // Add this method to your controller
+    public function getCustomerRecentOrders($customerId)
     {
-        $order = Order::with(['table', 'office', 'orderItems.variation', 'orderItems.menu'])
-            ->where('restaurent_id', auth()->user()->restaurent_id)
-            ->where('status', 'pending')
-            ->orderBy('order_time', 'DESC')
-            ->first();
+        try {
+            $orders = Order::with(['table', 'items.menu', 'items.variation'])
+                ->where('customer_id', $customerId)
+                ->where('restaurent_id', auth()->user()->restaurent_id)
+                ->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready'])
+                ->orderBy('order_time', 'DESC')
+                ->limit(5)
+                ->get()
+                ->map(function ($order) {
+                    // Calculate total from items
+                    $calculatedTotal = $order->items->sum(function ($item) {
+                        $price = $item->variation->price ?? $item->menu->price ?? 0;
+                        return $price * $item->qty;
+                    });
 
-        if (!$order) {
-            return response()->json(['new' => false]);
+                    return [
+                        'id' => $order->id,
+                        'status' => $order->status,
+                        'order_time' => $order->order_time,
+                        'grand_total' => $order->grand_total, // From database
+                        'calculated_total' => $calculatedTotal, // Calculated from items
+                        'table_number' => optional($order->table)->table_number,
+                        'items' => $order->items->map(function ($item) {
+                            $price = $item->variation->price ?? $item->menu->price ?? 0;
+                            return [
+                                'item_name' => $item->menu->name ?? 'Unknown Item',
+                                'variation_name' => $item->variation->name ?? '',
+                                'qty' => $item->qty,
+                                'price' => $price
+                            ];
+                        })->toArray(),
+                    ];
+                });
+
+            return response()->json($orders);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching recent orders: ' . $e->getMessage());
+            return response()->json([], 500);
         }
-
-        $isRecent = \Carbon\Carbon::parse($order->order_time)->diffInSeconds(now()) <= 5;
-
-        return response()->json([
-            'new' => $isRecent,
-            'order_time' => $order->order_time,
-            'table_number' => optional($order->table)->table_number,
-            'office_name' => optional($order->office)->name,
-            'items' => $order->orderItems->map(function ($item) {
-                return [
-                    'item_name' => $item->menu->name ?? '',
-                    'variation_name' => $item->variation->name ?? '',
-                    'qty' => $item->qty
-                ];
-            }),
-        ]);
     }
 }

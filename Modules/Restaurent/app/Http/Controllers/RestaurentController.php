@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\Hash;
 use Modules\Restaurent\Models\Employee;
 use Spatie\Permission\Models\Role;
 use Modules\Restaurent\Models\Restaurent;
+use Modules\Restaurent\Models\Order;
+use Modules\Restaurent\Models\OfficeRegister;
+use Modules\Restaurent\Models\Menu;
+use Modules\Restaurent\Models\MenuVariation;
+use Modules\Restaurent\Models\Customer;
+use Modules\Restaurent\Models\RestaurentTable;
+
 
 class RestaurentController extends Controller
 {
@@ -140,5 +147,83 @@ class RestaurentController extends Controller
         }
         $branch->delete();
         return back()->with('success', 'Restaurent Deleted Successfully');
+    }
+
+    public function table_order($id)
+    {
+        $restaurent_table = RestaurentTable::where('id', $id)->first();
+        $orders = Order::with('items', 'table', 'office', 'customer')->get();
+        return view('restaurent::orders.order', compact('id', 'orders', 'restaurent_table'));
+    }
+
+    public function checkCustomerByPhone(Request $request)
+    {
+        $phone = $request->phone;
+        $restaurant_id = auth()->user()->restaurent_id;
+
+        $customer = Customer::where('phone', $phone)
+            ->where('restaurent_id', $restaurant_id)
+            ->first();
+
+        return response()->json([
+            'exists' => !is_null($customer),
+            'customer' => $customer
+        ]);
+    }
+
+    public function getRestaurantProducts(Request $request)
+    {
+        $restaurant_id = auth()->user()->restaurent_id;
+        $query = $request->query('query', '');
+
+        $products = Product::where('restaurent_id', $restaurant_id)
+            ->where('name', 'like', '%' . $query . '%')
+            ->get();
+
+        return response()->json($products);
+    }
+
+    public function getProductWithVariations($id)
+    {
+        $restaurant_id = auth()->user()->restaurent_id;
+
+        $product = Product::where('id', $id)
+            ->where('restaurent_id', $restaurant_id)
+            ->with('variations')
+            ->first();
+
+        if (!$product) {
+            return response()->json(['error' => 'Product not found'], 404);
+        }
+
+        return response()->json($product);
+    }
+
+    public function storeCustomer(Request $request)
+    {
+        $restaurant_id = auth()->user()->restaurent_id;
+
+        $customer = Customer::create([
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'restaurent_id' => $restaurant_id,
+        ]);
+
+        return response()->json($customer);
+    }
+    public function office_order(Request $request, $id)
+    {
+        $menus = Menu::where('restaurent_id', $id)->with('variations')->get();
+
+        $menusVariations = MenuVariation::where('restaurent_id', $id)->get();
+
+        $office = OfficeRegister::where('id', $id)->first();
+
+        if (!$office) {
+            abort(404, 'Office not found');
+        }
+
+        return view('restaurent::orders.office_order', compact('id', 'office', 'menus', 'menusVariations'));
     }
 }

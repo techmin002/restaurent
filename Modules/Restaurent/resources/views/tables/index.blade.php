@@ -60,8 +60,8 @@
                                     <tbody>
                                         @foreach ($tables as $key => $table)
                                             @php
-                                                $url = url("/order/{$table['id']}");
-
+                                                // $url = url("/order/{$table['id']}");
+                                                $url = route('tab.order', $table->id);
                                             @endphp
                                             <tr>
                                                 <td class="text-center">{{ $loop->iteration }}</td>

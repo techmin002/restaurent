@@ -73,9 +73,9 @@
 
                                                         @endphp
                                                         <tr>
-                                                            <td>{{ $variation->name }}</td>
+                                                            <td>{{ $variation->name?? $item->name }}</td>
                                                             <td>{{ $item->qty }}</td>
-                                                            <td>{{ $variation->price }}</td>
+                                                            <td>{{ $variation->price?? $item->price }}</td>
                                                         </tr>
                                                         @endforeach
                                                     </table>
