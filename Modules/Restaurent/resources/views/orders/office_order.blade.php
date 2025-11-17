@@ -4,292 +4,1143 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create Order | Office Management</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    @php
+        $profile = \Modules\Setting\Entities\CompanyProfile::first();
+    @endphp
+    <title>Office Orders || {{ $profile->company_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
         :root {
             --primary: #0d6efd;
-            --muted: #6c757d;
-            --card: #ffffff;
-            --bg: #f4f6f9;
-            --accent: #0b5ed7;
-            --glass: rgba(255, 255, 255, 0.9);
-            --radius: 12px;
+            --primary-dark: #0b5ed7;
+            --primary-light: #3d8bfd;
+            --secondary: #6c757d;
+            --success: #198754;
+            --info: #0dcaf0;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --card-bg: #ffffff;
+            --body-bg: #f4f6f9;
+            --sidebar-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            --gradient-success: linear-gradient(135deg, var(--success), #157347);
+            --gradient-danger: linear-gradient(135deg, var(--danger), #c82333);
+            --gradient-warning: linear-gradient(135deg, var(--warning), #e0a800);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         html,
         body {
             height: 100%;
-            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            background: var(--bg);
+            font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--body-bg);
+            color: var(--text-primary);
             margin: 0;
+            padding: 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        body {
+            padding-bottom: 80px;
         }
 
         .app-shell {
-            padding: 22px;
-            max-width: 1200px;
+            padding: 16px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
         .topnav {
-            background: linear-gradient(90deg, #0b4b8a, #063459);
+            background: var(--gradient-primary);
             color: #fff;
-            padding: 12px 18px;
-            border-radius: var(--radius);
+            padding: 12px 16px;
+            border-radius: var(--border-radius);
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
         }
 
         .topnav .brand {
             display: flex;
             align-items: center;
             gap: 12px;
+            flex: 1;
         }
 
         .topnav .logo {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            background: #fff;
-            color: var(--accent);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--border-radius-sm);
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
+            font-size: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .topnav .brand-text {
+            flex: 1;
+        }
+
+        .topnav .brand-text div:first-child {
+            font-weight: 700;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .topnav .brand-text .small-muted {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .topnav .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main {
+            padding: 0;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .topbar > div:first-child {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .topbar h3 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .topbar .small-muted {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            background: var(--card-bg);
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .card-footer {
+            background: transparent;
+            border-top: 1px solid var(--border-color);
+            padding: 12px 16px;
         }
 
         .small-muted {
-            color: var(--muted);
-            font-size: .9rem;
+            color: var(--text-muted);
+            font-size: .85rem;
         }
 
-        .card-shadow {
-            box-shadow: 0 6px 18px rgba(35, 47, 52, 0.06);
-            border-radius: var(--radius);
+        .order-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .menu-section {
+            order: 2;
+        }
+
+        .sidebar-section {
+            order: 1;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            z-index: 3;
+        }
+
+        .search-input {
+            padding-left: 48px;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color);
+            height: 42px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .category-nav-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .category-scroll {
+            display: flex;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            gap: 6px;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-nav {
+            display: flex;
+            gap: 6px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            flex-wrap: nowrap;
+        }
+
+        .category-nav .nav-link {
+            padding: 8px 12px;
+            border-radius: var(--border-radius-sm);
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: var(--transition);
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            border: 1px solid var(--border-color);
+            background: var(--light);
+            text-decoration: none;
+            display: block;
+        }
+
+        .category-nav .nav-link.active {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .menu-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .menu-item .card {
             border: 0;
-            background: var(--glass);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            overflow: hidden;
+            background: white;
+            height: 100%;
+            cursor: pointer;
         }
 
-        .card-header-prim {
-            background: linear-gradient(90deg, var(--primary), var(--accent));
+        .menu-item .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .menu-item .card-img-container {
+            position: relative;
+            overflow: hidden;
+            height: 120px;
+        }
+
+        .menu-item img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            transition: var(--transition);
+        }
+
+        .menu-item .card:hover img {
+            transform: scale(1.05);
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            z-index: 1;
+        }
+
+        .price-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            font-weight: 700;
             color: #fff;
-            border-top-left-radius: var(--radius);
-            border-top-right-radius: var(--radius);
-            padding: 14px 18px;
+            background: var(--gradient-danger);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            z-index: 1;
+        }
+
+        .card-body {
+            padding: 0.75rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+
+        .card-text {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            background: transparent;
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 0.75rem;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .qty-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.7rem;
+        }
+
+        .qty-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .qty-input {
+            width: 36px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 2px 4px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .add-to-cart-btn {
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: var(--border-radius-sm);
+            padding: 6px 10px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: white;
+            width: 100%;
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .recent-orders {
+            max-height: 200px;
+            overflow: auto;
+            padding: 10px;
+            background: var(--light);
+            border-radius: var(--border-radius-sm);
+            margin: 10px 0;
+            display: none;
+        }
+
+        .recent-orders .order-item {
+            padding: 8px;
+            border-radius: var(--border-radius-sm);
+            background: white;
+            margin-bottom: 6px;
+            border-left: 3px solid var(--primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .order-status {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #856404;
+        }
+
+        .status-preparing {
+            background: rgba(13, 110, 253, 0.2);
+            color: var(--primary);
+        }
+
+        .status-ready {
+            background: rgba(25, 135, 84, 0.2);
+            color: var(--success);
+        }
+
+        .status-completed {
+            background: rgba(108, 117, 125, 0.2);
+            color: var(--secondary);
+        }
+
+        .order-time {
+            font-size: 0.7rem;
+        }
+
+        .order-items {
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
+
+        .order-total {
+            font-size: 0.75rem;
+        }
+
+        .cart-sidebar {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: none;
+            position: sticky;
+            top: 16px;
+        }
+
+        .cart-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem;
+        }
+
+        .cart-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 12px;
+            transition: var(--transition);
+        }
+
+        .cart-item:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            font-size: 0.85rem;
+        }
+
+        .cart-item-details {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .cart-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .cart-qty-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: white;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .cart-qty-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .remove-btn {
+            color: var(--danger);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            transition: var(--transition);
+        }
+
+        .remove-btn:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .empty-cart {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .empty-cart-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .cart-footer {
+            background: var(--light);
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            font-size: 0.85rem;
+        }
+
+        .checkout-btn {
+            background: var(--gradient-success);
+            border: none;
+            border-radius: var(--border-radius-sm);
+            padding: 10px;
+            font-weight: 600;
+            width: 100%;
+            transition: var(--transition);
+            margin-top: 0.75rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .checkout-btn:hover {
+            background: #157347;
+            transform: translateY(-2px);
         }
 
         .order-summary {
             background: linear-gradient(180deg, #fff, #f8fafc);
-            padding: 14px;
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            margin-top: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 12px 16px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            gap: 4px;
+            transition: var(--transition);
+        }
+
+        .mobile-nav-item.active {
+            color: var(--primary);
+        }
+
+        .mobile-nav-item i {
+            font-size: 1.25rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 16px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .item-modal {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .item-modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .modal-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-description {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .variants-section {
+            margin-bottom: 1rem;
+        }
+
+        .variants-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .variants-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .variant-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .variant-option input[type="radio"] {
+            margin: 0;
+        }
+
+        .variant-option label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .modal-qty-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .modal-qty-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-qty-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-qty-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .modal-qty-input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 5px;
+            font-weight: 600;
+        }
+
+        .modal-add-to-cart-btn {
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: var(--border-radius-sm);
+            padding: 10px 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: white;
+            width: 100%;
+        }
+
+        .modal-add-to-cart-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 250px;
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .recent-orders-total {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
             border-radius: 10px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            border: 1px solid #90caf9;
+            box-shadow: 0 2px 6px rgba(33, 150, 243, 0.15);
+            display: none;
+        }
+
+        .recent-orders-total-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .recent-orders-total-label {
+            font-weight: 600;
+            color: #1565c0;
+            font-size: 0.9rem;
+        }
+
+        .recent-orders-total-value {
+            font-weight: 700;
+            color: #0d47a1;
+            font-size: 1rem;
+        }
+
+        .recent-orders-total-note {
+            font-size: 0.75rem;
+            color: #1976d2;
+            font-style: italic;
+        }
+
+        .combined-total {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            border: 1px solid #81c784;
+            box-shadow: 0 2px 6px rgba(76, 175, 80, 0.15);
+            display: none;
+        }
+
+        .combined-total-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .combined-total-label {
+            font-weight: 600;
+            color: #2e7d32;
+            font-size: 0.9rem;
+        }
+
+        .combined-total-value {
+            font-weight: 700;
+            color: #1b5e20;
+            font-size: 1.1rem;
+        }
+
+        .combined-total-note {
+            font-size: 0.75rem;
+            color: #388e3c;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .app-shell {
+                padding: 12px;
+            }
+
+            .mobile-bottom-nav {
+                display: block;
+            }
+
+            .topnav .brand-text div:first-child {
+                font-size: 0.8rem;
+            }
+
+            .topnav .brand-text .small-muted {
+                font-size: 0.7rem;
+            }
+
+            .menu-items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+            }
+
+            .cart-sidebar {
+                position: relative;
+                top: 0;
+            }
+
+            .order-summary {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .order-summary > div {
+                flex: 1;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .order-container {
+                flex-direction: row;
+            }
+
+            .menu-section {
+                order: 1;
+                flex: 1;
+            }
+
+            .sidebar-section {
+                order: 2;
+                width: 400px;
+                flex-shrink: 0;
+            }
+
+            .menu-items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 16px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .menu-items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
         }
 
         .btn-wide {
-            min-width: 140px;
+            min-width: 120px;
+        }
+
+        .text-info-Soft {
+            color: #0b76d1;
         }
 
         .badge-soft {
             background: rgba(11, 125, 209, 0.12);
-            color: var(--accent);
-            padding: .35rem .6rem;
+            color: var(--primary);
+            padding: .25rem .5rem;
             border-radius: .7rem;
             font-weight: 600;
+            font-size: 0.75rem;
         }
 
         footer {
-            padding: 18px;
+            padding: 1rem;
             text-align: center;
-            color: var(--muted);
-            font-size: .9rem;
+            color: var(--text-muted);
+            font-size: .8rem;
+            margin-top: 2rem;
         }
 
-        .cust-avatar {
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .mobile-bottom-nav {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .order-mode-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .mode-new {
+            background: rgba(25, 135, 84, 0.1);
+            color: var(--success);
+        }
+
+        .mode-update {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
+        }
+
+        .order-stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .office-avatar {
             width: 64px;
             height: 64px;
-            border-radius: 12px;
-            background: linear-gradient(180deg, #fff, #f1f6fb);
+            border-radius: var(--border-radius);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            color: var(--accent);
-            box-shadow: 0 6px 18px rgba(11, 93, 155, 0.08);
+            color: white;
+            box-shadow: var(--shadow);
             font-size: 1.4rem;
         }
 
-        .form-label.fw-600 {
-            font-weight: 600;
-        }
-
-        .itemRow .form-label {
-            font-size: .85rem;
-            color: var(--muted);
-        }
-
-        .visually-hidden {
-            position: absolute !important;
-            height: 1px;
-            width: 1px;
-            overflow: hidden;
-            clip: rect(1px, 1px, 1px, 1px);
-            white-space: nowrap;
-        }
-
-        .customer-section {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .discount-section {
-            background: #fff8e1;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-
-        /* Recent Orders Styling */
-        .recent-orders {
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 16px;
-            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
-            border-radius: 12px;
-            margin: 16px;
-            border: 1px solid #e1e5ff;
-            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.08);
-            display: none;
-        }
-
-        .recent-orders-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e1e5ff;
-        }
-
-        .recent-orders-header h6 {
-            margin: 0;
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .recent-orders-count {
-            background: var(--primary);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .recent-orders .order-item {
-            padding: 12px;
-            border-radius: 10px;
-            background: white;
-            margin-bottom: 10px;
+        .office-info-card {
+            background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
             border-left: 4px solid var(--primary);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .recent-orders .order-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .recent-orders .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .recent-orders .order-id {
-            font-size: 0.9rem;
-            color: var(--primary);
-        }
-
-        .recent-orders .order-status {
-            font-size: 0.75rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .recent-orders .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .recent-orders .status-preparing {
-            background: #cce7ff;
-            color: #004085;
-        }
-
-        .recent-orders .status-ready {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .recent-orders .status-completed {
-            background: #d1f7e4;
-            color: #0f5132;
-        }
-
-        .recent-orders .order-time {
-            font-size: 0.8rem;
-            color: var(--muted);
-            margin-bottom: 8px;
-        }
-
-        .recent-orders .order-items {
-            font-size: 0.85rem;
-            color: var(--muted);
-            line-height: 1.4;
-        }
-
-        .recent-orders .order-total {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 6px;
-            text-align: right;
-        }
-
-        @media (max-width: 768px) {
-            .topnav {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+        .office-order-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
         }
     </style>
 </head>
 
 <body>
     <div class="app-shell">
+        <!-- Top Navigation -->
         <div class="topnav">
             <div class="brand">
-                <div class="logo">R</div>
-                <div>
-                    <div style="font-weight:700">BG RestroCare</div>
-                    <div class="small-muted">Office Orders</div>
+                <div class="logo">O</div>
+                <div class="brand-text">
+                    <div>BG RestroCare</div>
+                    <div class="small-muted">Office Orders Panel</div>
                 </div>
             </div>
-
-            <div class="d-flex align-items-center gap-3">
+            <div class="actions">
                 <div class="small-muted d-none d-md-block text-end me-2">
                     <div>Hello, Admin</div>
                     <div class="small-muted">Today: {{ \Carbon\Carbon::now()->format('d M, Y') }}</div>
@@ -299,348 +1150,365 @@
             </div>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <main class="main">
-            <div class="topbar d-flex justify-content-between align-items-center mb-3">
+            <div class="topbar">
                 <div>
-                    <h3 class="mb-0">Create New Order</h3>
-                    <div class="small-muted">Make an order from office for delivery</div>
+                    <h3 class="mb-0">Create Office Order</h3>
+                    <div class="small-muted d-flex align-items-center gap-2">
+                        <span id="orderModeText">Create new office delivery orders</span>
+                        <span id="orderModeIndicator" class="order-mode-indicator mode-new d-none">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>NEW ORDER</span>
+                        </span>
+                    </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
+                    <div class="small-muted text-end me-2 d-md-none">
+                        <div>Hello, Admin</div>
+                        <div class="small-muted">Today: {{ \Carbon\Carbon::now()->format('d M, Y') }}</div>
+                    </div>
                     <button class="btn btn-outline-secondary btn-sm"><i class="fa-regular fa-bell"></i></button>
-                    <span class="badge-soft">Office Order</span>
+                    <button class="btn btn-primary btn-sm btn-wide" onclick="window.location.reload()">
+                        <i class="fa-solid fa-plus me-1"></i>New
+                    </button>
                 </div>
             </div>
 
-            <div class="row g-4">
-                <!-- Office Details (left) -->
-                <div class="col-lg-5">
-                    <div class="card card-shadow">
-                        <div class="card-header-prim">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <h5 class="mb-0">Office Details</h5>
-                                    <small class="small-muted">Auto-filled for this office</small>
-                                </div>
-                                <div class="small-muted">Office Info</div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex gap-3 align-items-center mb-3">
-                                <div class="cust-avatar"><i class="fa-solid fa-building"></i></div>
-                                <div>
-                                    <h6 class="mb-0">{{ $office->name ?? 'N/A' }}</h6>
-                                    <div class="small-muted">{{ $office->address ?? 'Address not available' }}</div>
-                                </div>
-                            </div>
-
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    <label class="form-label fw-600">Office Name</label>
-                                    <input type="text" class="form-control" value="{{ $office->name ?? 'N/A' }}"
-                                        readonly>
-                                </div>
-
-                                <div class="col-12">
-                                    <label class="form-label fw-600">Office Phone</label>
-                                    <input type="text" class="form-control"
-                                        value="{{ $office->contact_numbers ?? 'N/A' }}" readonly>
-                                </div>
-
-                                <div class="col-12">
-                                    <label class="form-label fw-600">Location</label>
-                                    <input type="text" class="form-control" value="{{ $office->address ?? 'N/A' }}"
-                                        readonly>
-                                </div>
-
-                                <div class="col-12 mt-2">
-                                    <div class="small-muted">Restaurant:
-                                        <strong>{{ $office->restaurent->name ?? ($office->restaurent_id ?? 'N/A') }}</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Order Stats -->
+            <div class="order-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="cart-items-count">0</div>
+                    <div class="stat-label">Items</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="cart-subtotal-value">Rs 0.00</div>
+                    <div class="stat-label">Subtotal</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="cart-total-value">Rs 0.00</div>
+                    <div class="stat-label">Total</div>
+                </div>
+            </div>
 
-                <!-- Order Details (right) -->
-                <div class="col-lg-7">
-                    <div class="card card-shadow">
-                        <div class="card-header-prim">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <h5 class="mb-0">Order Details</h5>
-                                <div class="small-muted">Create items and place order</div>
+            <!-- DYNAMIC FORM -->
+            <form id="orderForm" action="{{ route('office.orders.submit') }}" method="post">
+                @csrf
+                <input type="hidden" name="office_id" value="{{ $office->id ?? '' }}">
+                <input type="hidden" name="restaurent_id" value="{{ $office->restaurent_id ?? '' }}">
+                <input type="hidden" name="created_by" value="{{ auth()->id() ?? 1 }}">
+                <input type="hidden" name="order_from" value="web">
+                <input type="hidden" name="order_time" value="{{ now() }}">
+                <input type="hidden" id="order_id" name="order_id" value="">
+                <input type="hidden" name="orderType" value="office">
+                
+                <div class="order-container">
+                    <!-- Menu Section -->
+                    <div class="menu-section">
+                        <!-- Search Bar -->
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input id="search-input" class="form-control search-input" type="search"
+                                placeholder="Search office menu items..." aria-label="Search">
+                        </div>
+
+                        <!-- Categories Navigation -->
+                        <div class="category-nav-container">
+                            <h6 class="mb-2">Categories</h6>
+                            <div class="category-scroll">
+                                <ul class="category-nav">
+                                    <li>
+                                        <a class="nav-link active" data-category="all">All Items</a>
+                                    </li>
+                                    @foreach ($categories as $category)
+                                        <li>
+                                            <a class="nav-link" data-category="{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
                             </div>
                         </div>
 
-                        <form id="orderForm" action="{{ route('office.orders.submit') }}" method="post">
-                            @csrf
-                            <!-- Hidden fields for order data -->
-                            <input type="hidden" name="office_id" value="{{ $office->id ?? '' }}">
-                            <input type="hidden" name="restaurent_id" value="{{ $office->restaurent_id ?? '' }}">
-                            <input type="hidden" name="created_by" value="{{ auth()->id() ?? 1 }}">
-                            <input type="hidden" name="orderType" value="office">
-                            <input type="hidden" name="order_from" value="web">
-                            <input type="hidden" name="order_time" value="{{ now() }}">
-
-                            <div class="card-body">
-                                <!-- Recent Orders Section -->
-                                <div id="recentOrdersContainer" class="recent-orders"></div>
-
-                                <!-- Customer Section -->
-                                <div class="customer-section">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="mb-0">Customer Information</h6>
-                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#addCustomerModal">
-                                            <i class="fa-solid fa-plus me-1"></i> Add Customer
-                                        </button>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="customerName" class="form-label">Select Customer</label>
-                                        <select class="form-control" id="customerName" name="customer_id" required>
-                                            <option value="">-- Select Customer --</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Items Section -->
-                                <div id="itemsContainer">
-                                    <div class="d-flex justify-content-between align-items-end mb-3">
-                                        <div>
-                                            <h6 class="mb-0">Order Items</h6>
-                                            <small class="small-muted">Select menu items & variations</small>
+                        <!-- Menu Items Grid -->
+                        <div class="menu-items-grid" id="menu-items">
+                            @foreach ($menus as $item)
+                                <div class="menu-item"
+                                    data-category="{{ $item->category_id }}" 
+                                    data-name="{{ strtolower($item->name) }}">
+                                    <div class="card h-100">
+                                        <div class="card-img-container">
+                                            <img src="{{ asset('upload/images/menu/' . $item['image']) }}"
+                                                alt="{{ $item->name }}" class="item-image" data-id="{{ $item->id }}">
+                                            <span class="category-badge">{{ $item->category_name }}</span>
+                                            <span class="price-badge">Rs {{ number_format($item->price, 2) }}</span>
                                         </div>
-                                        <div>
-                                            <button type="button" id="addItemBtn" class="btn btn-success btn-sm">
-                                                <i class="fa-solid fa-plus me-1"></i> Add Item
-                                            </button>
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ $item->name }}</h6>
+                                            <p class="card-text">{{ Str::limit($item->description, 60) }}</p>
                                         </div>
-                                    </div>
-
-                                    <!-- Initial Item Row -->
-                                    <div class="itemRow row g-2 align-items-end mb-2">
-                                        <div class="col-md-5">
-                                            <label class="form-label small-muted">Item</label>
-                                            <select class="form-control item-search" name="menu_id[]" required>
-                                                <option value="">-- Select Item --</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label small-muted">Variation</label>
-                                            <div class="variation-container">
-                                                <select class="form-control item-variation" name="variation_id[]"
-                                                    required>
-                                                    <option value="">Select Variation</option>
-                                                </select>
+                                        <div class="card-footer">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <div class="qty-control">
+                                                    <button class="qty-btn minus" data-id="{{ $item->id }}">-</button>
+                                                    <input type="number" min="1" value="1" class="qty-input"
+                                                        id="qty-{{ $item->id }}">
+                                                    <button class="qty-btn plus" data-id="{{ $item->id }}">+</button>
+                                                </div>
+                                                <button type="button" class="add-to-cart-btn"
+                                                    data-id="{{ $item->id }}" 
+                                                    data-name="{{ $item->name }}"
+                                                    data-price="{{ $item->price }}"
+                                                    data-description="{{ $item->description }}"
+                                                    data-image="{{ asset('upload/images/menu/' . $item['image']) }}"
+                                                    data-has-variants="{{ $item->variations && count($item->variations) > 0 ? 'true' : 'false' }}">
+                                                    <i class="fas fa-cart-plus me-1"></i> Add
+                                                </button>
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small-muted">Qty</label>
-                                            <input type="number" name="qty[]" class="form-control item-qty"
-                                                placeholder="Qty" min="1" value="1" required>
-                                        </div>
-                                        <div class="col-md-1 text-end">
-                                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove"
-                                                title="Remove">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </div>
                                     </div>
                                 </div>
+                            @endforeach
+                        </div>
+                    </div>
 
+                    <!-- Sidebar Section -->
+                    <div class="sidebar-section">
+                        <!-- Office Details Card -->
+                        <div class="card customer-card">
+                            <div class="card-header office-order-header">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="mb-0">Office Details</h6>
+                                        <small class="small-muted">Auto-filled for this office</small>
+                                    </div>
+                                    <div class="office-avatar">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
                                 <div class="mb-3">
-                                    <label class="form-label">Remarks / Message</label>
-                                    <textarea class="form-control" id="remarks" name="remarks" rows="2"
-                                        placeholder="Any special instructions..."></textarea>
+                                    <label class="form-label fw-600">Office Name</label>
+                                    <input type="text" class="form-control" value="{{ $office->name ?? 'N/A' }}" readonly>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-600">Office Phone</label>
+                                    <input type="text" class="form-control" value="{{ $office->contact_numbers ?? 'N/A' }}" readonly>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-600">Location</label>
+                                    <input type="text" class="form-control" value="{{ $office->address ?? 'N/A' }}" readonly>
                                 </div>
 
-                                <div
-                                    class="order-summary d-flex gap-3 align-items-center justify-content-between mt-3">
+                                <!-- Recent Orders Container -->
+                                <div id="recentOrdersContainer" class="recent-orders"></div>
+
+                                <!-- Order Remarks -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-600">Order Remarks</label>
+                                    <textarea class="form-control" id="order_remarks" name="remarks" rows="2" placeholder="Any special instructions for this office order..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cart Sidebar -->
+                        <div class="card cart-sidebar">
+                            <div class="cart-header office-order-header">
+                                <h6 class="mb-0">Office Order</h6>
+                                <small id="cart-count">0 items</small>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="cart-items-list" style="max-height: 300px; overflow-y: auto;">
+                                    <div class="empty-cart">
+                                        <div class="empty-cart-icon">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </div>
+                                        <p>Your cart is empty</p>
+                                        <small class="text-muted">Add items to create an order</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="cart-footer">
+                                <div class="total-row">
+                                    <span>Subtotal</span>
+                                    <span id="cart-subtotal">Rs 0.00</span>
+                                </div>
+                                <div class="total-row">
+                                    <span>Discount</span>
+                                    <span id="cart-discount">Rs 0.00</span>
+                                </div>
+                                <div class="total-row" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                                    <strong>Total</strong>
+                                    <strong id="cart-total">Rs 0.00</strong>
+                                </div>
+
+                                <!-- Recent Orders Total Display -->
+                                <div class="recent-orders-total" id="recent-orders-total">
+                                    <div class="recent-orders-total-header">
+                                        <span class="recent-orders-total-label">Recent Orders Total</span>
+                                        <span class="recent-orders-total-value" id="recent-orders-total-value">Rs 0.00</span>
+                                    </div>
+                                    <div class="recent-orders-total-note">Total from previous orders</div>
+                                </div>
+
+                                <!-- Combined Total Display -->
+                                <div class="combined-total" id="combined-total">
+                                    <div class="combined-total-header">
+                                        <span class="combined-total-label">Combined Total</span>
+                                        <span class="combined-total-value" id="combined-total-value">Rs 0.00</span>
+                                    </div>
+                                    <div class="combined-total-note">Current order + Recent orders</div>
+                                </div>
+
+                                <div class="order-summary d-flex align-items-center justify-content-between mt-3">
                                     <div>
                                         <div class="small-muted">Current Order</div>
-                                        <h4 id="totalAmount" class="mb-0">0.00</h4>
+                                        <h5 id="totalAmount" class="mb-0">0.00</h5>
                                     </div>
                                     <div>
-                                        <div class="small-muted">Recent Orders</div>
-                                        <h5 id="recentOrdersTotal" class="mb-0">0.00</h5>
-                                    </div>
-                                    <div>
-                                        <div class="small-muted">Grand Total</div>
-                                        <h3 id="grandTotal" class="mb-0 text-success">0.00</h3>
-                                    </div>
-                                    <div class="ms-3">
-                                        <button type="submit" class="btn btn-primary btn-wide">
-                                            <i class="fa-solid fa-check me-1"></i> Place Order
+                                        <button type="submit" id="submitBtn" class="btn btn-primary btn-wide">
+                                            <i class="fa-solid fa-check me-1"></i> 
+                                            <span id="submitBtnText">Place Order</span>
                                         </button>
                                     </div>
                                 </div>
 
-                                <!-- Hidden inputs for calculated values -->
-                                <input type="hidden" name="sub_total" id="subTotalInput" value="0">
-                                <input type="hidden" name="discount_amount" id="discountAmountInput"
-                                    value="0">
-                                <input type="hidden" name="grand_total" id="grandTotalInput" value="0">
+                                <input type="hidden" name="sub_total" id="subTotalInput">
+                                <input type="hidden" name="discount_amount" id="discountAmountInput" value="0">
+                                <input type="hidden" name="grand_total" id="grandTotalInput">
+                                <input type="hidden" name="order_items" id="orderItemsInput">
+                                <input type="hidden" name="recent_orders_total" id="recentOrdersTotalInput" value="0">
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </form>
 
             <footer class="mt-4">
-                © {{ date('Y') }} Restaurant Admin • Crafted for operations
+                © {{ date('Y') }} Restaurant Admin • Crafted for office operations
             </footer>
         </main>
     </div>
 
-    <!-- Add Customer Modal -->
-    <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addCustomerModalLabel">Add New Customer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="#" class="mobile-nav-item active">
+                <i class="fas fa-utensils"></i>
+                <span>Menu</span>
+            </a>
+            <a href="#" class="mobile-nav-item">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Cart</span>
+                <span class="badge bg-danger" id="mobile-cart-count">0</span>
+            </a>
+            <a href="#" class="mobile-nav-item">
+                <i class="fas fa-building"></i>
+                <span>Office</span>
+            </a>
+            <a href="#" class="mobile-nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Item Modal for Variants -->
+    <div class="modal-overlay" id="item-modal">
+        <div class="item-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">Customize Item</h5>
+                <button type="button" id="close-modal" class="btn-close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" src="" alt="Item Image" class="modal-image">
+                <h4 id="modal-item-name" class="modal-title"></h4>
+                <div id="modal-item-price" class="modal-price"></div>
+                <p id="modal-item-description" class="modal-description"></p>
+                
+                <div id="variants-section" class="variants-section" style="display: none;">
+                    <h6 class="variants-title">Select Variant</h6>
+                    <div id="variants-container" class="variants-container"></div>
                 </div>
-                <form id="addCustomerForm">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="newCustomerName" class="form-label">Name *</label>
-                            <input type="text" class="form-control" id="newCustomerName" name="name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="newCustomerPhone" class="form-label">Phone</label>
-                            <input type="text" class="form-control" id="newCustomerPhone" name="phone">
-                        </div>
-                        <div class="mb-3">
-                            <label for="newCustomerEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="newCustomerEmail" name="email">
-                        </div>
+                
+                <div class="modal-qty-control">
+                    <div class="modal-qty-label">Quantity</div>
+                    <div class="modal-qty-buttons">
+                        <button class="modal-qty-btn" id="modal-minus">-</button>
+                        <input type="number" min="1" value="1" class="modal-qty-input" id="modal-qty">
+                        <button class="modal-qty-btn" id="modal-plus">+</button>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fa-solid fa-save me-1"></i> Save Customer
-                        </button>
-                    </div>
-                </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-add-to-cart-btn" id="modal-add-to-cart">
+                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- JS: jQuery and Bootstrap bundle -->
+    <!-- JS: jQuery, Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Global variables
-        let customers = [];
-        let products = [];
+        // Enhanced Office Order Management System
         let userRestaurantId = "{{ $office->restaurent_id ?? '' }}";
         let recentOrdersTotal = 0;
+        let existingOrderId = null;
+        let isUpdateMode = false;
+        const cart = [];
 
-        // Initialize the application
-        $(document).ready(function() {
-            fetchCustomers();
-            fetchProductsByRestaurant(userRestaurantId, $('.item-search'));
-            updateTotal();
-            hideRecentOrders();
-
-            // Initialize event listeners
-            initializeEventListeners();
-        });
-
-        // Fetch customers from API
-        function fetchCustomers() {
-            console.log('Fetching customers from:', '/api/customers');
-
-            $.ajax({
-                url: '/api/customers',
-                method: 'GET',
-                success: function(data) {
-                    console.log('Customers API response:', data);
-                    customers = data;
-
-                    if (data && data.length > 0) {
-                        populateCustomerSelect(data);
-                    } else {
-                        console.log('No customers found in response');
-                        // Add fallback dummy data
-                        const dummyCustomers = [{
-                                id: 1,
-                                name: 'John Doe',
-                                phone: '123-456-7890'
-                            },
-                            {
-                                id: 2,
-                                name: 'Jane Smith',
-                                phone: '098-765-4321'
-                            },
-                            {
-                                id: 3,
-                                name: 'Robert Johnson',
-                                phone: '555-123-4567'
-                            }
-                        ];
-                        populateCustomerSelect(dummyCustomers);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Failed to fetch customers:', error);
-                    console.log('Status:', status);
-                    console.log('XHR response:', xhr.responseText);
-
-                    // Add fallback dummy data
-                    const dummyCustomers = [{
-                            id: 1,
-                            name: 'John Doe',
-                            phone: '123-456-7890'
-                        },
+        // Variants data from backend
+        const variantsData = {};
+        @foreach ($menus as $item)
+            @if ($item->variations && count($item->variations) > 0)
+                variantsData[{{ $item->id }}] = [
+                    @foreach ($item->variations as $variant)
                         {
-                            id: 2,
-                            name: 'Jane Smith',
-                            phone: '098-765-4321'
+                            id: '{{ $variant->id }}',
+                            name: '{{ $variant->name }}',
+                            price: {{ $variant->price }}
                         },
-                        {
-                            id: 3,
-                            name: 'Robert Johnson',
-                            phone: '555-123-4567'
-                        }
-                    ];
-                    populateCustomerSelect(dummyCustomers);
-                }
-            });
-        }
+                    @endforeach
+                ];
+            @endif
+        @endforeach
 
-        // Populate customer select dropdown
-        function populateCustomerSelect(customerList) {
-            const customerSelect = $('#customerName');
-            customerSelect.empty().append('<option value="">-- Select Customer --</option>');
+        // Current item being viewed in modal
+        let currentModalItem = null;
 
-            if (customerList && customerList.length > 0) {
-                console.log('Populating customers:', customerList.length, 'customers found');
-                customerList.forEach(customer => {
-                    const displayText = customer.phone ?
-                        `${customer.name} - ${customer.phone}` : customer.name;
-                    customerSelect.append(
-                        `<option value="${customer.id}">${displayText}</option>`
-                    );
-                });
-            } else {
-                console.log('No customers to populate');
-                customerSelect.append('<option value="">No customers found</option>');
-            }
-        }
+        // Modal elements
+        const modalOverlay = document.getElementById('item-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalItemName = document.getElementById('modal-item-name');
+        const modalItemPrice = document.getElementById('modal-item-price');
+        const modalItemDescription = document.getElementById('modal-item-description');
+        const variantsSection = document.getElementById('variants-section');
+        const variantsContainer = document.getElementById('variants-container');
+        const modalMinusBtn = document.getElementById('modal-minus');
+        const modalPlusBtn = document.getElementById('modal-plus');
+        const modalQtyInput = document.getElementById('modal-qty');
+        const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
 
-        // Fetch recent orders for selected customer
-        function fetchRecentOrders(customerId) {
-            if (!customerId) {
-                hideRecentOrders();
-                return;
-            }
+        // Function to fetch recent orders for office
+        function fetchRecentOrders() {
+            console.log('Fetching recent orders for office: {{ $office->id ?? '' }}');
 
-            console.log('Fetching recent orders for customer:', customerId);
-
-            fetch(`/api/customers/${customerId}/recent-orders`, {
+            fetch(`/api/office/{{ $office->id ?? '' }}/recent-orders`, {
                     method: 'GET',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -657,14 +1525,29 @@
                 .then(data => {
                     console.log('Recent orders received:', data);
                     displayRecentOrders(data);
+
+                    if (data && data.length > 0) {
+                        const incompleteOrder = data.find(order =>
+                            order.status === 'pending' || order.status === 'confirmed' || order.status === 'preparing'
+                        );
+
+                        if (incompleteOrder) {
+                            setUpdateMode(incompleteOrder.id);
+                        } else {
+                            setNewOrderMode();
+                        }
+                    } else {
+                        setNewOrderMode();
+                    }
                 })
                 .catch(error => {
                     console.error('Error fetching recent orders:', error);
                     hideRecentOrders();
+                    setNewOrderMode();
                 });
         }
 
-        // Display recent orders
+        // Function to display recent orders with totals
         function displayRecentOrders(orders) {
             const container = $('#recentOrdersContainer');
 
@@ -676,30 +1559,22 @@
                 return;
             }
 
-            let html = `
-                <div class="recent-orders-header">
-                    <h6><i class="fas fa-history me-2"></i>Recent Incomplete Orders</h6>
-                    <span class="recent-orders-count">${orders.length} orders</span>
-                </div>
-            `;
-
+            let html = '<h6 class="mb-3"><i class="fas fa-history me-2"></i>Recent Office Orders</h6>';
             recentOrdersTotal = 0;
 
             orders.forEach(order => {
                 const statusClass = getStatusClass(order.status);
                 const orderTime = new Date(order.order_time).toLocaleString();
-                
-                // Use grand_total from the order (preferred) or calculated_total as fallback
                 const orderTotal = order.grand_total || order.calculated_total || 0;
                 recentOrdersTotal += orderTotal;
 
                 html += `
                     <div class="order-item">
                         <div class="order-header">
-                            <span class="order-id">Order #${order.id}</span>
-                            <span class="order-status ${statusClass}">${order.status.toUpperCase()}</span>
+                            <span>Order #${order.id}</span>
+                            <span class="order-status ${statusClass}">${order.status}</span>
                         </div>
-                        <div class="order-time">
+                        <div class="order-time small text-muted mb-2">
                             <i class="fas fa-clock me-1"></i>${orderTime}
                         </div>
                         <div class="order-items">
@@ -710,13 +1585,8 @@
                                 : 'No items'
                             }
                         </div>
-                        ${order.table_number ? `
-                            <div class="order-location">
-                                <i class="fas fa-table me-1"></i>Table: ${order.table_number}
-                            </div>
-                        ` : ''}
-                        <div class="order-total">
-                            Total: Rs. ${orderTotal.toFixed(2)}
+                        <div class="order-total small text-muted mt-2">
+                            <strong>Order Total: Rs. ${orderTotal.toFixed(2)}</strong>
                         </div>
                     </div>
                 `;
@@ -725,6 +1595,84 @@
             container.html(html).show();
             updateRecentOrdersTotalDisplay();
             updateOverallTotal();
+        }
+
+        // Function to hide recent orders container
+        function hideRecentOrders() {
+            $('#recentOrdersContainer').hide().html('');
+            recentOrdersTotal = 0;
+            updateRecentOrdersTotalDisplay();
+            updateOverallTotal();
+        }
+
+        // Update recent orders total display
+        function updateRecentOrdersTotalDisplay() {
+            const recentOrdersTotalValue = $('#recent-orders-total-value');
+            const recentOrdersTotalDisplay = $('#recent-orders-total');
+            const recentOrdersTotalInput = $('#recentOrdersTotalInput');
+
+            if (recentOrdersTotal > 0) {
+                recentOrdersTotalValue.text(`Rs ${recentOrdersTotal.toFixed(2)}`);
+                recentOrdersTotalDisplay.show();
+                recentOrdersTotalInput.val(recentOrdersTotal);
+            } else {
+                recentOrdersTotalDisplay.hide();
+                recentOrdersTotalInput.val(0);
+            }
+        }
+
+        // Update overall total (current order + recent orders)
+        function updateOverallTotal() {
+            const currentOrderTotal = parseFloat($('#totalAmount').text()) || 0;
+            const overallTotal = currentOrderTotal + recentOrdersTotal;
+
+            $('#grandTotalInput').val(overallTotal.toFixed(2));
+
+            const combinedTotalValue = $('#combined-total-value');
+            const combinedTotalDisplay = $('#combined-total');
+
+            if (recentOrdersTotal > 0) {
+                combinedTotalValue.text(`Rs ${overallTotal.toFixed(2)}`);
+                combinedTotalDisplay.show();
+            } else {
+                combinedTotalDisplay.hide();
+            }
+        }
+
+        // Set form to UPDATE mode
+        function setUpdateMode(orderId) {
+            isUpdateMode = true;
+            existingOrderId = orderId;
+
+            $('#orderForm').attr('action', '{{ route('office.orders.update') }}');
+            $('#order_id').val(orderId);
+
+            $('#orderModeText').html('Adding items to existing order');
+            $('#orderModeIndicator').removeClass('d-none mode-new').addClass('mode-update').html(
+                '<i class="fas fa-edit"></i><span>UPDATE MODE</span>'
+            );
+            $('#submitBtnText').text('Update Order');
+            $('#submitBtn').removeClass('btn-primary').addClass('btn-warning');
+
+            console.log('Switched to UPDATE mode for order:', orderId);
+        }
+
+        // Set form to NEW ORDER mode
+        function setNewOrderMode() {
+            isUpdateMode = false;
+            existingOrderId = null;
+
+            $('#orderForm').attr('action', '{{ route('office.orders.submit') }}');
+            $('#order_id').val('');
+
+            $('#orderModeText').text('Create new office delivery orders');
+            $('#orderModeIndicator').removeClass('d-none mode-update').addClass('mode-new').html(
+                '<i class="fas fa-plus-circle"></i><span>NEW ORDER</span>'
+            );
+            $('#submitBtnText').text('Place Order');
+            $('#submitBtn').removeClass('btn-warning').addClass('btn-primary');
+
+            console.log('Switched to NEW ORDER mode');
         }
 
         // Helper function to get status class
@@ -739,399 +1687,443 @@
             return statusMap[status] || 'status-pending';
         }
 
-        // Hide recent orders container
-        function hideRecentOrders() {
-            $('#recentOrdersContainer').hide().html('');
-            recentOrdersTotal = 0;
-            updateRecentOrdersTotalDisplay();
-            updateOverallTotal();
-        }
-
-        // Update recent orders total display
-        function updateRecentOrdersTotalDisplay() {
-            $('#recentOrdersTotal').text(recentOrdersTotal.toFixed(2));
-        }
-
-        // Update overall total (current order + recent orders)
-        function updateOverallTotal() {
-            const currentOrderTotal = parseFloat($('#totalAmount').text()) || 0;
-            const overallTotal = currentOrderTotal + recentOrdersTotal;
-            
-            // Update the grand total display
-            $('#grandTotal').text(overallTotal.toFixed(2));
-            
-            // Update hidden form field
-            $('#grandTotalInput').val(overallTotal.toFixed(2));
-            
-            console.log('Current Order:', currentOrderTotal, 'Recent Orders:', recentOrdersTotal, 'Overall:', overallTotal);
-        }
-
-        // Add new customer via form
-        $('#addCustomerForm').on('submit', function(e) {
-            e.preventDefault();
-
-            const formData = {
-                name: $('#newCustomerName').val(),
-                phone: $('#newCustomerPhone').val(),
-                email: $('#newCustomerEmail').val(),
-                _token: $('meta[name="csrf-token"]').attr('content')
+        // Open modal function
+        function openModal(id, name, price, description, imageSrc) {
+            currentModalItem = {
+                id,
+                name,
+                basePrice: price,
+                price,
+                description,
+                imageSrc
             };
 
-            $.ajax({
-                url: '/api/customers/store',
-                method: 'POST',
-                data: formData,
-                success: function(response) {
-                    // Add new customer to the select and select it
-                    const displayText = response.phone ?
-                        `${response.name} - ${response.phone}` : response.name;
-                    $('#customerName').append(
-                        `<option value="${response.id}" selected>${displayText}</option>`
-                    );
+            // Set modal content
+            modalImage.src = imageSrc;
+            modalItemName.textContent = name;
+            modalItemPrice.textContent = `Rs ${price.toFixed(2)}`;
+            modalItemDescription.textContent = description;
+            modalQtyInput.value = 1;
 
-                    // Close modal and reset form
-                    $('#addCustomerModal').modal('hide');
-                    $('#addCustomerForm')[0].reset();
+            // Check if item has variants
+            const variants = variantsData[id];
+            if (variants && variants.length > 0) {
+                variantsSection.style.display = 'block';
+                renderVariants(variants);
 
-                    // Show success message
-                    alert('Customer added successfully!');
-                },
-                error: function(xhr, status, error) {
-                    console.error('Failed to add customer:', error);
-                    alert('Failed to add customer. Please try again.');
+                // Set initial price to first variant's price
+                if (variants.length > 0) {
+                    const firstVariantPrice = variants[0].price;
+                    currentModalItem.price = firstVariantPrice;
+                    modalItemPrice.textContent = `Rs ${firstVariantPrice.toFixed(2)}`;
                 }
-            });
-        });
-
-        // Calculate discount
-        function calculateDiscount(subTotal, discountType, discountValue) {
-            let discountAmount = 0;
-
-            if (discountType && discountValue) {
-                if (discountType === 'fixed') {
-                    discountAmount = Math.min(parseFloat(discountValue), subTotal);
-                } else if (discountType === 'percentage') {
-                    discountAmount = (subTotal * parseFloat(discountValue)) / 100;
-                }
+            } else {
+                variantsSection.style.display = 'none';
             }
 
-            return discountAmount;
+            // Show modal
+            modalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
-        // Update total amounts
-        function updateTotal() {
-            let subTotal = 0;
+        // Render variants in modal
+        function renderVariants(variants) {
+            variantsContainer.innerHTML = '';
 
-            // Calculate subtotal from items
-            $(".itemRow").each(function() {
-                const qty = parseFloat($(this).find(".item-qty").val()) || 0;
-                let price = 0;
+            variants.forEach((variant, index) => {
+                const variantOption = document.createElement('div');
+                variantOption.className = 'variant-option';
 
-                // Try to get price from variation select
-                const variationSelect = $(this).find(".item-variation");
-                if (variationSelect.is('select')) {
-                    price = parseFloat(variationSelect.find("option:selected").data("price")) || 0;
-                } else {
-                    // If it's a static input (no variations)
-                    price = parseFloat(variationSelect.data("price")) || 0;
-                }
+                const inputId = `variant-${variant.id}`;
 
-                subTotal += qty * price;
+                variantOption.innerHTML = `
+                    <input type="radio" id="${inputId}" name="variant" value="${variant.id}" data-price="${variant.price}" ${index === 0 ? 'checked' : ''}>
+                    <label for="${inputId}">${variant.name} (Rs ${variant.price.toFixed(2)})</label>
+                `;
+
+                variantsContainer.appendChild(variantOption);
             });
 
-            // Calculate discount
-            const discountType = $("#discountType").val();
-            const discountValue = parseFloat($("#discountValue").val()) || 0;
-            const discountAmount = calculateDiscount(subTotal, discountType, discountValue);
-            const grandTotal = subTotal - discountAmount;
+            // Add event listeners to variant options
+            document.querySelectorAll('input[name="variant"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    updateModalPrice();
+                });
+            });
 
-            // Update display
-            $("#totalAmount").text(subTotal.toFixed(2));
-            $("#discountApplied").text(discountAmount.toFixed(2));
+            updateModalPrice();
+        }
 
-            // Update hidden inputs
-            $("#subTotalInput").val(subTotal.toFixed(2));
-            $("#discountAmountInput").val(discountAmount.toFixed(2));
-            
-            // Update overall total when current order changes
+        // Update price in modal based on selected variant
+        function updateModalPrice() {
+            const selectedVariant = document.querySelector('input[name="variant"]:checked');
+            if (selectedVariant) {
+                const variantPrice = parseFloat(selectedVariant.dataset.price);
+                currentModalItem.price = variantPrice;
+                modalItemPrice.textContent = `Rs ${variantPrice.toFixed(2)}`;
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            currentModalItem = null;
+        }
+
+        // Cart functionality
+        function addToCart(id, name, price, qty = 1, variantId = null, variantName = null) {
+            const cartItemId = variantId ? `${id}-${variantId}` : id.toString();
+            const existingItem = cart.find(item => item.cartItemId === cartItemId);
+
+            if (existingItem) {
+                existingItem.qty += qty;
+            } else {
+                cart.push({
+                    id,
+                    name: variantName ? `${name} (${variantName})` : name,
+                    price,
+                    qty,
+                    variantId,
+                    cartItemId
+                });
+            }
+
+            renderCart();
+            updateTotal();
+            updateOrderStats();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+            updateTotal();
+            updateOrderStats();
+        }
+
+        function updateCartItemQty(index, change) {
+            const item = cart[index];
+            item.qty += change;
+
+            if (item.qty < 1) {
+                removeFromCart(index);
+            } else {
+                renderCart();
+                updateTotal();
+                updateOrderStats();
+            }
+        }
+
+        function renderCart() {
+            const cartItemsList = $('#cart-items-list');
+            const cartCount = $('#cart-count');
+            const cartSubtotal = $('#cart-subtotal');
+            const cartTotalElement = $('#cart-total');
+
+            if (cart.length === 0) {
+                cartItemsList.html(`
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <p>Your cart is empty</p>
+                        <small class="text-muted">Add items to create an order</small>
+                    </div>
+                `);
+                cartCount.text('0 items');
+                cartSubtotal.text('Rs 0.00');
+                cartTotalElement.text('Rs 0.00');
+                $('#orderItemsInput').val('');
+                return;
+            }
+
+            let html = '';
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.qty;
+                subtotal += itemTotal;
+
+                html += `
+                    <div class="cart-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-details">Rs ${item.price.toFixed(2)} × ${item.qty} = Rs ${itemTotal.toFixed(2)}</div>
+                            </div>
+                            <div class="cart-controls">
+                                <button class="cart-qty-btn minus" data-index="${index}">-</button>
+                                <span class="mx-1" style="font-size: 0.8rem;">${item.qty}</span>
+                                <button class="cart-qty-btn plus" data-index="${index}">+</button>
+                                <button class="remove-btn ms-2" data-index="${index}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            cartCount.text(totalItems + (totalItems === 1 ? ' item' : ' items'));
+            cartSubtotal.text('Rs ' + subtotal.toFixed(2));
+            cartTotalElement.text('Rs ' + subtotal.toFixed(2));
+            cartItemsList.html(html);
+
+            // Update order items input for form submission
+            $('#orderItemsInput').val(JSON.stringify(cart.map(item => ({
+                menu_id: item.id,
+                name: item.name,
+                price: item.price,
+                qty: item.qty,
+                variation_id: item.variantId || '',
+                item_total: (item.price * item.qty)
+            }))));
+        }
+
+        function updateTotal() {
+            let total = 0;
+
+            cart.forEach(item => {
+                total += item.price * item.qty;
+            });
+
+            $("#totalAmount").text(total.toFixed(2));
+            $("#cart-total").text('Rs ' + total.toFixed(2));
+            $("#subTotalInput").val(total.toFixed(2));
+            $("#grandTotalInput").val(total.toFixed(2));
+
             updateOverallTotal();
         }
 
-        // Fetch products by restaurant ID
-        function fetchProductsByRestaurant(restaurantId, selectElement) {
-            if (!restaurantId) {
-                console.error('No restaurant ID provided');
-                selectElement.empty().append('<option value="">-- No Items Available --</option>');
-                return;
-            }
-
-            // Use the search endpoint that works with table ID 0 (for office orders)
-            $.ajax({
-                url: '/api/products/search/0', // Using 0 as placeholder for office orders
-                method: 'GET',
-                data: {
-                    query: '',
-                    restaurant_id: restaurantId
-                },
-                success: function(data) {
-                    products = data;
-                    selectElement.empty().append('<option value="">-- Select Item --</option>');
-
-                    if (data.length === 0) {
-                        selectElement.append(
-                            '<option value="">No items available for this restaurant</option>');
-                    } else {
-                        data.forEach(product => {
-                            selectElement.append(
-                                `<option value="${product.id}">${product.name}</option>`
-                            );
-                        });
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Failed to fetch products:', error);
-
-                    // Alternative: Try the by-restaurant endpoint without table_id
-                    $.ajax({
-                        url: '/api/products/by-restaurant/' + restaurantId,
-                        method: 'GET',
-                        success: function(fallbackData) {
-                            products = fallbackData;
-                            selectElement.empty().append(
-                                '<option value="">-- Select Item --</option>');
-                            if (fallbackData.length === 0) {
-                                selectElement.append(
-                                    '<option value="">No items available</option>');
-                            } else {
-                                fallbackData.forEach(product => {
-                                    selectElement.append(
-                                        `<option value="${product.id}">${product.name}</option>`
-                                    );
-                                });
-                            }
-                        },
-                        error: function() {
-                            // Final fallback with dummy data
-                            console.log('Using fallback dummy data');
-                            const dummyProducts = [{
-                                    id: 1,
-                                    name: 'Pizza Margherita',
-                                    price: 12.99
-                                },
-                                {
-                                    id: 2,
-                                    name: 'Chicken Burger',
-                                    price: 8.99
-                                },
-                                {
-                                    id: 3,
-                                    name: 'Caesar Salad',
-                                    price: 7.99
-                                }
-                            ];
-                            selectElement.empty().append(
-                                '<option value="">-- Select Item --</option>');
-                            dummyProducts.forEach(product => {
-                                selectElement.append(
-                                    `<option value="${product.id}">${product.name}</option>`
-                                );
-                            });
-                        }
-                    });
-                }
-            });
+        function updateOrderStats() {
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            $('#cart-items-count').text(totalItems);
+            $('#cart-subtotal-value').text('Rs ' + subtotal.toFixed(2));
+            $('#cart-total-value').text('Rs ' + subtotal.toFixed(2));
+            
+            // Update mobile cart count
+            $('#mobile-cart-count').text(totalItems);
         }
 
-        // Fetch variations by product ID with restaurant filter
-        function fetchVariationsByProductId(id, selectElement) {
-            if (!id) {
-                selectElement.closest('.variation-container').html(
-                    `<select class="form-control item-variation" name="variation_id[]" required>
-                        <option value="">Select Variation</option>
-                    </select>`
-                );
-                updateTotal();
-                return;
-            }
+        // Category filter
+        function setupCategoryFilter() {
+            $('.category-nav .nav-link').on('click', function(e) {
+                e.preventDefault();
+                $('.category-nav .nav-link').removeClass('active');
+                $(this).addClass('active');
 
-            $.ajax({
-                url: '/api/products/' + id,
-                method: 'GET',
-                data: {
-                    restaurant_id: userRestaurantId
-                },
-                success: function(product) {
-                    const options = product.variations || [];
-                    const variationContainer = selectElement.closest('.variation-container');
-
-                    if (options.length > 0) {
-                        const selectHTML =
-                            `<select class="form-control item-variation" name="variation_id[]" required>
-                                <option value="">Select Variation</option>
-                                ${options.map(opt => 
-                                    `<option data-price="${opt.price}" value="${opt.id}">
-                                                    ${opt.name} - Rs. ${opt.price}
-                                                </option>`
-                                ).join('')}
-                            </select>`;
-                        variationContainer.html(selectHTML);
+                const categoryId = $(this).data('category');
+                $('.menu-item').each(function() {
+                    if (categoryId === 'all' || $(this).data('category') == categoryId) {
+                        $(this).show();
                     } else {
-                        const basePrice = product.price || 0;
-                        const staticHTML =
-                            `<input type="text" class="form-control item-variation" 
-                                data-price="${basePrice}" 
-                                value="Standard - Rs. ${basePrice}" 
-                                readonly>`;
-                        variationContainer.html(staticHTML);
-                    }
-                    updateTotal();
-                },
-                error: function(xhr, status, error) {
-                    console.error('Failed to fetch product variations:', error);
-                    // Fallback to standard price
-                    const variationContainer = selectElement.closest('.variation-container');
-                    const basePrice = 0; // Default price
-                    const staticHTML =
-                        `<input type="text" class="form-control item-variation" 
-                            data-price="${basePrice}" 
-                            value="Standard - Rs. ${basePrice}" 
-                            readonly>`;
-                    variationContainer.html(staticHTML);
-                    updateTotal();
-                }
-            });
-        }
-
-        // Initialize event listeners
-        function initializeEventListeners() {
-            // Customer selection change - fetch recent orders
-            $(document).on('change', '#customerName', function() {
-                const customerId = $(this).val();
-                if (customerId) {
-                    fetchRecentOrders(customerId);
-                } else {
-                    hideRecentOrders();
-                }
-            });
-
-            // Item search change
-            $(document).on('change', '.item-search', function() {
-                const menuId = $(this).val();
-                const variationSelect = $(this).closest('.itemRow').find('.item-variation');
-                fetchVariationsByProductId(menuId, variationSelect);
-            });
-
-            // Variation and quantity change
-            $(document).on('change', '.item-variation, .item-qty', updateTotal);
-
-            // Discount type change
-            $(document).on('change', '#discountType', function() {
-                const discountType = $(this).val();
-                const discountValueInput = $('#discountValue');
-
-                if (discountType) {
-                    discountValueInput.prop('disabled', false);
-                    discountValueInput.val('');
-                } else {
-                    discountValueInput.prop('disabled', true);
-                    discountValueInput.val('0');
-                }
-                updateTotal();
-            });
-
-            // Discount value input
-            $(document).on('input', '#discountValue', updateTotal);
-
-            // Add item button
-            $(document).on('click', '#addItemBtn', function() {
-                const itemRow = `<div class="itemRow row g-2 align-items-end mb-2">
-                    <div class="col-md-5">
-                        <label class="form-label visually-hidden">Item</label>
-                        <select class="form-control item-search" name="menu_id[]" required>
-                            <option value="">-- Select Item --</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label visually-hidden">Variation</label>
-                        <div class="variation-container">
-                            <select class="form-control item-variation" name="variation_id[]" required>
-                                <option value="">Select Variation</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label visually-hidden">Qty</label>
-                        <input type="number" class="form-control item-qty" name="qty[]" 
-                            placeholder="Qty" min="1" value="1" required>
-                    </div>
-                    <div class="col-md-1 text-end">
-                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove" title="Remove">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                </div>`;
-
-                $('#itemsContainer').append(itemRow);
-                fetchProductsByRestaurant(userRestaurantId, $('#itemsContainer .itemRow:last .item-search'));
-            });
-
-            // Remove item button
-            $(document).on('click', '.btn-remove', function() {
-                if ($('.itemRow').length > 1) {
-                    $(this).closest('.itemRow').remove();
-                    updateTotal();
-                } else {
-                    alert('At least one item is required.');
-                }
-            });
-
-            // Form submission
-            $('#orderForm').on('submit', function(e) {
-                const itemCount = $('.itemRow').length;
-                if (itemCount === 0) {
-                    e.preventDefault();
-                    alert('Please add at least one item to the order.');
-                    return false;
-                }
-
-                // Validate customer selection
-                const customerId = $('#customerName').val();
-                if (!customerId) {
-                    e.preventDefault();
-                    alert('Please select a customer for this order.');
-                    $('#customerName').focus();
-                    return false;
-                }
-
-                // Validate that all items have selections
-                let valid = true;
-                $('.itemRow').each(function() {
-                    const menuId = $(this).find('.item-search').val();
-                    const variation = $(this).find('.item-variation');
-
-                    if (!menuId) {
-                        valid = false;
-                        $(this).find('.item-search').addClass('is-invalid');
-                    } else {
-                        $(this).find('.item-search').removeClass('is-invalid');
-                    }
-
-                    if (variation.is('select') && !variation.val()) {
-                        valid = false;
-                        variation.addClass('is-invalid');
-                    } else {
-                        variation.removeClass('is-invalid');
+                        $(this).hide();
                     }
                 });
+            });
+        }
 
-                if (!valid) {
-                    e.preventDefault();
-                    alert('Please select both item and variation for all order items.');
-                    return false;
+        // Search functionality
+        function setupSearch() {
+            $('#search-input').on('input', function() {
+                const query = $(this).val().trim().toLowerCase();
+                $('.menu-item').each(function() {
+                    const name = $(this).data('name') || '';
+                    if (name.includes(query)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+        }
+
+        // Quantity controls for menu items
+        function setupQuantityControls() {
+            $(document).on('click', '.qty-btn', function() {
+                const id = $(this).data('id');
+                const input = $(`#qty-${id}`);
+                let value = parseInt(input.val());
+
+                if ($(this).hasClass('plus')) {
+                    value++;
+                } else if ($(this).hasClass('minus') && value > 1) {
+                    value--;
+                }
+
+                input.val(value);
+            });
+
+            // Add to cart from menu items
+            $(document).on('click', '.add-to-cart-btn', function() {
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+                const price = parseFloat($(this).data('price'));
+                const description = $(this).data('description');
+                const image = $(this).data('image');
+                const hasVariants = $(this).data('has-variants') === true;
+                const qtyInput = $(`#qty-${id}`);
+                const qty = Math.max(1, parseInt(qtyInput.val() || 1, 10));
+
+                // Check if item has variants
+                if (hasVariants) {
+                    openModal(id, name, price, description, image);
+                } else {
+                    addToCart(id, name, price, qty);
+                    qtyInput.val(1);
+                    showNotification(`${name} added to cart!`);
+                }
+            });
+
+            // Cart controls
+            $(document).on('click', '.cart-qty-btn, .remove-btn', function() {
+                const index = $(this).data('index');
+
+                if ($(this).hasClass('remove-btn')) {
+                    removeFromCart(index);
+                    showNotification('Item removed from cart');
+                } else if ($(this).hasClass('minus')) {
+                    updateCartItemQty(index, -1);
+                } else if ($(this).hasClass('plus')) {
+                    updateCartItemQty(index, 1);
                 }
             });
         }
+
+        // Modal event listeners
+        closeModalBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+
+        // Modal quantity controls
+        modalMinusBtn.addEventListener('click', function() {
+            let value = parseInt(modalQtyInput.value);
+            if (value > 1) {
+                value--;
+                modalQtyInput.value = value;
+            }
+        });
+
+        modalPlusBtn.addEventListener('click', function() {
+            let value = parseInt(modalQtyInput.value);
+            value++;
+            modalQtyInput.value = value;
+        });
+
+        // Add to cart from modal
+        modalAddToCartBtn.addEventListener('click', function() {
+            if (!currentModalItem) return;
+
+            const qty = parseInt(modalQtyInput.value);
+            let price = currentModalItem.price;
+            let name = currentModalItem.name;
+            let variantId = null;
+            let variantName = null;
+
+            // Check if a variant is selected
+            const selectedVariant = document.querySelector('input[name="variant"]:checked');
+            if (selectedVariant) {
+                const variantPrice = parseFloat(selectedVariant.dataset.price);
+                price = variantPrice;
+                variantName = selectedVariant.nextElementSibling.textContent.split(' (Rs')[0].trim();
+                variantId = selectedVariant.value;
+            }
+
+            addToCart(currentModalItem.id, name, price, qty, variantId, variantName);
+            showNotification(`${name} ${variantName ? '(' + variantName + ')' : ''} added to cart!`);
+            closeModal();
+        });
+
+        // Notification function
+        function showNotification(message, type = 'success') {
+            // Remove any existing notifications
+            $('.notification').remove();
+
+            const icon = type === 'warning' ? 'fa-exclamation-triangle' : 
+                        type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
+            
+            const notification = $(`
+                <div class="notification alert alert-${type}">
+                    <div class="d-flex align-items-center">
+                        <i class="fas ${icon} me-2"></i>
+                        <span>${message}</span>
+                    </div>
+                </div>
+            `);
+
+            $('body').append(notification);
+
+            // Show notification with animation
+            setTimeout(() => {
+                notification.addClass('show');
+            }, 10);
+
+            // Remove notification after delay
+            setTimeout(() => {
+                notification.removeClass('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Mobile navigation functionality
+        $(document).on('click', '.mobile-nav-item', function(e) {
+            e.preventDefault();
+            $('.mobile-nav-item').removeClass('active');
+            $(this).addClass('active');
+            
+            const target = $(this).find('span').text().toLowerCase();
+            
+            if (target === 'cart') {
+                $('html, body').animate({
+                    scrollTop: $('.cart-sidebar').offset().top - 20
+                }, 500);
+            } else if (target === 'menu') {
+                $('html, body').animate({
+                    scrollTop: $('.menu-section').offset().top - 20
+                }, 500);
+            } else if (target === 'office') {
+                $('html, body').animate({
+                    scrollTop: $('.customer-card').offset().top - 20
+                }, 500);
+            }
+        });
+
+        $(document).ready(function() {
+            updateTotal();
+            updateOrderStats();
+            hideRecentOrders();
+            setNewOrderMode();
+            setupCategoryFilter();
+            setupSearch();
+            setupQuantityControls();
+            renderCart();
+
+            // Fetch recent orders for this office
+            fetchRecentOrders();
+        });
+
+        // Form validation before submission
+        $('#orderForm').on('submit', function(e) {
+            console.log('Form submission started');
+            console.log('Mode:', isUpdateMode ? 'UPDATE' : 'NEW ORDER');
+            console.log('Order ID:', existingOrderId);
+
+            if (cart.length === 0) {
+                e.preventDefault();
+                showNotification('Please add at least one item to the cart.', 'warning');
+                return false;
+            }
+
+            console.log('Form validation passed, submitting...');
+        });
     </script>
 </body>
-
 </html>

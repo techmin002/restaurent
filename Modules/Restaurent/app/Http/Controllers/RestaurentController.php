@@ -14,7 +14,9 @@ use Modules\Restaurent\Models\OfficeRegister;
 use Modules\Restaurent\Models\Menu;
 use Modules\Restaurent\Models\MenuVariation;
 use Modules\Restaurent\Models\Customer;
+use Modules\Restaurent\Models\Category;
 use Modules\Restaurent\Models\RestaurentTable;
+use Modules\Restaurent\Models\RestaurentTableMenu;
 
 
 class RestaurentController extends Controller
@@ -139,21 +141,31 @@ class RestaurentController extends Controller
      */
     public function destroy($id)
     {
-        $branch = Restaurent::findOrfail($id);
-        $user = User::where('restaurent_id', $id)->first();
-        if ($user) {
-            $user->restaurent_id = null;
-            $user->save();
+        try {
+            $order = Order::findOrFail($id);
+
+            // Delete related items first if needed
+            if ($order->items) {
+                $order->items()->delete(); // if you have items relationship
+            }
+
+            $order->delete();
+
+            return back()->with('success', 'Order Deleted Successfully');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error deleting order: ' . $e->getMessage());
         }
-        $branch->delete();
-        return back()->with('success', 'Restaurent Deleted Successfully');
     }
 
     public function table_order($id)
     {
+        $categories = Category::where('restaurent_id', auth()->user()->restaurent_id)->get();
+
+        $menus = Menu::with('variations')->where('restaurent_id', auth()->user()->restaurent_id)->get();
         $restaurent_table = RestaurentTable::where('id', $id)->first();
+        // dd($restaurent_table);
         $orders = Order::with('items', 'table', 'office', 'customer')->get();
-        return view('restaurent::orders.order', compact('id', 'orders', 'restaurent_table'));
+        return view('restaurent::orders.order', compact('id', 'orders', 'restaurent_table', 'categories', 'menus'));
     }
 
     public function checkCustomerByPhone(Request $request)
@@ -214,16 +226,14 @@ class RestaurentController extends Controller
     }
     public function office_order(Request $request, $id)
     {
-        $menus = Menu::where('restaurent_id', $id)->with('variations')->get();
-
-        $menusVariations = MenuVariation::where('restaurent_id', $id)->get();
-
+       $categories = Category::where('restaurent_id', auth()->user()->restaurent_id)->get();
         $office = OfficeRegister::where('id', $id)->first();
-
-        if (!$office) {
-            abort(404, 'Office not found');
-        }
-
-        return view('restaurent::orders.office_order', compact('id', 'office', 'menus', 'menusVariations'));
+        $menus = Menu::with('variations')->where('restaurent_id', auth()->user()->restaurent_id)->get();
+        $restaurent_table = RestaurentTable::where('id', $id)->first();
+        $customers = Customer::where('restaurent_id', auth()->user()->restaurent_id)->get();
+        // dd($restaurent_table);
+        $orders = Order::with('items', 'table', 'office', 'customer')->get();
+        return view('restaurent::orders.office_order', compact('id', 'orders', 'office', 'categories', 'menus', 'customers'));
+        
     }
 }

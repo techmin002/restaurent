@@ -1,50 +1,11 @@
-{{-- <audio id="orderAlertSound" src="{{ asset('sounds/order_received_audio.mp3') }}" preload="auto" loop></audio> --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
-<!-- Modal -->
-{{-- <div class="modal fade" id="orderAlertModal" tabindex="-1" role="dialog" aria-labelledby="orderAlertModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="orderAlertModalLabel">New Order Received</h5>
-            </div>
-            <div class="modal-body">
-                <h6 id="orderFromHeading" class="text-primary mb-3"></h6>
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Variation</th>
-                            <th>Qty</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orderItemsTableBody">
-                        <!-- Order items will be appended here -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button id="rejectOrderBtn" class="btn btn-danger">Reject</button>
-                <button id="acceptOrderBtn" class="btn btn-success">Accept</button>
-            </div>
-        </div>
-    </div>
-</div> --}}
-    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"> --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
- {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script> --}}
-    <!-- Your app.js or bootstrap.js script -->
-    {{-- <script src="{{ asset('/build/assets/app-Dvg8hMT9.js') }}"></script>
-    <audio id="notificationAudio" preload="auto">
-        <source src="{{ asset('sounds/order_received_audio.mp3') }}" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio> --}}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Include jQuery -->
-    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
-      <!-- Include Toastr JS -->
 
-    <!-- Your app.js or bootstrap.js script -->
+<!-- Your app.js or bootstrap.js script -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <ul class="navbar-nav">
         <li class="nav-item">
@@ -54,7 +15,7 @@
             <a href="{{ route('home') }}" class="nav-link">Home</a>
         </li>
         {{-- <li class="nav-item">    <button onclick="document.getElementById('notificationAudio').play()">Test Sound</button> --}}
-</li>
+        </li>
     </ul>
 
     <ul class="navbar-nav ml-auto">
@@ -121,7 +82,81 @@
     </ul>
 </nav>
 
+<!-- New Orders Modal -->
+<div class="modal fade" id="newOrderModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
 
-<!-- Bootstrap + jQuery (Ensure they are loaded before this script) -->
-{{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script> --}}
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-bell me-2"></i>New Orders Alert
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle" id="newOrdersTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Table Type</th>
+                                <th>Total Amount</th>
+                                <th>Items</th>
+                                <th>Table ID</th>
+                                <th>Customer Name</th>
+                                <th>Costumer Contact</th>
+                                <th>Office Name</th>
+                                <th>Contact No.</th>
+                                <th>Address</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="newOrdersBody">
+                            <!-- Orders Will Load Here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    #newOrdersTable th,
+    #newOrdersTable td {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .btn-accept {
+        background: #198754;
+        color: white;
+        border-radius: 6px;
+        padding: 5px 12px;
+    }
+
+    .btn-reject {
+        background: #dc3545;
+        color: white;
+        border-radius: 6px;
+        padding: 5px 12px;
+    }
+
+    .item-badge {
+        display: inline-block;
+        background: #f1f1f1;
+        padding: 3px 8px;
+        margin: 2px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+</style>
+
+<audio id="newOrderSound" src="{{ asset('sounds/order_received_audio.mp3') }}" preload="auto"></audio>
+

@@ -32,7 +32,8 @@ class Order extends Model
         'grand_total',
         'order_time',
         'status',
-        'order_from'
+        'order_from',
+        'vat'
     ];
     public function items()
 {

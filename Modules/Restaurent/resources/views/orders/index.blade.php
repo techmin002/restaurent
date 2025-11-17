@@ -55,9 +55,9 @@
                                             <tr>
                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td class="text-center">#RCO000{{ $res->id }}</td>
-                                                <td class="text-center">{{ $res->customer['name'] }}</td>
+                                                <td class="text-center">{{  $res->customer ? $res->customer['name'] : 'N/A' }}</td>
 
-                                                <td class="text-center">{{ $res->customer['phone'] }}</td>
+                                                <td class="text-center">{{ $res->customer ? $res->customer['phone'] : 'N/A' }}</td>
                                                 <td class="text-center">
                                                     <b>Iteams:</b>
                                                     <table>
@@ -68,19 +68,21 @@
                                                         </tr>
                                                         @foreach ($res->items as $item)
                                                         @php
-                                                            $variation = Modules\Restaurent\Models\MenuVariation::select('name','price')->where('id',$item->variation_id)->first()
-                                                            // $menu = Modules\Restaurent\Models\Menu::select('name','price')->where('id',$item->variation_id)->first()
+                                                            $variation = Modules\Restaurent\Models\MenuVariation::select('name','price')->where('id',$item->variation_id)->first();
+                                                            
+                                                            $menu = Modules\Restaurent\Models\Menu::select('name','price')->where('id',$item->menu_id)->first();
 
                                                         @endphp
+                                                       {{-- @dd($variation); --}}
                                                         <tr>
-                                                            <td>{{ $variation->name?? $item->name }}</td>
+                                                            <td>{{ $menu->name?? $item->name }}</td>
                                                             <td>{{ $item->qty }}</td>
                                                             <td>{{ $variation->price?? $item->price }}</td>
                                                         </tr>
                                                         @endforeach
                                                     </table>
                                                 </td>
-                                                <td class="text-center">{{ $res->address }}</td>
+                                                <td class="text-center">{{ $res->order_type }}</td>
                                                 <td class="text-center">{{ $res->status }}</td>
                                                 <td>
 
