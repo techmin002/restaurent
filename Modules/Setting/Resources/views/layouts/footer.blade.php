@@ -273,10 +273,10 @@
                 <td>${escapeHtml(order.order_type.toString())}</td>
                 <td>Rs. ${Number(order.grand_total).toFixed(2)}</td>
                  <td>
-                    ${order.items && order.items.length > 0 
-                    ? order.items.map(item => escapeHtml(item.menu_name || 'N/A')).join(', ')
-                    : 'N/A'}
-                </td>
+    ${order.items && order.items.length > 0 
+    ? order.items.map(item => `${escapeHtml(item.menu_name || 'N/A')} (Qty: ${item.qty || 0})`).join(', ')
+    : 'N/A'}
+</td>
                 <td>${order.order_type === 'dinein' ? escapeHtml(order.table_id || 'N/A') : '-'}</td>
                 <td>${order.order_type === 'dinein' ? escapeHtml(order.customer_name || 'N/A') : '-'}</td>
                 <td>${order.order_type === 'dinein' ? escapeHtml(order.customer_contact || 'N/A') : '-'}</td>

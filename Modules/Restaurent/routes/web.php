@@ -71,4 +71,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/accept-order/{id}', [OrderController::class, 'acceptOrder']);
     Route::post('/reject-order/{id}', [OrderController::class, 'rejectOrder']);
+
+    Route::get('/check-notification', [OrderController::class, 'check']);
+    Route::post('/reset-notification', [OrderController::class, 'reset']);
+
+    Route::get('/notify/{table_number}', [OrderController::class, 'setNotification']);
+
+
+
+
 });

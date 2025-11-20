@@ -160,3 +160,179 @@
 
 <audio id="newOrderSound" src="{{ asset('sounds/order_received_audio.mp3') }}" preload="auto"></audio>
 
+
+<div class="popup" id="notifyPopup">
+    <div class="popup-icon">🔔</div>
+    <div class="popup-content">
+        <h4>New Notification</h4>
+
+        <p>Tables: <span id="tableList"></span> need attention!</p>
+
+        <button id="popupOkBtn" class="popup-btn">OK</button>
+    </div>
+    <span class="popup-close" id="popupClose">&times;</span>
+</div>
+
+<audio id="notifySound">
+    <source src="{{ asset('sounds/order_completed_audio.mp3') }}" type="audio/mpeg">
+</audio>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // let lastTables = [];
+
+        const popup = document.getElementById('notifyPopup');
+        const closeBtn = document.getElementById('popupClose');
+
+        closeBtn.addEventListener('click', () => {
+            popup.classList.remove('show');
+        });
+
+        function checkNotification() {
+            fetch('/check-notification')
+                .then(res => res.json())
+                .then(data => {
+
+                    if (data.notify == 1) {
+
+                        document.getElementById('tableList').textContent = data.tables.join(', ');
+                        popup.classList.add('show');
+
+                        // Play sound ONLY if new tables arrived
+                        if (JSON.stringify(data.tables) !== JSON.stringify(lastTables)) {
+                            document.getElementById('notifySound').play();
+                        }
+
+                        lastTables = data.tables; // update previous list
+
+                    } else {
+                        popup.classList.remove('show');
+                        lastTables = [];
+                    }
+
+                })
+                .catch(err => console.error(err));
+        }
+
+        setInterval(checkNotification, 3000);
+        checkNotification();
+
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const popup = document.getElementById('notifyPopup');
+        const closeBtn = document.getElementById('popupClose');
+        const okBtn = document.getElementById('popupOkBtn');
+
+        // Close with X
+        closeBtn.addEventListener('click', () => {
+            popup.classList.remove('show');
+        });
+
+        // OK BUTTON → Go to controller to reset notification
+        okBtn.addEventListener('click', () => {
+            fetch('/reset-notification', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    popup.classList.remove('show'); // hide popup
+                });
+        });
+
+        function checkNotification() {
+            fetch('/check-notification')
+                .then(res => res.json())
+                .then(data => {
+
+                    if (data.notify == 1) {
+                        document.getElementById('tableNum').textContent = data.table_number;
+                        popup.classList.add('show');
+                    } else {
+                        popup.classList.remove('show');
+                    }
+
+                })
+                .catch(err => console.error(err));
+        }
+
+        setInterval(checkNotification, 3000);
+        checkNotification();
+
+    });
+</script>
+
+
+<style>
+    .popup {
+        position: fixed;
+        top: 20px;
+        right: -350px;
+        /* hidden outside screen */
+        width: 300px;
+        background: #ff4b4b;
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 99999;
+        transition: right 0.4s ease;
+        font-family: Arial, sans-serif;
+    }
+
+    .popup.show {
+        right: 20px;
+        /* slide into screen */
+    }
+
+    .popup-icon {
+        font-size: 30px;
+    }
+
+    .popup-content h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .popup-content p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .popup-close {
+        margin-left: auto;
+        font-size: 22px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .popup-close:hover {
+        color: #000;
+    }
+
+    .popup-btn {
+        background: white;
+        color: #ff4b4b;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .popup-btn:hover {
+        background: #ffe1e1;
+    }
+</style>

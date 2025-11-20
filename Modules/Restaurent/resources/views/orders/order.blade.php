@@ -239,21 +239,33 @@
             transform: translateY(-50%);
             color: var(--text-muted);
             z-index: 3;
+            pointer-events: none;
+            /* Add this */
         }
 
         .search-input {
-            padding-left: 48px;
+            padding-left: 48px !important;
+            /* Increased from 48px to 50px */
+            padding-right: 16px;
             border-radius: var(--border-radius-sm);
             border: 1px solid var(--border-color);
             height: 42px;
             font-size: 0.9rem;
             transition: var(--transition);
             width: 100%;
+            box-sizing: border-box;
         }
 
         .search-input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            padding-left: 50px !important;
+            /* Maintain consistent padding on focus */
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.8;
         }
 
         /* Categories Navigation */
@@ -1243,7 +1255,7 @@
                     <div>Hello, Admin</div>
                     <div class="small-muted">Today: {{ \Carbon\Carbon::now()->format('d M, Y') }}</div>
                 </div>
-                <button class="btn btn-outline-light btn-sm"><i class="fa-regular fa-bell"></i></button>
+
                 <button class="btn btn-light btn-sm" id="compactNavToggle"><i class="fa-solid fa-bars"></i></button>
             </div>
         </div>
@@ -1272,7 +1284,12 @@
                         <div>Hello, Admin</div>
                         <div class="small-muted">Today: {{ \Carbon\Carbon::now()->format('d M, Y') }}</div>
                     </div>
-                    <button class="btn btn-outline-secondary btn-sm"><i class="fa-regular fa-bell"></i></button>
+
+                    <a href="{{ url('/notify/' . $restaurent_table->table_number) }}" class="btn btn-primary">
+                        <i class="fa-solid fa-bell"></i>
+                    </a>
+
+
                     <button class="btn btn-primary btn-sm btn-wide" onclick="window.location.reload()">
                         <i class="fa-solid fa-plus me-1"></i>New
                     </button>
@@ -1314,7 +1331,7 @@
                         <div class="search-container">
                             <i class="fas fa-search search-icon"></i>
                             <input id="search-input" class="form-control search-input" type="search"
-                                placeholder="Search menu items..." aria-label="Search">
+                                placeholder="Search office menu items..." aria-label="Search">
                         </div>
 
                         <!-- Categories Navigation -->
@@ -1475,7 +1492,8 @@
                                 <div class="recent-orders-total" id="recent-orders-total">
                                     <div class="recent-orders-total-header">
                                         <span class="recent-orders-total-label">Recent Orders Total</span>
-                                        <span class="recent-orders-total-value" id="recent-orders-total-value">Rs 0.00</span>
+                                        <span class="recent-orders-total-value" id="recent-orders-total-value">Rs
+                                            0.00</span>
                                     </div>
                                     <div class="recent-orders-total-note">Total from previous orders</div>
                                 </div>
@@ -1507,7 +1525,8 @@
                                     value="0">
                                 <input type="hidden" name="grand_total" id="grandTotalInput">
                                 <input type="hidden" name="order_items" id="orderItemsInput">
-                                <input type="hidden" name="recent_orders_total" id="recentOrdersTotalInput" value="0">
+                                <input type="hidden" name="recent_orders_total" id="recentOrdersTotalInput"
+                                    value="0">
                             </div>
                         </div>
                     </div>
@@ -1815,15 +1834,15 @@
                                 <strong>Order Total: Rs. ${orderTotal.toFixed(2)}</strong>
                             </div>
                             ${order.table_number ? `
-                                    <div class="order-location small text-muted mt-1">
-                                        <i class="fas fa-table me-1"></i>Table: ${order.table_number}
-                                    </div>
-                                ` : ''}
+                                                                                                                    <div class="order-location small text-muted mt-1">
+                                                                                                                        <i class="fas fa-table me-1"></i>Table: ${order.table_number}
+                                                                                                                    </div>
+                                                                                                                ` : ''}
                             ${order.order_type ? `
-                                    <div class="order-type small text-muted mt-1">
-                                        <span class="badge order-type-badge bg-secondary">${order.order_type}</span>
-                                    </div>
-                                ` : ''}
+                                                                                                                    <div class="order-type small text-muted mt-1">
+                                                                                                                        <span class="badge order-type-badge bg-secondary">${order.order_type}</span>
+                                                                                                                    </div>
+                                                                                                                ` : ''}
                         </div>
                     `;
             });
@@ -2498,6 +2517,7 @@
             console.log('Form validation passed, submitting...');
         });
     </script>
+
 </body>
 
 </html>

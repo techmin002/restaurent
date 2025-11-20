@@ -297,7 +297,7 @@ class OrderController extends Controller
             $orders = Order::with(['items.menu', 'items.variation'])
                 ->where('office_id', $officeId)
                 ->where('restaurent_id', auth()->user()->restaurent_id)
-                ->whereIn('status', ['pending', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
+                ->whereIn('status', ['pending', 'accepted', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
                 ->orderBy('order_time', 'DESC')
                 ->limit(5)
                 ->get()
@@ -758,7 +758,7 @@ class OrderController extends Controller
             $orders = Order::with(['table', 'items.menu', 'items.variation'])
                 ->where('customer_id', $customerId)
                 ->where('restaurent_id', auth()->user()->restaurent_id)
-                ->whereIn('status', ['pending', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
+                ->whereIn('status', ['pending', 'accepted', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
                 ->orderBy('order_time', 'DESC')
                 ->limit(5)
                 ->get()
@@ -863,7 +863,7 @@ class OrderController extends Controller
             }
 
             foreach ($order->items as $item) {
-                 $menuName = $item->menu->name ?? null;
+                $menuName = $item->menu->name ?? null;
                 $variantName = $item->variation->name ?? null; // get variant name if exists
                 $item->menu_name = $menuName . ($variantName ? " ({$variantName})" : "");
             }
@@ -1194,5 +1194,39 @@ class OrderController extends Controller
         $order->delete();
 
         return back()->with('success', 'Order rejected and deleted successfully!');
+    }
+
+
+
+    public function check()
+    {
+        $rows = \DB::table('restaurent_tables')
+            ->where('notification', 1)
+            ->get();  // fetch ALL rows
+
+        return response()->json([
+            'notify' => $rows->count() > 0 ? 1 : 0,
+            'tables' => $rows->pluck('table_number')  // send only table numbers
+        ]);
+    }
+
+
+    public function reset()
+    {
+        // Update all rows where notification = 1
+        \DB::table('restaurent_tables')
+            ->where('notification', 1)
+            ->update(['notification' => 0]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function setNotification($table_number)
+    {
+        \DB::table('restaurent_tables')
+            ->where('table_number', $table_number)
+            ->update(['notification' => 1]);
+
+        return back()->with('success', "Notification set for table $table_number");
     }
 }
