@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Modules\Restaurent\Models\Employee;
 use Spatie\Permission\Models\Role;
 use Modules\Restaurent\Models\Restaurent;
+use Modules\Restaurent\Models\Order;
+
 
 class RestaurentController extends Controller
 {
@@ -139,6 +141,52 @@ class RestaurentController extends Controller
             $user->save();
         }
         $branch->delete();
-        return back()->with('success', 'Restaurent Deleted Successfully');
-    }
+        return back()->with('success', 'Restaurent Deleted Successfully');}
+
+    //receptionist
+public function moveToKitchen(Request $request, $id)
+{
+    $order = Order::findOrFail($id);
+
+    // Update order_source column
+    $order->order_source = 'Kitchen';
+    $order->status = 'Sent to Kitchen';
+    $order->save();
+
+    return response()->json([
+        'success' => true,
+        'order_source' => $order->order_source,
+        'status' => $order->status
+    ]);
+}
+
+
+//kitchen
+// Start Cooking
+public function startCooking($id)
+{
+    $order = Order::find($id);
+    if(!$order) return response()->json(['success'=>false,'message'=>'Order not found'],404);
+
+    $order->status = 'Cooking';
+    $order->save();
+
+    return response()->json(['success'=>true,'message'=>'Order status updated to Cooking','status'=>'Cooking']);
+}
+
+// Mark Served
+public function markServed($id)
+{
+    $order = Order::find($id);
+    if(!$order) return response()->json(['success'=>false,'message'=>'Order not found'],404);
+
+    $order->status = 'Completed';
+    $order->save();
+
+    return response()->json(['success'=>true,'message'=>'Order status updated to Completed','status'=>'Completed']);
+}
+
+
+
+
 }

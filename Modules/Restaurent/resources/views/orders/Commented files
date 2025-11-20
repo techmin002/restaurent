@@ -1,0 +1,599 @@
+// ===== Serve -> Completed / Due =====
+            document.querySelectorAll('.serveBtn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const orderId = button.getAttribute('data-id');
+
+                    // Get total amount from server
+                    fetch(`/reception/get-total/${orderId}`, {
+                            headers: {
+                                "Accept": "application/json"
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.success) return Swal.fire('Error',
+                                'Failed to fetch total amount.', 'error');
+
+                            const totalAmount = parseFloat(data.total) || 0;
+
+                            Swal.fire({
+                                title: 'Serve Order',
+                                html: `
+                        <p>Total Amount: <strong>Rs. ${totalAmount.toFixed(2)}</strong></p>
+                        <label>Discount (Rs.):</label>
+                        <input type="number" id="discountInput" class="swal2-input" min="0" placeholder="Enter discount">
+                        <label>Paid Amount (Rs.):</label>
+                        <input type="number" id="paidInput" class="swal2-input" min="0" placeholder="Enter amount paid"><br>
+                        <p id="netAmountText">Net Amount: Rs. ${totalAmount.toFixed(2)} | Due: Rs. 0</p>
+                    `,
+                                showCancelButton: true,
+                                confirmButtonText: 'Serve Order',
+                                preConfirm: () => {
+                                    const discount = parseFloat(document
+                                        .getElementById('discountInput').value
+                                    ) || 0;
+                                    const paidAmount = parseFloat(document
+                                        .getElementById('paidInput').value) || 0;
+                                    if (discount > totalAmount) Swal
+                                        .showValidationMessage(
+                                            'Discount cannot exceed total amount');
+                                    return {
+                                        discount,
+                                        paidAmount
+                                    };
+                                },
+                                didOpen: () => {
+                                    const discountInput = Swal.getPopup()
+                                        .querySelector('#discountInput');
+                                    const paidInput = Swal.getPopup().querySelector(
+                                        '#paidInput');
+                                    const netText = Swal.getPopup().querySelector(
+                                        '#netAmountText');
+
+                                    const updateNet = () => {
+                                        const discountVal = parseFloat(
+                                            discountInput.value) || 0;
+                                        const paidVal = parseFloat(paidInput
+                                            .value) || 0;
+                                        const netTotal = totalAmount -
+                                            discountVal;
+                                        const due = netTotal - paidVal;
+                                        netText.innerHTML =
+                                            `Net Amount: Rs. ${netTotal.toFixed(2)} | Due: Rs. ${due > 0 ? due.toFixed(2) : 0}`;
+                                    };
+
+                                    discountInput.addEventListener('input',
+                                        updateNet);
+                                    paidInput.addEventListener('input', updateNet);
+                                }
+                            }).then(result => {
+                                if (!result.isConfirmed) return;
+
+                                const {
+                                    discount,
+                                    paidAmount
+                                } = result.value;
+                                const netTotal = totalAmount - discount;
+
+                                // Serve order AJAX
+                                fetch(`/reception/serve/${orderId}`, {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            "Accept": "application/json",
+                                            "X-CSRF-TOKEN": csrfToken
+                                        },
+                                        body: JSON.stringify({
+                                            discount,
+                                            net_total: netTotal,
+                                            paid_amount: paidAmount
+                                        })
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            const statusText = data.status || (
+                                                netTotal - paidAmount > 0 ?
+                                                'Due' : 'Completed');
+                                            updateButton(button, statusText);
+                                            Swal.fire('Success',
+                                                `Order marked as ${statusText}!`,
+                                                'success');
+                                        } else {
+                                            Swal.fire('Error', data.message ||
+                                                'Failed to process order.',
+                                                'error');
+                                        }
+                                    })
+                                    .catch(() => Swal.fire('Error',
+                                        'Failed to connect to server.', 'error'));
+                            });
+                        })
+                        .catch(() => Swal.fire('Error', 'Failed to connect to server.', 'error'));
+                });
+            });
+
+            ///
+
+
+
+            //modal
+            <div class="modal fade" id="serveModal{{$res->id}}" tabindex="-1" aria-labelledby="serveModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serveModalLabel">Order Summary</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">X</button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Order Info -->
+                    <div class="order-info mb-3 d-flex justify-content-between align-items-center">
+                        <p><strong>Order ID:</strong> <span id="modalOrderId">{{ $res->id }}</span></p>
+                        <p><strong>Customer Name:</strong> <span id="modalCustomerName">{{ $res->customer['name'] }}</span>
+                        </p>
+                    </div>
+
+                    <hr>
+
+                    <!-- Order Details Table -->
+                    <h5 class="mb-3">Order Details</h5>
+                    <table class="table table-bordered" id="modalOrderDetails">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item</th>
+                                <th>Variation</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Price (Rs.)</th>
+                                <th class="text-end">Total (Rs.)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                       
+                            <td>{{$variation->menu->name ?? 'N/A'}}</td>
+                        
+                            <td>{{ $variation->name ?? 'N/A' }}</td>
+                            <td>{{ $item->qty }}</td>
+                            <td>{{ $variation->price ?? 0,  }}</td>
+                             <td>{{ $res->grand_total ?? 0 }}</td>
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-secondary">
+                                <th colspan="4" class="text-end">Grand Total:</th>
+                                <td class="text-end" id="modalGrandTotal">{{ $res->grand_total ?? 0 }}</td>
+                            </tr>
+                            <tr class="table-secondary align-middle">
+                                <th colspan="4" class="text-end">Discount:</th>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end align-items-center">
+                                        <input type="number" class="form-control form-control-sm me-2 text-end"
+                                            placeholder="Enter discount" style="width: 120px;">
+                                        <select class="form-select form-select-sm" style="width: 90px;">
+                                            <option value="flat">Flat</option>
+                                            <option value="percent">%</option>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="table-secondary">
+                                <th colspan="4" class="text-end">Net Payable:</th>
+                                <td class="text-end fw-bold text-success" id="modalNetPayable"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <!-- Payment Details -->
+                    <div class="payment-details">
+                        <h5 class="mb-3">Payment Details</h5>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="payment_status" id="unpaid"
+                                value="unpaid" checked>
+                            <label class="form-check-label" for="unpaid">Unpaid</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="payment_status" id="paid"
+                                value="paid" data-toggle="modal"  data-target="#exampleModal1">
+                            <label class="form-check-label" for="paid">Paid</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+
+            </div>
+        </div> 
+
+          
+         <!-- Modal for paid Button -->
+    <div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm">
+                        <!-- Paid Amount -->
+                        <div class="mb-3">
+                            <label for="paidAmount" class="form-label">Paid Amount:</label>
+                            <input type="number" class="form-control" id="paidAmount" readonly>
+                             </div>
+
+                            <!-- Due Amount (readonly) -->
+                            <div class="mb-3">
+                                <label for="dueAmount" class="form-label">Due Amount:</label>
+                                <input type="number" class="form-control" id="dueAmount" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="subTotal" class="form-label">Sub-Total</label>
+                                <input type="number" class="form-control" id="sub-total" readonly>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="mb-3">
+                                <label for="paymentMethod" class="form-label">Payment Method:</label>
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="mobileBanking">MobileBanking</option>
+                                    <option value="esewa">eSewa</option>
+                                    <option value="khalti">Khalti</option>
+                                </select>
+                            </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>///
+
+
+    ///due orders
+    
+public function dueCustomers()
+{
+    $dues = \Modules\Restaurent\Models\DueOrder::latest()->get();
+    return view('restaurent::orders.dueCustomers', compact('dues'));
+}
+public function getOrder($id)
+{
+    $order = Order::with(['customer', 'items.menu'])->find($id);
+
+    if (!$order) {
+        return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+    }
+
+   $items = $order->items->map(function($item) {
+    $variation = $item->menuVariation; // make sure this relation exists in Item model
+    return [
+        'name' => $variation->menu->name ?? 'N/A', // menu name
+        'variation' => $variation->name ?? 'N/A',  // variation name
+        'qty' => $item->qty,                       // quantity
+        'price' => $variation->price ?? 0,        // variation price
+        'total' => $item->qty * ($variation->price ?? 0)
+    ];
+});
+
+    $grand_total = $items->sum('total');
+    $discount = $order->discount ?? 0;
+    $net_payable = $grand_total - $discount;
+
+    return response()->json([
+        'id' => $order->id,
+        'customer_name' => $order->customer->name ?? 'N/A',
+        'items' => $items,
+        'grand_total' => $grand_total,
+        'discount' => $discount,
+        'net_payable' => $net_payable
+    ]);
+}
+
+
+//
+Route::post('/orders/update-payment', [OrderController::class, 'updatePayment'])->name('orders.updatePayment');
+    Route::resource('duecustomers', DueOrderController::class)->names('duecustomers');
+
+    //
+      @foreach ($res->items as $item)
+                                                        @php
+                                                            $menu = Modules\Restaurent\Models\Menu::find($item->menu_id);
+                                                            $variation = Modules\Restaurent\Models\MenuVariation::find($item->variation_id);
+                                                        @endphp
+                                                        <tr>
+                                                          
+                                                            <td>{{ $variation->name ?? 'N/A' }}-{{ $menu->name ?? 'N/A' }}</td>
+                                                            <td>{{ $item->qty ?? 0 }}</td>
+                                                        
+                                                        </tr>
+                                                    @endforeach
+
+
+
+<!-- JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Send to Kitchen
+    document.querySelectorAll('.moveBtn').forEach(button => {
+        button.addEventListener('click', () => {
+            const orderId = button.dataset.id;
+            if (confirm("Send this order to the kitchen?")) {
+                fetch(`/restaurent/move/${orderId}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": csrfToken
+                    },
+                    body: JSON.stringify({ order_id: orderId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        button.disabled = true;
+                        button.className = 'btn btn-sm btn-success';
+                        button.innerHTML = `${data.status} <i class="fa fa-check"></i>`;
+
+                        const row = button.closest('tr');
+                        row.querySelector('td:nth-child(7)').textContent = data.order_source;
+                        row.querySelector('td:nth-child(8)').textContent = data.status;
+                    } else alert('Failed to send order.');
+                })
+                .catch(err => { console.error(err); alert('Server error'); });
+            }
+        });
+    });
+
+    // Payment Status Toggle
+    document.querySelectorAll('.payment-status').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const paidSection = this.closest('.payment-details').querySelector('.paid-section');
+            paidSection.style.display = (this.value === 'paid') ? 'block' : 'none';
+        });
+    });
+
+    // Discount & Net Payable
+    function updateNetPayable(modal) {
+        const total = parseFloat(modal.querySelector('.total-amount').innerText) || 0;
+        const discount = parseFloat(modal.querySelector('.discount-input').value) || 0;
+        const type = modal.querySelector('.discount-type').value;
+        let net = total;
+        if (type === 'percent') net -= (total * discount / 100);
+        else net -= discount;
+        modal.querySelector('.net-payable').innerText = net.toFixed(2);
+    }
+    document.querySelectorAll('.discount-input, .discount-type').forEach(el => {
+        el.addEventListener('input', function() {
+            const modal = el.closest('.modal-content');
+            updateNetPayable(modal);
+        });
+    });
+
+    // Paying Amount => Paid & Due Amount
+    document.querySelectorAll('.serveModal').forEach(modal => {
+        const payingInput = modal.querySelector('.paying-input');
+        const netPayableEl = modal.querySelector('.net-payable');
+        const paidAmountEl = modal.querySelector('.paid-amount');
+        const dueAmountEl = modal.querySelector('.due-amount');
+
+        if (payingInput && netPayableEl && paidAmountEl && dueAmountEl) {
+            payingInput.addEventListener('input', () => {
+                const payingAmount = parseFloat(payingInput.value) || 0;
+                const net = parseFloat(netPayableEl.textContent) || 0;
+                paidAmountEl.textContent = `Rs. ${payingAmount.toFixed(2)}`;
+                dueAmountEl.textContent = `Rs. ${Math.max(net - payingAmount, 0).toFixed(2)}`;
+            });
+        }
+    });
+
+    // Payment Method Image Update
+    document.querySelectorAll('.payment-method-select').forEach(select => {
+        const img = select.closest('.paid-section').querySelector('.payment-method-img');
+        select.addEventListener('change', () => {
+            img.src = select.options[select.selectedIndex].dataset.img;
+        });
+    });
+});
+</script>
+@endsection
+
+
+//
+
+  <div class="payment-details mt-3">
+                                                                    <div class="card shadow-sm border-primary">
+                                                                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                                                            <h6 class="mb-0"><i class="fa fa-credit-card me-2"></i>Payment Details</h6>
+                                                                            <small class="text-white-50">Order ID: #{{ $due->order_id }}</small>
+                                                                        </div>
+                                                                        <div class="card-body">
+
+                                                                            <div class="mb-3">
+                                                                                <label class="form-label fw-bold">Payment Status:</label><br>
+                                                                                <div class="form-check form-check-inline">
+                                                                                    <input class="form-check-input payment-status" type="radio" name="payment_status_{{ $due->id }}" value="unpaid" checked>
+                                                                                    <label class="form-check-label">Unpaid</label>
+                                                                                </div>
+                                                                                <div class="form-check form-check-inline">
+                                                                                    <input class="form-check-input payment-status" type="radio" name="payment_status_{{ $res->id }}" value="paid">
+                                                                                    <label class="form-check-label">Paid</label>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div class="paid-section p-3 border rounded shadow-sm" style="display:none; background-color:#f8f9fa;">
+                                                                                <div class="mb-3">
+                                                                                    <label class="form-label fw-bold">Payment Method</label>
+                                                                                    <div class="input-group">
+                                                                                        <select name="payment_method" class="form-select form-select-sm payment-method-select">
+                                                                                            <option value="cash" data-img="{{ asset('payment_images/cash.png') }}">Cash</option>
+                                                                                            <option value="card" data-img="{{ asset('payment_images/card.png') }}">Card</option>
+                                                                                            <option value="esewa" data-img="{{ asset('payment_images/esewa.png') }}">eSewa</option>
+                                                                                        </select>
+                                                                                        <span class="input-group-text bg-white border-start-0">
+                                                                                            <img class="payment-method-img rounded border" src="{{ asset('payment_images/cash.png') }}" alt="Payment" style="width:40px; height:40px;">
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <div class="row g-2 text-dark">
+                                                                                    <div class="col-md-6">
+                                                                                        <div class="p-2 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center">
+                                                                                            <span>Total Amount:</span>
+                                                                                            <span class="fw-bold">{{ $res->grand_total ?? 0 }}</span>
+                                                                                        </div
+                                                                                        >
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <div class="p-2 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center">
+                                                                                            <span>Paying Amount:</span>
+                                                                                            <input type="number" name="paying_amount" class="form-control form-control-sm paying-input d-inline-block text-end" style="width:120px;">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <div class="p-2 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center">
+                                                                                            <span>Paid Amount:</span>
+                                                                                            <span class="paid-amount fw-bold">Rs. 0</span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <div class="p-2 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center">
+                                                                                            <span>Due Amount:</span>
+                                                                                            <span class="due-amount fw-bold">Rs. 0</span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+ Schema::table('customer_payments', function (Blueprint $table) {
+             $table->bigIncrements('id');
+            $table->integer('Customer_Id');
+            $table->integer('Due_Amount');
+            $table->integer('Paid_Amount');
+            $table->integer('Total_Amount');
+            $table->string('status')->default('unknown');
+            $table->softDeletes();
+
+
+            //
+            //paid
+            <div class="paid-section p-3 border rounded shadow-sm"
+                                                                                                style="display:none; background-color:#f8f9fa;">
+                                                                                                <div class="mb-3">
+                                                                                                    <label
+                                                                                                        class="form-label fw-bold">Payment
+                                                                                                        Method</label>
+                                                                                                    <div
+                                                                                                        class="input-group">
+                                                                                                        <select
+                                                                                                            name="payment_method"
+                                                                                                            class="form-select form-select-sm payment-method-select">
+                                                                                                            <option
+                                                                                                                value="cash"
+                                                                                                                data-img="{{ asset('payment_images/cash.png') }}">
+                                                                                                                Cash
+                                                                                                            </option>
+                                                                                                            <option
+                                                                                                                value="card"
+                                                                                                                data-img="{{ asset('payment_images/card.png') }}">
+                                                                                                                Card
+                                                                                                            </option>
+                                                                                                            <option
+                                                                                                                value="esewa"
+                                                                                                                data-img="{{ asset('payment_images/esewa.png') }}">
+                                                                                                                eSewa
+                                                                                                            </option>
+                                                                                                        </select>
+                                                                                                        <span
+                                                                                                            class="input-group-text bg-white border-start-0">
+                                                                                                            <img class="payment-method-img rounded border"
+                                                                                                                src="{{ asset('payment_images/cash.png') }}"
+                                                                                                                alt="Payment"
+                                                                                                                style="width:40px; height:40px;">
+                                                                                                        </span>
+                                                                                                    </div>
+
+                                                                                                </div>
+
+                                                                                                <div
+                                                                                                    class="row g-2 text-dark">
+                                                                                                    <div class="col-md-6">
+                                                                                                        <div
+                                                                                                            class="p-2 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center">
+                                                                                                            <span>Total
+                                                                                                                Amount:</span>
+                                                                                                            <span
+                                                                                                                class="fw-bold net-payable">{{ $res->grand_total ?? 0 }}</span>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="col-md-6">
+                                                                                                        <div
+                                                                                                            class="p-2 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center">
+                                                                                                            <span>Paying
+                                                                                                                Amount:</span>
+                                                                                                            <input
+                                                                                                                type="number"
+                                                                                                                name="paying_amount"
+                                                                                                                class="form-control form-control-sm paying-input d-inline-block text-end"
+                                                                                                                style="width:120px;">
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="col-md-6">
+                                                                                                        <div
+                                                                                                            class="p-2 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center">
+                                                                                                            <span>Paid
+                                                                                                                Amount:</span>
+                                                                                                            <span
+                                                                                                                class="paid-amount fw-bold">Rs.
+                                                                                                                0</span>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div class="col-md-6">
+                                                                                                        <div
+                                                                                                            class="p-2 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center">
+                                                                                                            <span>Due
+                                                                                                                Amount:</span>
+                                                                                                            @php
+                                                                                                                $cid =
+                                                                                                                    $res->customer_id ??
+                                                                                                                    ($res
+                                                                                                                        ->customer[
+                                                                                                                        'id'
+                                                                                                                    ] ??
+                                                                                                                        null);
+                                                                                                                $due =
+                                                                                                                    \Modules\Restaurent\Models\CustomerPayment::where(
+                                                                                                                        'customer_id',
+                                                                                                                        $cid,
+                                                                                                                    )->value(
+                                                                                                                        'due_amount',
+                                                                                                                    ) ??
+                                                                                                                    0;
+                                                                                                            @endphp
+                                                                                                            <span
+                                                                                                                class="due-amount fw-bold"
+                                                                                                                data-old-due="{{ $due ?? 0 }}">
+                                                                                                                Rs.
+                                                                                                                {{ $due ?? 0 }}
+                                                                                                            </span>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div> 

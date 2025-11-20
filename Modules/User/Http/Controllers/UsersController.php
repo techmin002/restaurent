@@ -47,7 +47,7 @@ class UsersController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|max:255|confirmed',
-            'branch_id' => 'required'
+            'restaurent_id' => 'required'
         ]);
 
         $imageName = '';
@@ -61,7 +61,7 @@ class UsersController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'access_type'    => $request->role,
-            'branch_id'    => $request->branch_id,
+            'restaurent_id'    => $request->restaurent_id,
             'created_by'    => $request->created_by,
             'user_type'    => $request->user_type,
             'password' => Hash::make($request->password),
@@ -72,10 +72,10 @@ class UsersController extends Controller
 
         $user->assignRole($request->role);
          $employee = new Employee();
-        $employee->name = $request['admin_name'];
-        $employee->email = $request['admin_email'];
-        $employee->phone = $request['admin_phone'];
-        $employee->address = $request['admin_address'];
+        $employee->name = $request['name'];
+        $employee->email = $request['email'];
+        $employee->phone = $request['phone'];
+        $employee->address = $request['address'];
         $employee->role = $role->name;
         $employee->restaurent_id = auth()->user()->restaurent_id;
         $employee->created_by = auth()->user()->id;

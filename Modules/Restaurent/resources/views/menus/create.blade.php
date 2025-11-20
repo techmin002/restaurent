@@ -79,6 +79,7 @@
                                                 <button type="button" class="btn btn-success btn-sm"
                                                     onclick="addVariation()">+</button>
                                             </div>
+                                          
                                         </div>
                                         {{-- <div class="row mt-2">
                                             <div class="col-lg-12">

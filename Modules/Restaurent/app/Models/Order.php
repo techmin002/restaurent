@@ -32,7 +32,11 @@ class Order extends Model
         'grand_total',
         'order_time',
         'status',
-        'order_from'
+        'order_from',
+        'order_source', 
+         'paying_amount',
+    'payment_status',
+    'payment_method',
     ];
     public function items()
 {
@@ -55,6 +59,10 @@ public function variation()
 public function menu()
 {
     return $this->belongsTo(Menu::class);
+}
+public function payments()
+{
+    return $this->hasMany(Payment::class, 'order_id', 'id');
 }
     // protected static function newFactory(): OrderFactory
     // {

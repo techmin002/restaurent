@@ -162,22 +162,47 @@
                                   </p>
                               </a>
                           </li>
-                          <li class="nav-item {{ request()->routeIs('neworders.*') ? 'menu-is-opening menu-open' : '' }}">
-                              <a href="{{ route('neworders') }}" class="nav-link" {{ request()->routeIs('neworders.*') ? 'active' : '' }}>
-                                  <i class="nav-icon fas fa-store"></i>
-                                  <p>
-                                      New Order
-                                  </p>
-                              </a>
-                          </li>
-                          <li class="nav-item {{ request()->routeIs('orders.index') ? 'menu-is-opening menu-open' : '' }}">
-                              <a href="{{ route('orders.index') }}" class="nav-link" {{ request()->routeIs('orders.index') ? 'active' : '' }}>
-                                  <i class="nav-icon fas fa-store"></i>
-                                  <p>
-                                      Orders
-                                  </p>
-                              </a>
-                          </li>
+  <li class="nav-item {{ request()->routeIs('neworders') || request()->routeIs('orders.index') ? 'menu-is-opening menu-open' : '' }}">
+    <a href="#" class="nav-link">
+        <i class="nav-icon fas fa-store"></i>
+        <p>
+            Order Management
+            <i class="right fas fa-angle-left"></i>
+        </p>
+    </a>
+    <ul class="nav nav-treeview">
+        <li class="nav-item">
+            <a href="{{ route('neworders') }}" class="nav-link {{ request()->routeIs('neworders') ? 'active' : '' }}">
+                <p>New Order</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('orders.index') }}" class="nav-link {{ request()->routeIs('orders.index') ? 'active' : '' }}">
+                <p>Orders</p>
+            </a>
+        </li>
+        {{-- Only include if routes exist --}}
+         <li class="nav-item">
+            <a href="{{ route('kitchenorders') }}" class="nav-link {{ request()->routeIs('kitchenorders') ? 'active' : '' }}">
+                <p>Kitchen Order</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('receptionorders') }}" class="nav-link {{ request()->routeIs('receptionorders') ? 'active' : '' }}">
+                <p>Reception Order</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('completedorders') }}" class="nav-link {{ request()->routeIs('completedorders') ? 'active' : '' }}">
+                <p>Completed Order</p>
+            </a>
+        </li> 
+      
+    </ul>
+</li>
+
+
+
                            <li class="nav-item {{ request()->routeIs('customers.*') ? 'menu-is-opening menu-open' : '' }}">
                               <a href="{{ route('customers.index') }}" class="nav-link" {{ request()->routeIs('customers.*') ? 'active' : '' }}>
                                   <i class="nav-icon fas fa-store"></i>
