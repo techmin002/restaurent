@@ -47,6 +47,8 @@ Route::get('completed/orders', [OrderController::class, 'completedOrders'])->nam
 Route::post('/kitchen/served/{id}', [KitchenController::class, 'markServed'])->name('kitchen.markServed');
 
 Route::post('/orders/update-payment', [OrderController::class, 'updatePayment'])->name('orders.updatePayment');
+Route::post('/orders/{id}/kitchen', [OrderController::class, 'moveToKitchen'])
+    ->name('orders.moveToKitchen');
 Route::get('/duecustomers', [DueOrderController::class, 'index'])->name('duecustomers');
     Route::post('/reception/restaurent/due/pay/{id}', [OrderController::class, 'payDue'])->name('due.pay');
     Route::post('/customers/pay-due', [CustomerController::class, 'payDue'])
