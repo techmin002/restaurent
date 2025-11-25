@@ -6,7 +6,7 @@
 <!-- Modal Structure -->
 <div class="modal fade" data-backdrop="static" id="editModal{{ $menu->id }}" tabindex="-1" role="dialog"
     aria-labelledby="editModalLabel{{ $menu->id }}" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content" style="border-radius: 8px;">
             <div class="modal-header justify-content-center" style="background-color: #007bff; color: #ffff;">
                 <h4 class="modal-title" id="editModalLabel{{ $menu->id }}">Edit Section</h4>
@@ -30,6 +30,16 @@
                                 <div class="invalid-feedback">
                                     Please Enter Item Name first!
                                 </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <label class="form-label12" for="name">Category <span
+                                        class="text-danger">*</span></label>
+                                <select name="category_id" class="form-control" required>
+                                    <option value="">Select Category</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" @if ($menu['category_id'] == $category->id) selected @endif>{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-lg-12" data-select2-id="select2-data-5-a5wr">
                                 <label class="form-label12" for="name">Image <small>(optional)</small></label>

@@ -18,6 +18,7 @@ class Menu extends Model
     protected $fillable = [
         'restaurent_id',
         'name',
+        'category_id',
         'created_by',
         'image',
         'description',
@@ -27,6 +28,10 @@ class Menu extends Model
 public function variations()
 {
     return $this->hasMany(MenuVariation::class,'menu_id','id');
+}
+
+public function category(){
+    return $this->belongsTo(Category::class);
 }
     // protected static function newFactory(): MenuFactory
     // {

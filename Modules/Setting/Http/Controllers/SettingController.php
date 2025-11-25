@@ -76,4 +76,5 @@ class SettingController extends Controller
     {
         //
     }
+
 }

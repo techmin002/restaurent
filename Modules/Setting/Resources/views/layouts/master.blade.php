@@ -18,3 +18,5 @@
                 @yield('content')
                 {{-- </body> --}}
                 @include('setting::layouts.footer')
+
+

@@ -54,8 +54,8 @@
 <!-- Custom Scripts -->
 <script>
     $(document).ready(function() {
-            $('.summernote').summernote();
-        });
+        $('.summernote').summernote();
+    });
     $(function() {
         // Initialize Select2 Elements
         $('.select2').select2();
@@ -181,76 +181,192 @@
         myDropzone.removeAllFiles(true);
     };
 </script>
-{{-- <script>
-    let modalOpen = false;
+<script>
+    (function() {
+        // --- Setup CSRF for Laravel ---
+        const csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            }
+        });
 
-    document.addEventListener('click', function unlockAudioOnce() {
-        const sound = document.getElementById('orderAlertSound');
-        sound.play().then(() => {
-            sound.pause();
-            sound.currentTime = 0;
-        }).catch(() => {});
-        document.removeEventListener('click', unlockAudioOnce);
-    });
+        let lastOrderId = 0;
+        const POLL_MS = 5000;
+        let pollHandle = null;
 
-    function checkNewOrders() {
-        if (modalOpen) return;
+        // Start polling
+        function startPolling() {
+            if (pollHandle) clearInterval(pollHandle);
+            pollHandle = setInterval(checkNewOrders, POLL_MS);
+            checkNewOrders(); // call once immediately
+        }
 
-        fetch("{{ url('/check-latest-order') }}")
-            .then(res => res.json())
-            .then(data => {
-                if (data.new && data.items && data.items.length > 0) {
-                    const sound = document.getElementById('orderAlertSound');
-                    sound.play();
+        // Check endpoint and add rows
+        function checkNewOrders() {
+            $.ajax({
+                url: "/check-latest-order",
+                method: "GET",
+                data: {
+                    last_order_id: lastOrderId
+                },
+                dataType: "json",
+                success: function(res) {
+                    try {
+                        let orders = [];
+                        if (res.newOrders && Array.isArray(res.newOrders)) {
+                            orders = res.newOrders;
+                        } else if (res.newOrder) {
+                            orders = [res.newOrder];
+                        }
+                        if (orders.length === 0) return;
 
-                    modalOpen = true;
+                        let hasNewOrder = false;
 
-                    // Fill heading
-                    const headingText = data.table_number
-                        ? `New Order Received from Table #${data.table_number}`
-                        : `New Order Received from Office "${data.office_name}"`;
-                    document.getElementById('orderFromHeading').textContent = headingText;
+                        orders.forEach(order => {
+                            if (order.id && Number(order.id) > Number(lastOrderId)) {
+                                lastOrderId = Number(order.id);
+                                appendOrderRow(order);
+                                hasNewOrder = true; // mark as new
+                            }
+                        });
 
-                    // Fill table
-                    const tbody = document.getElementById('orderItemsTableBody');
-                    tbody.innerHTML = '';
-                    data.items.forEach(item => {
-                        const row = `<tr>
-                            <td>${item.item_name}</td>
-                            <td>${item.variation_name}</td>
-                            <td>${item.qty}</td>
-                        </tr>`;
-                        tbody.insertAdjacentHTML('beforeend', row);
-                    });
+                        // Play notification sound only if there is at least one new order
+                        if (hasNewOrder) {
+                            const audio = document.getElementById('newOrderSound');
+                            if (audio) {
+                                audio.pause();
+                                audio.currentTime = 0;
+                                audio.play().catch(e => console.error('Audio play error:', e));
+                            }
 
-                    $('#orderAlertModal').modal('show');
+                            // Show modal
+                            const modalEl = document.getElementById('newOrderModal');
+                            if (typeof $ !== 'undefined' && typeof $(modalEl).modal === 'function') {
+                                $(modalEl).modal('show');
+                            } else if (typeof bootstrap !== 'undefined') {
+                                const bsModal = new bootstrap.Modal(modalEl);
+                                bsModal.show();
+                            }
+                        }
+
+                    } catch (e) {
+                        console.error('Error processing checkNewOrders:', e);
+                    }
+                },
+                error: function(xhr, status, err) {
+                    console.error('checkNewOrders AJAX error:', status, err, xhr.responseText);
                 }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    setInterval(checkNewOrders, 5000);
-
-    // Accept & Reject
-    document.getElementById('acceptOrderBtn').addEventListener('click', function () {
-        modalOpen = false;
-        stopSound();
-        $('#orderAlertModal').modal('hide');
-        // Optionally send AJAX to update status
-    });
-
-    document.getElementById('rejectOrderBtn').addEventListener('click', function () {
-        modalOpen = false;
-        stopSound();
-        $('#orderAlertModal').modal('hide');
-        // Optionally send AJAX to update status
-    });
-
-    function stopSound() {
-        const sound = document.getElementById('orderAlertSound');
-        sound.pause();
-        sound.currentTime = 0;
-    }
-</script> --}}
+            });
+        }
 
 
+        // Build and append a table row for one order
+        function appendOrderRow(order) {
+            if (!order || !order.id) return;
+            if ($('#orderRow' + order.id).length) return;
+
+            const total = (typeof order.total !== 'undefined') ? Number(order.total) :
+                (order.order_items ? computeTotalFromItems(order.order_items) : 0);
+
+            const rowHtml = `
+            <tr id="orderRow${order.id}">
+                <td>#${escapeHtml(order.id.toString())}</td>
+                <td>${escapeHtml(order.order_type.toString())}</td>
+                <td>Rs. ${Number(order.grand_total).toFixed(2)}</td>
+                 <td>
+    ${order.items && order.items.length > 0 
+    ? order.items.map(item => `${escapeHtml(item.menu_name || 'N/A')} (Qty: ${item.qty || 0})`).join(', ')
+    : 'N/A'}
+</td>
+                <td>${order.order_type === 'dinein' ? escapeHtml(order.table_id || 'N/A') : '-'}</td>
+                <td>${order.order_type === 'dinein' ? escapeHtml(order.customer_name || 'N/A') : '-'}</td>
+                <td>${order.order_type === 'dinein' ? escapeHtml(order.customer_contact || 'N/A') : '-'}</td>
+                <td>${order.order_type === 'office' ? escapeHtml(order.office_name || 'N/A') : '-'}</td>
+                <td>${order.order_type === 'office' ? escapeHtml(order.office_contact || 'N/A') : '-'}</td>
+                <td>${order.order_type === 'office' ? escapeHtml(order.office_address || 'N/A') : '-'}</td>
+                <td>
+                    <button class="btn btn-sm btn-success btn-accept" data-id="${order.id}" title="Accept order ${order.id}">
+                        Accept
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-reject ms-2" data-id="${order.id}" title="Reject order ${order.id}">
+                        Reject
+                    </button>
+                </td>
+            </tr>
+        `;
+
+            $('#newOrdersBody').append(rowHtml);
+
+            // Highlight new row briefly
+            const $row = $('#orderRow' + order.id);
+            $row.css('background-color', '#e9f7ef');
+            setTimeout(() => {
+                $row.css('transition', 'background-color 800ms').css('background-color', '');
+            }, 800);
+        }
+
+        function computeTotalFromItems(items) {
+            if (!items || !Array.isArray(items)) return 0;
+            return items.reduce((sum, it) => {
+                const price = Number(it.price) || 0;
+                const qty = Number(it.quantity) || 0;
+                return sum + (price * qty);
+            }, 0);
+        }
+
+        // --- Accept and Reject via POST form submission ---
+        $(document).on('click', '.btn-accept', function(e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+            if (!id) return;
+            const csrf = $('meta[name="csrf-token"]').attr('content');
+            const form = $('<form>', {
+                method: 'POST',
+                action: `/accept-order/${id}`
+            }).append(`<input type="hidden" name="_token" value="${csrf}">`);
+            $('body').append(form);
+            form.submit();
+        });
+
+        $(document).on('click', '.btn-reject', function(e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+            if (!id) return;
+            if (!confirm('Reject order #' + id + '?')) return;
+            const csrf = $('meta[name="csrf-token"]').attr('content');
+            const form = $('<form>', {
+                method: 'POST',
+                action: `/reject-order/${id}`
+            }).append(`<input type="hidden" name="_token" value="${csrf}">`);
+            $('body').append(form);
+            form.submit();
+        });
+
+        function checkIfNoRowsHideModal() {
+            if ($('#newOrdersBody tr').length === 0) {
+                const modalEl = document.getElementById('newOrderModal');
+                if (typeof $ !== 'undefined' && typeof $(modalEl).modal === 'function') {
+                    $(modalEl).modal('hide');
+                } else if (typeof bootstrap !== 'undefined') {
+                    const bsModal = bootstrap.Modal.getInstance(modalEl);
+                    if (bsModal) bsModal.hide();
+                }
+            }
+        }
+
+        function escapeHtml(unsafe) {
+            return String(unsafe)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        $(document).ready(function() {
+            startPolling();
+        });
+
+    })();
+</script>

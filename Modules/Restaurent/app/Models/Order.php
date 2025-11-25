@@ -33,17 +33,21 @@ class Order extends Model
         'order_time',
         'status',
         'order_from',
+<<<<<<< HEAD
         'order_source', 
          'paying_amount',
     'payment_status',
     'payment_method',
+=======
+        'vat'
+>>>>>>> ARbranch
     ];
     public function items()
 {
-    return $this->hasMany(OrderMenu::class);
+    return $this->hasMany(OrderMenu::class, 'order_id');
 }
 public function table() {
-    return $this->belongsTo(RestaurentTable::class);
+    return $this->belongsTo(RestaurentTable::class, 'table_id');
 }
 
 public function office() {

@@ -20,9 +20,10 @@ class Customer extends Model
         'name',
         'phone',
         'email',
+        'restaurent_id',
         'last_visit',
         'due_amount',
-        'status'
+        'status',
     ];
     public function orders()
 {
