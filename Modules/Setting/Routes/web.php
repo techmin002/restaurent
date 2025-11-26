@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Employee\Http\Controllers\PayrollController;
 use Modules\Setting\Http\Controllers\CompanyProfileController;
 use Modules\Setting\Http\Controllers\PopUpController;
+use Modules\Setting\Http\Controllers\CounterController;
 
 Route::prefix('setting')->group(function () {
     Route::get('/', 'SettingController@index');
@@ -58,4 +59,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('whyus/update/{id}', [CompanyProfileController::class, 'WhyUsUpdate'])->name('whyus.update');
     Route::get('whyus/delete/{id}', [CompanyProfileController::class, 'WhyUsDelete'])->name('whyus.delete');
 
+    // Counter Module Routes
+    Route::post('/open-counter', [CounterController::class, 'open'])->name('openCounter');
+    Route::post('/close-counter', [CounterController::class, 'close'])->name('closeCounter');
+    Route::get('/counter/today-state', [CounterController::class, 'getTodayCounter'])->name('todayCounterState');
 });

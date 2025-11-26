@@ -1213,9 +1213,17 @@ class OrderController extends Controller
 
     public function reset()
     {
-        // Update all rows where notification = 1
         \DB::table('restaurent_tables')
             ->where('notification', 1)
+            ->update(['notification' => 0]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function resetSingleNotification(Request $request)
+    {
+        \DB::table('restaurent_tables')
+            ->where('table_number', $request->table_number)
             ->update(['notification' => 0]);
 
         return response()->json(['success' => true]);

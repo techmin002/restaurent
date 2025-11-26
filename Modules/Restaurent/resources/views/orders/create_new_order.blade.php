@@ -1657,7 +1657,7 @@
                             // For simplicity, we'll update the first incomplete order
                             const incompleteOrder = data.find(order =>
                                 order.status === 'pending' || order.status === 'confirmed' || order.status ===
-                                'preparing'
+                                'accepted'
                             );
 
                             if (incompleteOrder) {

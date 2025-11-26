@@ -49,6 +49,11 @@
             box-sizing: border-box;
         }
 
+        .status-accepted {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ef6c00;
+        }
+
         html,
         body {
             height: 100%;
@@ -1773,7 +1778,7 @@
                     if (data && data.length > 0) {
                         const incompleteOrder = data.find(order =>
                             order.status === 'pending' || order.status === 'confirmed' || order.status ===
-                            'preparing'
+                            'preparing' || order.status === 'accepted'
                         );
 
                         if (incompleteOrder) {
@@ -1834,15 +1839,15 @@
                                 <strong>Order Total: Rs. ${orderTotal.toFixed(2)}</strong>
                             </div>
                             ${order.table_number ? `
-                                                                                                                    <div class="order-location small text-muted mt-1">
-                                                                                                                        <i class="fas fa-table me-1"></i>Table: ${order.table_number}
-                                                                                                                    </div>
-                                                                                                                ` : ''}
+                                                                                                                            <div class="order-location small text-muted mt-1">
+                                                                                                                                <i class="fas fa-table me-1"></i>Table: ${order.table_number}
+                                                                                                                            </div>
+                                                                                                                        ` : ''}
                             ${order.order_type ? `
-                                                                                                                    <div class="order-type small text-muted mt-1">
-                                                                                                                        <span class="badge order-type-badge bg-secondary">${order.order_type}</span>
-                                                                                                                    </div>
-                                                                                                                ` : ''}
+                                                                                                                            <div class="order-type small text-muted mt-1">
+                                                                                                                                <span class="badge order-type-badge bg-secondary">${order.order_type}</span>
+                                                                                                                            </div>
+                                                                                                                        ` : ''}
                         </div>
                     `;
             });
@@ -1934,6 +1939,7 @@
         function getStatusClass(status) {
             const statusMap = {
                 'pending': 'status-pending',
+                'accepted': 'status-accepted',
                 'confirmed': 'status-preparing',
                 'preparing': 'status-preparing',
                 'ready': 'status-ready',

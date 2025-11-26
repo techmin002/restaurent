@@ -76,6 +76,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/reset-notification', [OrderController::class, 'reset']);
 
     Route::get('/notify/{table_number}', [OrderController::class, 'setNotification']);
+    Route::post('/reset-single-notification', [OrderController::class, 'resetSingleNotification']);
 
 
 

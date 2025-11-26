@@ -1528,7 +1528,7 @@
 
                     if (data && data.length > 0) {
                         const incompleteOrder = data.find(order =>
-                            order.status === 'pending' || order.status === 'confirmed' || order.status === 'preparing'
+                            order.status === 'pending' || order.status === 'confirmed' || order.status === 'preparing' || order.status === 'accepted'
                         );
 
                         if (incompleteOrder) {
