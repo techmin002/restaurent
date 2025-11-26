@@ -95,7 +95,6 @@
                                               <th class="text-center">Table/ Office/ Takeway</th>
                                               <th class="text-center">is_Reception/is_Kitchen</th>
 
-<<<<<<< HEAD
                                               <th class="text-center">Status</th>
                                               <th class="text-center">Action</th>
 
@@ -121,57 +120,18 @@
                                                         @php
                                                             $menu = Modules\Restaurent\Models\Menu::find($item->menu_id);
                                                             $variation = Modules\Restaurent\Models\MenuVariation::find($item->variation_id);
-=======
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($orders as $key => $res)
-                                            <tr>
-                                                <td class="text-center">{{ $loop->iteration }}</td>
-                                                <td class="text-center">#RCO000{{ $res->id }}</td>
-                                                <td class="text-center">{{  $res->customer ? $res->customer['name'] : 'N/A' }}</td>
-
-                                                <td class="text-center">{{ $res->customer ? $res->customer['phone'] : 'N/A' }}</td>
-                                                <td class="text-center">
-                                                    <b>Iteams:</b>
-                                                    <table>
-                                                        <tr>
-                                                            <th>Name</th>
-                                                            <th>Qty</th>
-                                                            <th>Price</th>
-                                                        </tr>
-                                                        @foreach ($res->items as $item)
-                                                        @php
-                                                            $variation = Modules\Restaurent\Models\MenuVariation::select('name','price')->where('id',$item->variation_id)->first();
-                                                            
-                                                            $menu = Modules\Restaurent\Models\Menu::select('name','price')->where('id',$item->menu_id)->first();
-
->>>>>>> ARbranch
                                                         @endphp
                                                        {{-- @dd($variation); --}}
                                                         <tr>
-<<<<<<< HEAD
-                                                          
+
                                                             <td>{{ $variation->name ?? 'N/A' }}-{{ $menu->name ?? 'N/A' }}</td>
                                                             <td>{{ $item->qty ?? 0 }}</td>
                                                             <td>{{ $variation->price ?? 0 }}</td>
-                                                        
+
                                                         </tr>
                                                     @endforeach
                                                       </table>
                                                   </td>
-=======
-                                                            <td>{{ $menu->name?? $item->name }}</td>
-                                                            <td>{{ $item->qty }}</td>
-                                                            <td>{{ $variation->price?? $item->price }}</td>
-                                                        </tr>
-                                                        @endforeach
-                                                    </table>
-                                                </td>
-                                                <td class="text-center">{{ $res->order_type }}</td>
-                                                <td class="text-center">{{ $res->status }}</td>
-                                                <td>
->>>>>>> ARbranch
 
                                                   <!-- <td class="text-center">{{ $res->order_type }}</td> -->
                                                   <td class="text-center">{{ $res->order_type }}</td>

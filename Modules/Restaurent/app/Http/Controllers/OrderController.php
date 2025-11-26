@@ -22,36 +22,27 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-<<<<<<< HEAD
-   public function index()
-{
-    $allOrdersCount = Order::count();
-$receptionOrdersCount = Order::where('order_source', 'Reception')
-    ->where('status', 'pending') // or whatever status means "new/in-reception"
-    ->count();
-
- $kitchenOrdersCount = Order::whereIn('status', ['Sent to Kitchen', 'Cooking'])->count();
-
-    $completedOrdersCount = Order::where('status', 'Completed')->count();
-
-    $orders = Order::with('items', 'customer')->get();
-
-    return view('restaurent::orders.index', compact(
-    'allOrdersCount',
-    'receptionOrdersCount',
-    'kitchenOrdersCount',
-    'completedOrdersCount',
-    'orders'
-));
-}
-
-=======
     public function index()
     {
-        $orders = Order::with('items', 'table', 'office', 'customer', 'menu')->where('restaurent_id', auth()->user()->restaurent_id)->get();
-        return view('restaurent::orders.index', compact('orders'));
+        $allOrdersCount = Order::count();
+        $receptionOrdersCount = Order::where('order_source', 'Reception')
+            ->where('status', 'pending') // or whatever status means "new/in-reception"
+            ->count();
+
+        $kitchenOrdersCount = Order::whereIn('status', ['Sent to Kitchen', 'Cooking'])->count();
+
+        $completedOrdersCount = Order::where('status', 'Completed')->count();
+
+        $orders = Order::with('items', 'customer')->get();
+
+        return view('restaurent::orders.index', compact(
+            'allOrdersCount',
+            'receptionOrdersCount',
+            'kitchenOrdersCount',
+            'completedOrdersCount',
+            'orders'
+        ));
     }
->>>>>>> ARbranch
 
     /**
      * Show the form for creating a new resource.
@@ -130,11 +121,7 @@ $receptionOrdersCount = Order::where('order_source', 'Reception')
             'delivery_charge' => $request->deliveryCharge,
             'remarks'        => $request->remarks,
             'status'         => 'pending', // or default
-<<<<<<< HEAD
-            'order_source'   => 'Reception',
-=======
             'vat'    => $request->vat_amount,
->>>>>>> ARbranch
         ]);
         foreach ($request->menu_id as $index => $menuId) {
             OrderMenu::create([
@@ -574,8 +561,8 @@ $receptionOrdersCount = Order::where('order_source', 'Reception')
     public function show($id)
     {
         $product = Menu::with('variations')
-                // ->where('restaurant_id', auth()->user()->restaurant_id)
-                ->findorFail($id);
+            // ->where('restaurant_id', auth()->user()->restaurant_id)
+            ->findorFail($id);
 
         return response()->json($product);
     }
@@ -909,18 +896,16 @@ $receptionOrdersCount = Order::where('order_source', 'Reception')
             'newOrders' => $orders
         ]);
     }
+    public function kitchenOrders()
+    {
 
-<<<<<<< HEAD
-  public function kitchenOrders()
-{
-  
-    $orders = Order::with(['items', 'customer'])
-        ->whereIn('status', ['Sent to Kitchen', 'Cooking'])
-        ->orderBy('created_at', 'asc') // older orders first
-        ->get();
+        $orders = Order::with(['items', 'customer'])
+            ->whereIn('status', ['Sent to Kitchen', 'Cooking'])
+            ->orderBy('created_at', 'asc') //
+            ->get();
 
-    return view('restaurent::orders.kitchen', compact('orders')); 
-=======
+        return view('restaurent::orders.kitchen', compact('orders'));
+    }
 
 
     // for creating order from menu page
@@ -1276,96 +1261,95 @@ $receptionOrdersCount = Order::where('order_source', 'Reception')
 
         return back()->with('success', "Notification set for table $table_number");
     }
->>>>>>> ARbranch
-}
-public function receptionOrders()
-{
-    $orders = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office')
-        ->where('restaurent_id', auth()->user()->restaurent_id)
-        ->where('order_source','Reception')
-       
-        ->where('status', 'pending') // pending orders
-        ->orwhere('status','serve')
-        ->orwhere('status','cooking')
-        ->get();
-       
 
-    return view('restaurent::orders.reception', compact('orders'));
-}
+    public function receptionOrders()
+    {
+        $orders = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office')
+            ->where('restaurent_id', auth()->user()->restaurent_id)
+            ->where('order_source', 'Reception')
+
+            ->where('status', 'pending') // pending orders
+            ->orwhere('status', 'serve')
+            ->orwhere('status', 'cooking')
+            ->get();
 
 
-public function completedOrders()
-{
-
-    $orders = \Modules\Restaurent\Models\Order::with('items', 'customer')
-        ->where('status', 'Completed')
-        ->orderBy('id', 'desc')
-        ->get();
+        return view('restaurent::orders.reception', compact('orders'));
+    }
 
 
-    return view('restaurent::orders.completed', compact('orders'));
-}
+    public function completedOrders()
+    {
+
+        $orders = \Modules\Restaurent\Models\Order::with('items', 'customer')
+            ->where('status', 'Completed')
+            ->orderBy('id', 'desc')
+            ->get();
 
 
-//move to kitchen
-public function moveToKitchen($id)
-{
-    $order = Order::findOrFail($id);
+        return view('restaurent::orders.completed', compact('orders'));
+    }
 
-    // Update status
-    $order->status = 'sent to kitchen';
-     $order->order_source = 'kitchen';
-    $order->save();
 
-    return redirect()->back()->with('success', 'Order sent to kitchen!');
-}
+    //move to kitchen
+    public function moveToKitchen($id)
+    {
+        $order = Order::findOrFail($id);
 
-public function updatePayment(Request $request)
-{
-    // Validate input
-    $request->validate([
-        'order_id' => 'required|exists:orders,id',
-        'customer_id' => 'nullable|exists:customers,id',
-        'discount' => 'nullable|numeric|min:0',
-        'discount_type' => 'nullable|string|in:flat,percent',
-        'paying_amount' => 'nullable|numeric|min:0',
-        'payment_status_' . $request->order_id => 'required|string|in:paid,unpaid',
-        'payment_method' => 'nullable|string',
-    ]);
+        // Update status
+        $order->status = 'sent to kitchen';
+        $order->order_source = 'kitchen';
+        $order->save();
 
-    $order = Order::findOrFail($request->order_id);
+        return redirect()->back()->with('success', 'Order sent to kitchen!');
+    }
 
-    // Dynamic payment status
-    $paymentStatus = $request->input('payment_status_' . $request->order_id);
+    public function updatePayment(Request $request)
+    {
+        // Validate input
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'customer_id' => 'nullable|exists:customers,id',
+            'discount' => 'nullable|numeric|min:0',
+            'discount_type' => 'nullable|string|in:flat,percent',
+            'paying_amount' => 'nullable|numeric|min:0',
+            'payment_status_' . $request->order_id => 'required|string|in:paid,unpaid',
+            'payment_method' => 'nullable|string',
+        ]);
 
-    // Calculate discount
-    $grandTotal = $order->grand_total ?? 0;
-    $discount = $request->discount ?? 0;
+        $order = Order::findOrFail($request->order_id);
 
-    $discountAmount = ($request->discount_type === 'percent')
-        ? ($grandTotal * $discount) / 100
-        : $discount;
+        // Dynamic payment status
+        $paymentStatus = $request->input('payment_status_' . $request->order_id);
 
-    // Net payable
-    $netPayable = max($grandTotal - $discountAmount, 0);
+        // Calculate discount
+        $grandTotal = $order->grand_total ?? 0;
+        $discount = $request->discount ?? 0;
 
-    // Payment and due
-    $payingAmount = $request->paying_amount ?? 0;
-    $dueAmount = max($netPayable - $payingAmount, 0);
+        $discountAmount = ($request->discount_type === 'percent')
+            ? ($grandTotal * $discount) / 100
+            : $discount;
 
-   $status = ($dueAmount == 0) ? 'Completed' : 'Due';
+        // Net payable
+        $netPayable = max($grandTotal - $discountAmount, 0);
 
-    // Update order
-    $order->update([
-        'discount'        => $discountAmount,
-        'discount_type'   => $request->discount_type,
-        'net_payable'     => $netPayable,
-        'paid_amount'     => $payingAmount,
-        'due_amount'      => $dueAmount,
-        'status'          => $status,
-    ]);
+        // Payment and due
+        $payingAmount = $request->paying_amount ?? 0;
+        $dueAmount = max($netPayable - $payingAmount, 0);
 
-     Payment::create([
+        $status = ($dueAmount == 0) ? 'Completed' : 'Due';
+
+        // Update order
+        $order->update([
+            'discount'        => $discountAmount,
+            'discount_type'   => $request->discount_type,
+            'net_payable'     => $netPayable,
+            'paid_amount'     => $payingAmount,
+            'due_amount'      => $dueAmount,
+            'status'          => $status,
+        ]);
+
+        Payment::create([
             'customer_id'    => $request->customer_id,
             'office_id'      => $request->office_id,
             'amount'         => $payingAmount,
@@ -1373,62 +1357,61 @@ public function updatePayment(Request $request)
             // 'payment_date'           => now(),
             'status'         => $status,
         ]);
-    
-//update customer payment
 
- if ($request->customer_id) {
-    $customerPayment = CustomerPayment::where('customer_id', $request->customer_id)->first();
+        //update customer payment
 
-    if ($customerPayment) {
-        // Ledger-style update: old due + current net - paying
-        $newDue = max($customerPayment->due_amount + $netPayable - $payingAmount, 0);
+        if ($request->customer_id) {
+            $customerPayment = CustomerPayment::where('customer_id', $request->customer_id)->first();
 
-        $customerPayment->update([
-            'total_amount' => $customerPayment->total_amount + $netPayable,
-            'paid_amount'  => $customerPayment->paid_amount + $payingAmount,
-            'due_amount'   => $newDue,
-            'status'       => $newDue > 0 ? 'Due' : 'completed',
-        ]);
-    } else {
-        // Create new row if not exists
-        CustomerPayment::create([
-            'customer_id'  => $request->customer_id,
-            'total_amount' => $netPayable,
-            'paid_amount'  => $payingAmount,
-            'due_amount'   => max($netPayable - $payingAmount, 0),
-            'status'       => ($payingAmount < $netPayable) ? 'Due' : 'completed',
-        ]);
+            if ($customerPayment) {
+                // Ledger-style update: old due + current net - paying
+                $newDue = max($customerPayment->due_amount + $netPayable - $payingAmount, 0);
+
+                $customerPayment->update([
+                    'total_amount' => $customerPayment->total_amount + $netPayable,
+                    'paid_amount'  => $customerPayment->paid_amount + $payingAmount,
+                    'due_amount'   => $newDue,
+                    'status'       => $newDue > 0 ? 'Due' : 'completed',
+                ]);
+            } else {
+                // Create new row if not exists
+                CustomerPayment::create([
+                    'customer_id'  => $request->customer_id,
+                    'total_amount' => $netPayable,
+                    'paid_amount'  => $payingAmount,
+                    'due_amount'   => max($netPayable - $payingAmount, 0),
+                    'status'       => ($payingAmount < $netPayable) ? 'Due' : 'completed',
+                ]);
+            }
+        }
+
+
+        // ----- Office Payment -----
+        if ($request->office_id) {
+            $officePayment = OfficePayment::where('office_id', $request->office_id)->first();
+
+            if ($officePayment) {
+                // Ledger-style update: old due + current net - paying
+                $newDue = max($officePayment->due_amount + $netPayable - $payingAmount, 0);
+
+                $officePayment->update([
+                    'total_amount' => $officePayment->total_amount + $netPayable,
+                    'paid_amount'  => $officePayment->paid_amount + $payingAmount,
+                    'due_amount'   => $newDue,
+                    'status'       => $newDue > 0 ? 'Due' : 'completed',
+                ]);
+            } else {
+                // Create new row if not exists
+                OfficePayment::create([
+                    'office_id'    => $request->office_id,
+                    'total_amount' => $netPayable,
+                    'paid_amount'  => $payingAmount,
+                    'due_amount'   => max($netPayable - $payingAmount, 0),
+                    'status'       => ($payingAmount < $netPayable) ? 'Due' : 'completed',
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Payment recorded successfully!');
     }
 }
-  
-
-    // ----- Office Payment -----
-   if ($request->office_id) {
-    $officePayment = OfficePayment::where('office_id', $request->office_id)->first();
-
-    if ($officePayment) {
-        // Ledger-style update: old due + current net - paying
-        $newDue = max($officePayment->due_amount + $netPayable - $payingAmount, 0);
-
-        $officePayment->update([
-            'total_amount' => $officePayment->total_amount + $netPayable,
-            'paid_amount'  => $officePayment->paid_amount + $payingAmount,
-            'due_amount'   => $newDue,
-            'status'       => $newDue > 0 ? 'Due' : 'completed',
-        ]);
-    } else {
-        // Create new row if not exists
-        OfficePayment::create([
-            'office_id'    => $request->office_id,
-            'total_amount' => $netPayable,
-            'paid_amount'  => $payingAmount,
-            'due_amount'   => max($netPayable - $payingAmount, 0),
-            'status'       => ($payingAmount < $netPayable) ? 'Due' : 'completed',
-        ]);
-    }
-}
-
-    return redirect()->back()->with('success', 'Payment recorded successfully!');
-}}
-
-

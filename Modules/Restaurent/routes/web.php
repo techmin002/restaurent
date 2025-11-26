@@ -26,7 +26,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('menus', MenuController::class)->names('menus');
     Route::resource('offices', OfficeRegisterController::class)->names('offices');
     Route::resource('customers', CustomerController::class)->names('customers');
-<<<<<<< HEAD
     // Route::get('pos', [PosController::class,'index'])->name('pos.index');
    // Order Management Routes
 Route::get('new/order', [OrderController::class, 'create'])->name('neworders');
@@ -35,7 +34,6 @@ Route::get('kitchen/orders', [OrderController::class, 'kitchenOrders'])->name('k
 Route::get('reception/orders', [OrderController::class, 'receptionOrders'])->name('receptionorders');
 Route::get('completed/orders', [OrderController::class, 'completedOrders'])->name('completedorders');
 
-=======
     Route::resource('orders', OrderController::class)->names('orders');
 
     // Category Management Routes
@@ -48,7 +46,6 @@ Route::get('completed/orders', [OrderController::class, 'completedOrders'])->nam
     // Order Management Routes
     Route::get('new/order', [OrderController::class, 'create'])->name('neworders');
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
->>>>>>> ARbranch
 
     // Universal Order Routes (Handles all order types)
     // Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
@@ -80,7 +77,6 @@ Route::get('completed/orders', [OrderController::class, 'completedOrders'])->nam
     Route::get('/check-latest-order', [OrderController::class, 'checkLatestOrder']);
 
 
-<<<<<<< HEAD
     Route::get('table/order', [RestaurentTableController::class, 'order'])->name('table.order');
 
     Route::post('/reception/serve/{id}', [ReceptionController::class, 'markServed']);
@@ -93,9 +89,8 @@ Route::get('/duecustomers', [DueOrderController::class, 'index'])->name('duecust
     Route::post('/reception/restaurent/due/pay/{id}', [OrderController::class, 'payDue'])->name('due.pay');
     Route::post('/customers/pay-due', [CustomerController::class, 'payDue'])
      ->name('customers.payDue');
-=======
 
-    // for popup order 
+    // for popup order
 
     Route::post('/accept-order/{id}', [OrderController::class, 'acceptOrder']);
     Route::post('/reject-order/{id}', [OrderController::class, 'rejectOrder']);
@@ -107,7 +102,6 @@ Route::get('/duecustomers', [DueOrderController::class, 'index'])->name('duecust
 
 
 
->>>>>>> ARbranch
 
 });
 
