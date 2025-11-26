@@ -1,0 +1,78 @@
+<div class="modal fade" id="payDueModal{{ $customer->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow">
+
+            <form action="{{ route('customers.payDue') }}" method="POST">
+                @csrf
+                <input type="hidden" name="customer_id" value="{{ $customer->id }}">
+
+                <!-- Header -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">Pay Due Amount</h5>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+
+                    <!-- Due Amount -->
+                    <div class="text-center mb-4">
+                        <small class="text-muted d-block">Total Due</small>
+                        <div class="h3 text-danger fw-bold">Rs. {{ $latestDue }}</div>
+                    </div>
+
+                    <!-- Payment Method -->
+                   <div class="d-flex align-items-center mb-3">
+
+                         <div class="mb-3">
+                        <label class="form-label fw-semibold">Payment Method</label>
+
+                        <div class="input-group">
+                            <select name="payment_method" class="form-select payment-method-select">
+                                <option value="cash" data-img="{{ asset('payment_images/cash.png') }}">Cash</option>
+                                <option value="card" data-img="{{ asset('payment_images/card.png') }}">Card</option>
+                                <option value="online" data-img="{{ asset('payment_images/esewa.png') }}">Online</option>
+                            </select>
+
+                            <span class="input-group-text bg-white">
+                                <img src="{{ asset('payment_images/cash.png') }}" alt="method" 
+                                     class="payment-method-img" width="40" height="40">
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Amount to Pay</label>
+                        <input type="number" name="paying_amount" max="{{ $latestDue }}"
+                               class="form-control" placeholder="Enter amount" required>
+                    </div> 
+                   </div>
+                           <input type="checkbox" class="newline"> <label>multiple pay</label>
+            
+                 
+                
+
+                    <!-- Remarks -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Remarks (Optional)</label>
+                        <textarea class="form-control" name="remarks" rows="2" placeholder="Add a note…"></textarea>
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">
+                        Pay Now
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>

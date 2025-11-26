@@ -50,6 +50,7 @@
                                             <th class="text-center">S.N</th>
                                             <th class="text-center">Image</th>
                                             <th class="text-center">Item</th>
+                                            <th class="text-center">Category</th>
                                             <th class="text-center">Price</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Action</th>
@@ -65,6 +66,7 @@
                                                     <img src="{{ asset('upload/images/menu/'.$menu['image']) }}" style="height: 100px;width:100px" alt="">
                                                 </td>
                                                  <td class="text-center">{{ $menu->name }}</td>
+                                                <td class="text-center">{{ $menu->category->name ?? 'No Category' }}</td>
                                                  <td class="text-center">{{ $menu->price }}</td>
                                                 <td class="text-center">{{ $menu->status }}</td>
                                                 <td>
@@ -92,6 +94,7 @@
                                             <th class="text-center">S.N</th>
                                             <th class="text-center">Image</th>
                                             <th class="text-center">Item</th>
+                                            <th class="text-center">Category</th>
                                             <th class="text-center">Price</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Action</th>

@@ -118,8 +118,8 @@
                                     </div>
                                     @if (auth()->user()->role->name === 'Super Admin')
                                         <div class="form-group">
-                                            <label for="branch_id">Branch <span class="text-danger">*</span></label>
-                                            <select class="form-control" name="branch_id" id="branch_id" required>
+                                            <label for="restaurent_id">Branch <span class="text-danger">*</span></label>
+                                            <select class="form-control" name="restaurent_id" id="restaurent_id" required>
                                                 <option value="" selected disabled>Select Branch</option>
                                                 @foreach ($branches as $branch)
                                                     <option value="{{ $branch->id }}">{{ $branch->name }}</option>
@@ -128,7 +128,7 @@
                                             </select>
                                         </div>
                                     @else
-                                        <input type="hidden" name="branch_id" value="{{ auth()->user()->branch_id }}">
+                                        <input type="hidden" name="restaurent_id" value="{{ auth()->user()->restaurent_id }}">
                                     @endif
                                     <div class="form-group">
                                         <label for="">Notification User Type</label>

@@ -14,6 +14,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Employee\Http\Controllers\PayrollController;
 use Modules\Setting\Http\Controllers\CompanyProfileController;
+use Modules\Setting\Http\Controllers\PopUpController;
 
 Route::prefix('setting')->group(function () {
     Route::get('/', 'SettingController@index');
@@ -23,10 +24,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('company', 'CompanyProfileController');
     Route::get('why/us', [CompanyProfileController::class, 'whyUs'])->name('whyus.index');
     Route::get('setsalary', [PayrollController::class, 'index'])->name('setsalary.index');
-    Route::get('payslip', [PayrollController::class,'payslip'])->name('setsalary.payslip.index');
+    Route::get('payslip', [PayrollController::class, 'payslip'])->name('setsalary.payslip.index');
     Route::get('/payslip/fetch', [PayrollController::class, 'fetchPayslip'])->name('payslip.fetch');
     Route::post('/payslip/markAsPaid', [PayrollController::class, 'markAsPaid'])->name('payslip.markAsPaid');
-    Route::post('payslip/store', [PayrollController::class,'payslipStore'])->name('payslip.store');
+    Route::post('payslip/store', [PayrollController::class, 'payslipStore'])->name('payslip.store');
     Route::post('/payslip/delete', [PayrollController::class, 'deletePayslip'])->name('payslip.delete');
     route::get('/payslip/view', [PayrollController::class, 'viewPayslip'])->name('payslip.view');
     Route::post('employee-salary/store', [PayrollController::class, 'StoreEmployeeSalary'])->name('employeesalary.store');
@@ -56,4 +57,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('whyus/store', [CompanyProfileController::class, 'WhyUsStore'])->name('whyus.store');
     Route::put('whyus/update/{id}', [CompanyProfileController::class, 'WhyUsUpdate'])->name('whyus.update');
     Route::get('whyus/delete/{id}', [CompanyProfileController::class, 'WhyUsDelete'])->name('whyus.delete');
+
 });
