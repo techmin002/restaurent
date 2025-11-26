@@ -133,100 +133,126 @@ class CustomerController extends Controller
         $customer->delete();
         return back()->with('success', 'Customer Deleted Successfully');
     }
-    //pay due
-    public function payDue(Request $request)
+// Pay Due
+public function payDue(Request $request)
 {
+    // Validate input
     $request->validate([
         'customer_id' => 'nullable|exists:customers,id',
         'office_id' => 'nullable|exists:offices,id',
-        'paying_amount' => 'required|numeric|min:0',
-        'payment_method' => 'required|string',
+        'paying_amount.*' => 'required|numeric|min:0',
+        'payment_method.*' => 'required|string',
         'remarks' => 'nullable|string',
     ]);
 
-    // --- CUSTOMER PAYMENT ---
+    $remarks = $request->remarks;
+
+    // --- CUSTOMER PAYMENTS ---
     if ($request->customer_id) {
-        $customerPayment = CustomerPayment::where('customer_id', $request->customer_id)
-                                         ->orderBy('created_at', 'desc')
-                                         ->first();
 
-        $customerDue = $customerPayment->due_amount ?? 0;
+        $latestCustomerPayment = CustomerPayment::where('customer_id', $request->customer_id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        $customerDue = $latestCustomerPayment->due_amount ?? 0;
 
-        if ($request->paying_amount > $customerDue) {
-            return back()->withErrors(['paying_amount' => 'Amount cannot exceed customer due']);
+        // Validate total payment against customer due
+        $totalPayingAmount = array_sum($request->paying_amount);
+        if ($totalPayingAmount > $customerDue) {
+            return back()->withErrors(['paying_amount' => 'Total payment cannot exceed customer due']);
         }
 
-        if ($customerPayment) {
-            $customerPayment->update([
-                'paid_amount' => ($customerPayment->paid_amount ?? 0) + $request->paying_amount,
-                'due_amount' => $customerDue - $request->paying_amount,
-                'status' => ($customerDue - $request->paying_amount) > 0 ? 'Due' : 'Completed',
-                'remarks' => $request->remarks,
-            ]);
-        } else {
-            CustomerPayment::create([
+        // Loop through each payment row
+        foreach ($request->paying_amount as $index => $amount) {
+            $method = $request->payment_method[$index];
+            if ($amount <= 0) continue;
+
+            // Update existing customer payment
+            if ($latestCustomerPayment) {
+                $latestCustomerPayment->update([
+                    'paid_amount' => ($latestCustomerPayment->paid_amount ?? 0) + $amount,
+                    'due_amount' => $customerDue - $amount,
+                    'status' => ($customerDue - $amount) > 0 ? 'Due' : 'Completed',
+                    'remarks' => $remarks,
+                ]);
+            } else {
+                // Create new customer payment if none exists
+                $latestCustomerPayment = CustomerPayment::create([
+                    'customer_id' => $request->customer_id,
+                    'total_amount' => $amount,
+                    'paid_amount' => $amount,
+                    'due_amount' => 0,
+                    'status' => 'Completed',
+                    'remarks' => $remarks,
+                ]);
+            }
+
+            $customerDue -= $amount;
+
+            // Insert into general Payment table
+            Payment::create([
                 'customer_id' => $request->customer_id,
-                'total_amount' => $request->paying_amount,
-                'paid_amount' => $request->paying_amount,
-                'due_amount' => 0,
-                'status' => 'Completed',
-                'remarks' => $request->remarks,
+                'office_id' => null,
+                'amount' => $amount,
+                'payment_method' => $method,
+                'remarks' => $remarks,
+                'status' => $customerDue > 0 ? 'Due' : 'Completed',
             ]);
         }
     }
 
-    // --- OFFICE PAYMENT ---
+    // --- OFFICE PAYMENTS ---
     if ($request->office_id) {
-        $officePayment = OfficePayment::where('office_id', $request->office_id)
-                                      ->orderBy('created_at', 'desc')
-                                      ->first();
 
-        $officeDue = $officePayment->due_amount ?? 0;
+        $latestOfficePayment = OfficePayment::where('office_id', $request->office_id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        $officeDue = $latestOfficePayment->due_amount ?? 0;
 
-        if ($request->paying_amount > $officeDue) {
-            return back()->withErrors(['paying_amount' => 'Amount cannot exceed office due']);
+        // Validate total payment against office due
+        $totalPayingAmount = array_sum($request->paying_amount);
+        if ($totalPayingAmount > $officeDue) {
+            return back()->withErrors(['paying_amount' => 'Total payment cannot exceed office due']);
         }
 
-        if ($officePayment) {
-            $officePayment->update([
-                'paid_amount' => ($officePayment->paid_amount ?? 0) + $request->paying_amount,
-                'due_amount' => $officeDue - $request->paying_amount,
-                'status' => ($officeDue - $request->paying_amount) > 0 ? 'Due' : 'Completed',
-                'remarks' => $request->remarks,
-            ]);
-        } else {
-            OfficePayment::create([
+        // Loop through each payment row
+        foreach ($request->paying_amount as $index => $amount) {
+            $method = $request->payment_method[$index];
+            if ($amount <= 0) continue;
+
+            // Update existing office payment
+            if ($latestOfficePayment) {
+                $latestOfficePayment->update([
+                    'paid_amount' => ($latestOfficePayment->paid_amount ?? 0) + $amount,
+                    'due_amount' => $officeDue - $amount,
+                    'status' => ($officeDue - $amount) > 0 ? 'Due' : 'Completed',
+                    'remarks' => $remarks,
+                ]);
+            } else {
+                // Create new office payment if none exists
+                $latestOfficePayment = OfficePayment::create([
+                    'office_id' => $request->office_id,
+                    'total_amount' => $amount,
+                    'paid_amount' => $amount,
+                    'due_amount' => 0,
+                    'status' => 'Completed',
+                    'remarks' => $remarks,
+                ]);
+            }
+
+            $officeDue -= $amount;
+
+            // Insert into general Payment table
+            Payment::create([
+                'customer_id' => null,
                 'office_id' => $request->office_id,
-                'total_amount' => $request->paying_amount,
-                'paid_amount' => $request->paying_amount,
-                'due_amount' => 0,
-                'status' => 'Completed',
-                'remarks' => $request->remarks,
+                'amount' => $amount,
+                'payment_method' => $method,
+                'remarks' => $remarks,
+                'status' => $officeDue > 0 ? 'Due' : 'Completed',
             ]);
         }
     }
 
-      $paidStatus = 'Completed';
-if ($request->customer_id && $customerDue - $request->paying_amount > 0) {
-    $paidStatus = 'Due';
-} elseif ($request->office_id && $officeDue - $request->paying_amount > 0) {
-    $paidStatus = 'Due';
-}
-
-Payment::create([
-    'customer_id'    => $request->customer_id,
-    'office_id'      => $request->office_id,
-    'amount'         => $request->paying_amount,
-    'payment_method' => $request->payment_method,
-    'remarks'        => $request->remarks,
-    'status'         => $paidStatus,
-]);
     return back()->with('success', 'Payment processed successfully!');
 }
-
-
-
-
-  
-
 }
