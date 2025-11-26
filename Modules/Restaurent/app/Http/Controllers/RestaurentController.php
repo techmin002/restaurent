@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Modules\Product\Entities\Product;
 use Modules\Restaurent\Models\Employee;
 use Spatie\Permission\Models\Role;
 use Modules\Restaurent\Models\Restaurent;
@@ -155,6 +156,51 @@ class RestaurentController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Error deleting order: ' . $e->getMessage());
         }
+        $branch->delete();
+        return back()->with('success', 'Restaurent Deleted Successfully');
+    }
+
+    //receptionist
+    public function moveToKitchen(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        // Update order_source column
+        $order->order_source = 'Kitchen';
+        $order->status = 'Sent to Kitchen';
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'order_source' => $order->order_source,
+            'status' => $order->status
+        ]);
+    }
+
+
+    //kitchen
+    // Start Cooking
+    public function startCooking($id)
+    {
+        $order = Order::find($id);
+        if (!$order) return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+
+        $order->status = 'Cooking';
+        $order->save();
+
+        return response()->json(['success' => true, 'message' => 'Order status updated to Cooking', 'status' => 'Cooking']);
+    }
+
+    // Mark Served
+    public function markServed($id)
+    {
+        $order = Order::find($id);
+        if (!$order) return response()->json(['success' => false, 'message' => 'Order not found'], 404);
+
+        $order->status = 'Completed';
+        $order->save();
+
+        return response()->json(['success' => true, 'message' => 'Order status updated to Completed', 'status' => 'Completed']);
     }
 
     public function table_order($id)
@@ -226,7 +272,7 @@ class RestaurentController extends Controller
     }
     public function office_order(Request $request, $id)
     {
-       $categories = Category::where('restaurent_id', auth()->user()->restaurent_id)->get();
+        $categories = Category::where('restaurent_id', auth()->user()->restaurent_id)->get();
         $office = OfficeRegister::where('id', $id)->first();
         $menus = Menu::with('variations')->where('restaurent_id', auth()->user()->restaurent_id)->get();
         $restaurent_table = RestaurentTable::where('id', $id)->first();
@@ -234,6 +280,5 @@ class RestaurentController extends Controller
         // dd($restaurent_table);
         $orders = Order::with('items', 'table', 'office', 'customer')->get();
         return view('restaurent::orders.office_order', compact('id', 'orders', 'office', 'categories', 'menus', 'customers'));
-        
     }
 }

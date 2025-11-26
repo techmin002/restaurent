@@ -15,7 +15,7 @@ class Order extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $table='orders';
+    protected $table = 'orders';
     protected $fillable = [
         'customer_id',
         'table_id',
@@ -33,30 +33,41 @@ class Order extends Model
         'order_time',
         'status',
         'order_from',
+        'order_source',
+        'paying_amount',
+        'payment_status',
+        'payment_method',
         'vat'
     ];
     public function items()
-{
-    return $this->hasMany(OrderMenu::class, 'order_id');
-}
-public function table() {
-    return $this->belongsTo(RestaurentTable::class, 'table_id');
-}
+    {
+        return $this->hasMany(OrderMenu::class, 'order_id');
+    }
+    public function table()
+    {
+        return $this->belongsTo(RestaurentTable::class, 'table_id');
+    }
 
-public function office() {
-    return $this->belongsTo(OfficeRegister::class);
-}
-public function customer() {
-    return $this->belongsTo(Customer::class);
-}
-public function variation()
-{
-    return $this->belongsTo(MenuVariation::class);
-}
-public function menu()
-{
-    return $this->belongsTo(Menu::class);
-}
+    public function office()
+    {
+        return $this->belongsTo(OfficeRegister::class);
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+    public function variation()
+    {
+        return $this->belongsTo(MenuVariation::class);
+    }
+    public function menu()
+    {
+        return $this->belongsTo(Menu::class);
+    }
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'order_id', 'id');
+    }
     // protected static function newFactory(): OrderFactory
     // {
     //     // return OrderFactory::new();

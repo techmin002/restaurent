@@ -15,7 +15,6 @@ class AdminAndSuperAdminSeeder extends Seeder
         // Create Roles
         $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
         $adminRole = Role::firstOrCreate(['name' => 'Admin']);
-
         // Get all permission names
         $superadminPermissions = Permission::pluck('name')->toArray();
 

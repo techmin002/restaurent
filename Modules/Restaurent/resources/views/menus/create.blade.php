@@ -88,6 +88,7 @@
                                             <div class="col-lg-1 d-flex align-items-center">
                                                 <button type="button" class="btn btn-success btn-sm add-variation">+</button>
                                             </div>
+                                          
                                         </div>
                                     </div>
                                 </div>

@@ -11,6 +11,8 @@
 </div>
 
 <!-- Required Scripts -->
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script src="{{ asset('backend/plugins/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('backend/plugins/jquery-ui/jquery-ui.min.js') }}"></script>
 <script>

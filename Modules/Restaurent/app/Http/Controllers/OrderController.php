@@ -11,7 +11,11 @@ use Modules\Restaurent\Models\OfficeRegister;
 use Modules\Restaurent\Models\Order;
 use Modules\Restaurent\Models\OrderMenu;
 use Modules\Restaurent\Models\RestaurentTable;
+use Modules\Restaurent\Models\CustomerPayment;
+use Modules\Restaurent\Models\OfficePayment;
+use Modules\Restaurent\Models\Payment;
 use App\Events\OrderCreated;
+
 
 class OrderController extends Controller
 {
@@ -20,8 +24,24 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::with('items', 'table', 'office', 'customer', 'menu')->where('restaurent_id', auth()->user()->restaurent_id)->get();
-        return view('restaurent::orders.index', compact('orders'));
+        $allOrdersCount = Order::count();
+        $receptionOrdersCount = Order::where('order_source', 'Reception')
+            ->where('status', 'pending') // or whatever status means "new/in-reception"
+            ->count();
+
+        $kitchenOrdersCount = Order::whereIn('status', ['Sent to Kitchen', 'Cooking'])->count();
+
+        $completedOrdersCount = Order::where('status', 'Completed')->count();
+
+        $orders = Order::with('items', 'customer')->get();
+
+        return view('restaurent::orders.index', compact(
+            'allOrdersCount',
+            'receptionOrdersCount',
+            'kitchenOrdersCount',
+            'completedOrdersCount',
+            'orders'
+        ));
     }
 
     /**
@@ -86,6 +106,7 @@ class OrderController extends Controller
         ]);
         $order = Order::create([
             'customer_id'    => $request->customer_id,
+
             'order_type'     => $request->orderType,
             'restaurent_id'     => auth()->user()->restaurent_id,
             'created_by'     => auth()->user()->id,
@@ -539,7 +560,9 @@ class OrderController extends Controller
 
     public function show($id)
     {
-        $product = Menu::with('variations')->findOrFail($id);
+        $product = Menu::with('variations')
+            // ->where('restaurant_id', auth()->user()->restaurant_id)
+            ->findorFail($id);
 
         return response()->json($product);
     }
@@ -873,7 +896,16 @@ class OrderController extends Controller
             'newOrders' => $orders
         ]);
     }
+    public function kitchenOrders()
+    {
 
+        $orders = Order::with(['items', 'customer'])
+            ->whereIn('status', ['Sent to Kitchen', 'Cooking'])
+            ->orderBy('created_at', 'asc') //
+            ->get();
+
+        return view('restaurent::orders.kitchen', compact('orders'));
+    }
 
 
     // for creating order from menu page
@@ -1208,9 +1240,13 @@ class OrderController extends Controller
             'notify' => $rows->count() > 0 ? 1 : 0,
             'tables' => $rows->pluck('table_number')  // send only table numbers
         ]);
-    }
 
+    $orders = Order::with('items', 'customer')
+        ->where('status', 'Completed')
+        ->orderBy('id', 'desc')
+        ->get();
 
+}
     public function reset()
     {
         \DB::table('restaurent_tables')
@@ -1237,4 +1273,149 @@ class OrderController extends Controller
 
         return back()->with('success', "Notification set for table $table_number");
     }
+
+    public function receptionOrders()
+    {
+        $orders = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office')
+            ->where('restaurent_id', auth()->user()->restaurent_id)
+            ->where('order_source', 'Reception')
+
+            ->where('status', 'pending') // pending orders
+            ->orwhere('status', 'serve')
+            ->orwhere('status', 'cooking')
+            ->get();
+
+
+        return view('restaurent::orders.reception', compact('orders'));
+    }
+
+
+    public function completedOrders()
+    {
+
+        $orders = \Modules\Restaurent\Models\Order::with('items', 'customer')
+            ->where('status', 'Completed')
+            ->orderBy('id', 'desc')
+            ->get();
+    return redirect()->back()->with('success', 'Order sent to kitchen!');
+}
+
+    //move to kitchen
+    public function moveToKitchen($id)
+    {
+        $order = Order::findOrFail($id);
+
+        // Update status
+        $order->status = 'sent to kitchen';
+        $order->order_source = 'kitchen';
+        $order->save();
+
+        return redirect()->back()->with('success', 'Order sent to kitchen!');
+    }
+
+    public function updatePayment(Request $request)
+{
+    // -----------------------------
+    // VALIDATE INPUT
+    // -----------------------------
+    $request->validate([
+        'order_id'       => 'required|exists:orders,id',
+        'customer_id'    => 'nullable|exists:customers,id',
+        'office_id'      => 'nullable|exists:office_registers,id',
+        'discount'       => 'nullable|numeric|min:0',
+        'discount_type'  => 'nullable|string|in:flat,percent',
+        'paying_amount'  => 'required|array', // multiple payment rows
+        'paying_amount.*'=> 'nullable|numeric|min:0',
+        'payment_method' => 'required|array',
+        'payment_method.*' => 'nullable|string',
+    ]);
+
+    $order = Order::findOrFail($request->order_id);
+
+    // -----------------------------
+    // CALCULATE NET PAYABLE
+    // -----------------------------
+    $grandTotal = $order->grand_total ?? 0;
+    $discount   = $request->discount ?? 0;
+
+    $discountAmount = ($request->discount_type === 'percent')
+        ? ($grandTotal * $discount) / 100
+        : $discount;
+
+    $netPayable = max($grandTotal - $discountAmount, 0);
+
+    // -----------------------------
+    // CALCULATE TOTAL PAID THIS PAYMENT
+    // -----------------------------
+    $totalPaidThisPayment = array_sum($request->paying_amount);
+
+    $totalPaidThisPayment = array_sum($request->paying_amount);
+$previousPaid = Payment::where('order_id', $order->id)->sum('amount');
+$totalPaidForOrder = $previousPaid + $totalPaidThisPayment;
+$netPayable = max($order->grand_total - ($order->discount ?? 0), 0);
+$remainingDue = max($netPayable - $totalPaidForOrder, 0);
+$orderStatus = $remainingDue == 0 ? 'Completed' : 'Due';
+
+foreach ($request->paying_amount as $index => $amount) {
+    if ($amount > 0) {
+        Payment::create([
+            'customer_id'    => $request->customer_id,
+            'office_id'      => $request->office_id,
+            'order_id'       => $order->id,
+            'amount'         => $amount,
+            'payment_method' => $request->payment_method[$index] ?? 'cash',
+            'status'         => $remainingDue == 0 ? 'Completed' : 'Due',
+        ]);
+    }
+}
+
+// Update order status
+$order->update([
+    'status' => $orderStatus,
+]);
+
+    // -----------------------------
+    // RE-CALCULATE CUSTOMER PAYMENT
+    // -----------------------------
+    if ($request->customer_id) {
+        $totalOrderAmount = Order::where('customer_id', $request->customer_id)->sum('grand_total') -
+                            Order::where('customer_id', $request->customer_id)->sum('discount_amount');
+
+        $totalOrderPaid = Payment::where('customer_id', $request->customer_id)->sum('amount');
+        $totalOrderDue  = max($totalOrderAmount - $totalOrderPaid, 0);
+
+        CustomerPayment::updateOrCreate(
+            ['customer_id' => $request->customer_id],
+            [
+                'total_amount' => $totalOrderAmount,
+                'paid_amount'  => $totalOrderPaid,
+                'due_amount'   => $totalOrderDue,
+                'status'       => $totalOrderDue > 0 ? 'Due' : 'Completed',
+            ]
+        );
+    }
+
+    // -----------------------------
+    // RE-CALCULATE OFFICE PAYMENT
+    // -----------------------------
+    if ($request->office_id) {
+        $totalOrderAmount = Order::where('office_id', $request->office_id)->sum('grand_total') -
+                            Order::where('office_id', $request->office_id)->sum('discount_amount');
+
+        $totalOrderPaid = Payment::where('office_id', $request->office_id)->sum('amount');
+        $totalOrderDue  = max($totalOrderAmount - $totalOrderPaid, 0);
+
+        OfficePayment::updateOrCreate(
+            ['office_id' => $request->office_id],
+            [
+                'total_amount' => $totalOrderAmount,
+                'paid_amount'  => $totalOrderPaid,
+                'due_amount'   => $totalOrderDue,
+                'status'       => $totalOrderDue > 0 ? 'Due' : 'Completed',
+            ]
+        );
+    }
+
+    return back()->with('success', 'Payment recorded successfully!');
+}
 }

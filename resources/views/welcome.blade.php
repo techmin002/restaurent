@@ -18,7 +18,7 @@
         href="{{ asset('backend/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}">
     <!-- iCheck -->
     <link rel="stylesheet" href="{{ asset('backend/dist/css/adminlte.min.css') }}">
-	<link rel="icon" type="image/x-icon" href="{{ asset('upload/images/settings/'.$profile->favicon) }}">
+	<link rel="icon" type="image/x-icon" href="{{ asset('upload/images/settings/'.$profile?->favicon) }}">
 
 </head>
 
@@ -27,7 +27,7 @@
 
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <a href="{{ url('/') }}" class="h1"><img src="{{ asset('upload/images/settings/'.$profile->logo) }}" class="w-100" alt=""></a>
+                <a href="{{ url('/') }}" class="h1"><img src="{{ asset('upload/images/settings/'.$profile?->logo) }}" class="w-100" alt=""></a>
             </div>
             <div class="card-body">
                 <p class="login-box-msg">Sign in to start your session</p>

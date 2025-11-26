@@ -25,6 +25,22 @@ class Customer extends Model
         'due_amount',
         'status',
     ];
+    public function orders()
+{
+    return $this->hasMany(Order::class);
+}
+
+public function payments()
+{
+    return $this->hasMany(Payment::class, 'customer_id', 'id');
+}
+public function paymentss()
+{
+    return $this->hasMany(CustomerPayment::class, 'customer_id', 'id');
+}
+
+
+
 
     // protected static function newFactory(): CustomerFactory
     // {

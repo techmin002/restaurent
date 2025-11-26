@@ -67,7 +67,7 @@
                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td class="text-center">{{ $customer->name }}</td>
                                                 <td class="text-center">{{ $customer->phone }}</td>
-                                                <td class="text-center">{{ $customer->due_amount ?? '0' }}</td>
+                                                <td class="text-center">{{ $customer->latest_due}}</td>
                                                 <td class="text-center">{{ $customer->last_visit }}</td>
                                                 <td class="text-center">{{ $customer->status }}</td>
                                                 <td>
@@ -104,6 +104,10 @@
                                 </table>
                             </div>
                             <!-- /.card-body -->
+
+                           
+
+                            
                         </div>
                         <!-- /.card -->
                     </div>
