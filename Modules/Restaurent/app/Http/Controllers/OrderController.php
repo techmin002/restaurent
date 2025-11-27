@@ -99,6 +99,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         $request->validate([
             'orderType' => 'required|in:dinein,takeaway,office',
             'menu_id' => 'required|array',
@@ -1283,6 +1284,7 @@ class OrderController extends Controller
             ->where('status', 'pending') // pending orders
             ->orwhere('status', 'serve')
             ->orwhere('status', 'cooking')
+            ->orwhere('status', 'accepted')
             ->get();
 
 
@@ -1312,8 +1314,7 @@ class OrderController extends Controller
 
         return redirect()->back()->with('success', 'Order sent to kitchen!');
     }
-
-    public function updatePayment(Request $request)
+public function updatePayment(Request $request)
 {
     // -----------------------------
     // VALIDATE INPUT
@@ -1324,7 +1325,7 @@ class OrderController extends Controller
         'office_id'      => 'nullable|exists:office_registers,id',
         'discount'       => 'nullable|numeric|min:0',
         'discount_type'  => 'nullable|string|in:flat,percent',
-        'paying_amount'  => 'required|array', // multiple payment rows
+        'paying_amount'  => 'required|array',
         'paying_amount.*'=> 'nullable|numeric|min:0',
         'payment_method' => 'required|array',
         'payment_method.*' => 'nullable|string',
@@ -1333,7 +1334,7 @@ class OrderController extends Controller
     $order = Order::findOrFail($request->order_id);
 
     // -----------------------------
-    // CALCULATE NET PAYABLE
+    // CALCULATE NET PAYABLE FOR CURRENT ORDER
     // -----------------------------
     $grandTotal = $order->grand_total ?? 0;
     $discount   = $request->discount ?? 0;
@@ -1349,40 +1350,49 @@ class OrderController extends Controller
     // -----------------------------
     $totalPaidThisPayment = array_sum($request->paying_amount);
 
-    $totalPaidThisPayment = array_sum($request->paying_amount);
-$previousPaid = Payment::where('order_id', $order->id)->sum('amount');
-$totalPaidForOrder = $previousPaid + $totalPaidThisPayment;
-$netPayable = max($order->grand_total - ($order->discount ?? 0), 0);
-$remainingDue = max($netPayable - $totalPaidForOrder, 0);
-$orderStatus = $remainingDue == 0 ? 'Completed' : 'Due';
-
-foreach ($request->paying_amount as $index => $amount) {
-    if ($amount > 0) {
-        Payment::create([
-            'customer_id'    => $request->customer_id,
-            'office_id'      => $request->office_id,
-            'order_id'       => $order->id,
-            'amount'         => $amount,
-            'payment_method' => $request->payment_method[$index] ?? 'cash',
-            'status'         => $remainingDue == 0 ? 'Completed' : 'Due',
-        ]);
-    }
-}
-
-// Update order status
-$order->update([
-    'status' => $orderStatus,
-]);
+    // Get previous payments for this order
+    $previousPaid = Payment::where('order_id', $order->id)->sum('amount');
+    $totalPaidForOrder = $previousPaid + $totalPaidThisPayment;
+    
+    // Calculate remaining due for THIS ORDER
+    $remainingDue = max($netPayable - $totalPaidForOrder, 0);
+    $orderStatus = $remainingDue == 0 ? 'Completed' : 'Due';
 
     // -----------------------------
-    // RE-CALCULATE CUSTOMER PAYMENT
+    // RECORD PAYMENTS
+    // -----------------------------
+    foreach ($request->paying_amount as $index => $amount) {
+        if ($amount > 0) {
+            Payment::create([
+                'customer_id'    => $request->customer_id,
+                'office_id'      => $request->office_id,
+                'order_id'       => $order->id,
+                'amount'         => $amount,
+                'payment_method' => $request->payment_method[$index] ?? 'cash',
+                'status'         => 'completed', // Always mark individual payments as completed
+                'payment_date'   => now(),
+            ]);
+        }
+    }
+
+    // Update order status
+    $order->update([
+        'status' => $orderStatus,
+    ]);
+
+    // -----------------------------
+    // UPDATE CUSTOMER PAYMENT SUMMARY
     // -----------------------------
     if ($request->customer_id) {
-        $totalOrderAmount = Order::where('customer_id', $request->customer_id)->sum('grand_total') -
-                            Order::where('customer_id', $request->customer_id)->sum('discount_amount');
+        // Get ALL orders total for this customer (including current order)
+        $totalOrderAmount = Order::where('customer_id', $request->customer_id)
+            ->sum('grand_total');
 
-        $totalOrderPaid = Payment::where('customer_id', $request->customer_id)->sum('amount');
-        $totalOrderDue  = max($totalOrderAmount - $totalOrderPaid, 0);
+        // Get ALL payments for this customer (including current payment)
+        $totalOrderPaid = Payment::where('customer_id', $request->customer_id)
+            ->sum('amount');
+            
+        $totalOrderDue = max($totalOrderAmount - $totalOrderPaid, 0);
 
         CustomerPayment::updateOrCreate(
             ['customer_id' => $request->customer_id],
@@ -1390,18 +1400,37 @@ $order->update([
                 'total_amount' => $totalOrderAmount,
                 'paid_amount'  => $totalOrderPaid,
                 'due_amount'   => $totalOrderDue,
+                'last_payment_date' => now(),
                 'status'       => $totalOrderDue > 0 ? 'Due' : 'Completed',
             ]
         );
+
+        // Update DueOrder record if there's remaining due for this specific order
+        if ($remainingDue > 0) {
+            \Modules\Restaurent\Models\CustomerPayment::updateOrCreate(
+                [
+                    'customer_id' => $request->customer_id,
+                   
+                ],
+              
+                [
+                    'customer_id' => $request->customer_id,
+                    'customer_name' => $order->customer->name ?? 'N/A',
+                    'due_amount' => $remainingDue,
+                    'status' => 'Due',
+                    'due_date' => now()->addDays(30),
+                ]
+            );
+        } else {
+            \Modules\Restaurent\Models\CustomerPayment::where('customer_id', $request->customer_id)->delete();
+        }
     }
 
     // -----------------------------
     // RE-CALCULATE OFFICE PAYMENT
     // -----------------------------
     if ($request->office_id) {
-        $totalOrderAmount = Order::where('office_id', $request->office_id)->sum('grand_total') -
-                            Order::where('office_id', $request->office_id)->sum('discount_amount');
-
+        $totalOrderAmount = Order::where('office_id', $request->office_id)->sum('grand_total');
         $totalOrderPaid = Payment::where('office_id', $request->office_id)->sum('amount');
         $totalOrderDue  = max($totalOrderAmount - $totalOrderPaid, 0);
 
@@ -1416,6 +1445,6 @@ $order->update([
         );
     }
 
-    return back()->with('success', 'Payment recorded successfully!');
+    return back()->with('success', 'Payment recorded successfully! Remaining Due: Rs. ' . number_format($remainingDue, 2));
 }
 }
