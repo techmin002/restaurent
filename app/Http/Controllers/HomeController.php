@@ -6,37 +6,92 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Modules\Branch\Entities\Branch;
 use Modules\Restaurent\Models\Order;
+use Modules\Restaurent\Models\OrderMenu;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index()
     {
-        $branch = Branch::where('id', auth()->user()->branch_id)->first();
+        $branch = Branch::find(auth()->user()->branch_id);
         Session::put('branch', $branch);
 
-        $recentOrders = Order::where('restaurent_id', auth()->user()->restaurent_id)
-            ->where('status', 'accepted')
+        $restaurant_id = auth()->user()->restaurent_id;
+        $today = now()->format('Y-m-d');
+
+        // --- Orders Count ---
+        $todaysOrders = Order::where('restaurent_id', $restaurant_id)
+            ->whereDate('created_at', $today)
+            ->count();
+
+        $kitchenOrdersCount = Order::where('restaurent_id', $restaurant_id)
+            ->where('status', 'sent to kitchen')
+            ->count();
+
+        $servingOrdersCount = Order::where('restaurent_id', $restaurant_id)
+            ->where('status', 'serve')
+            ->count();
+
+        $completedOrdersCount = Order::where('restaurent_id', $restaurant_id)
+            ->where('status', 'completed')
+            ->count();
+
+        // --- Orders Lists ---
+        $kitchenOrders = Order::where('restaurent_id', $restaurant_id)
+            ->where('status', 'sent to kitchen')
+            ->with('items.menu')
+            ->latest()
+            ->get();
+
+        $servedOrders = Order::where('restaurent_id', $restaurant_id)
+            ->where('status', 'serve')
             ->with(['customer', 'items.menu'])
-            ->latest()   // same as orderBy('created_at', 'desc')
+            ->latest()
+            ->get();
+
+        $completedOrders = Order::where('restaurent_id', $restaurant_id)
+            ->where('status', 'completed')
+            ->with(['customer', 'items.menu'])
+            ->latest()
             ->limit(5)
             ->get();
 
+        $recentOrders = Order::where('restaurent_id', $restaurant_id)
+            ->where('status', 'accepted')
+            ->with(['customer', 'items.menu'])
+            ->latest()
+            ->limit(5)
+            ->get();
 
-        return view('setting::index', compact('recentOrders'));
+        // --- Popular Menu Items ---
+        $popularItems = OrderMenu::whereHas('order', function ($q) use ($restaurant_id) {
+            $q->where('restaurent_id', $restaurant_id);
+        })
+            ->selectRaw('menu_id, SUM(qty) as total_sold')
+            ->groupBy('menu_id')
+            ->orderByDesc('total_sold')
+            ->limit(10)
+            ->with('menu')
+            ->get();
+
+        $popularLabels = $popularItems->pluck('menu.name');
+        $popularData = $popularItems->pluck('total_sold');
+
+        return view('setting::index', compact(
+            'todaysOrders',
+            'kitchenOrdersCount',
+            'servingOrdersCount',
+            'completedOrdersCount',
+            'kitchenOrders',
+            'servedOrders',
+            'completedOrders',
+            'recentOrders',
+            'popularLabels',
+            'popularData'
+        ));
     }
 }

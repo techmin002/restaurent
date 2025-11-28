@@ -1418,7 +1418,7 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <input type="hidden" id="customer_id" name="customer_id">
+                                <input type="hidden" id="customer_id" name="customer_id" value="">
 
                                 <div class="mb-3">
                                     <label class="form-label fw-600">Customer Phone *</label>

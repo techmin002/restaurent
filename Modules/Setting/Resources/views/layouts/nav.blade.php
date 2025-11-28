@@ -72,8 +72,6 @@
         </div>
 
 
-
-
         @guest
             @if (Route::has('login'))
                 <li class="nav-item">
@@ -842,8 +840,8 @@
                         html += `
                             <tr>
                                 <td class="order-id">#${order.id}</td>
-                                <td class="customer-name">${order.customer?.name ?? 'Walk-in'}</td>
-                                <td>${order.table ?? 'Takeaway'}</td>
+                                <td class="customer-name">${order.customer?.name ?? 'Office-order'}</td>
+                                <td>${order.table ?? 'office'}</td>
                                 <td>${itemCount} item${itemCount !== 1 ? 's' : ''}</td>
                                 <td>${totalQty}</td>
                                 <td class="total-amount">Rs. ${parseFloat(order.grand_total).toLocaleString()}</td>
