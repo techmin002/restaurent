@@ -68,6 +68,7 @@ class Order extends Model
     {
         return $this->hasMany(Payment::class, 'order_id', 'id');
     }
+
     // protected static function newFactory(): OrderFactory
     // {
     //     // return OrderFactory::new();

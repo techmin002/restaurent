@@ -116,11 +116,14 @@
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                <a href="{{ route('customers.show', $order->id) }}"
-                                                    class="btn btn-info btn-sm">
-                                                    <i class="fa fa-eye"></i>
-                                                </a>
-                                            </td>
+    <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?');">
+        @csrf
+        @method('DELETE')
+        <button class="btn btn-danger btn-sm">
+            <i class="fa fa-trash"></i>
+        </button>
+    </form>
+</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -178,12 +181,15 @@
                                                 </span>
                                             </td>
                                             <td class="text-center">{{ $payment->remarks ?? '-' }}</td>
-                                            <td class="text-center">
-                                                <a href="{{ route('customers.show', $payment->id) }}"
-                                                    class="btn btn-info btn-sm">
-                                                    <i class="fa fa-eye"></i>
-                                                </a>
-                                            </td>
+      <td class="text-center">
+    <form action="{{ route('payments.destroy', $payment->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this payment?');">
+        @csrf
+        @method('DELETE')
+        <button class="btn btn-danger btn-sm">
+            <i class="fa fa-trash"></i>
+        </button>
+    </form>
+</td>
                                         </tr>
                                     @empty
                                         <tr>

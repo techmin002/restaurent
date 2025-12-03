@@ -1328,6 +1328,7 @@
                 <input type="hidden" name="table_id" value="{{ $restaurent_table->table_number ?? '' }}">
                 <input type="hidden" id="order_id" name="order_id" value="">
                 <input type="hidden" id="orderType" name="orderType" value="dinein">
+                <input type="hidden" name="table_id" value="{{ $restaurent_table->id ?? '' }}">
 
                 <div class="order-container">
                     <!-- Menu Section -->

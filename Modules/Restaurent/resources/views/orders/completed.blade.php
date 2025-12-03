@@ -41,7 +41,7 @@
                                     <th>Items</th>
                                     <th>Type</th>
                                     <th>Status</th>
-                                    <th>View</th>
+                                    <th>Action</th>
                                 </tr>
                   </thead>
                    <tbody>
@@ -49,8 +49,8 @@
                                     <tr class="text-center">
                                         <td>{{ $loop->iteration }}</td>
                                         <td class="fw-bold text-success">#RCO000{{ $order->id }}</td>
-                                        <td>{{ $order->customer['name'] ?? 'N/A' }}</td>
-                                        <td>{{ $order->customer['phone'] ?? 'N/A' }}</td>
+                                        <td>{{ $order->customer['name'] ?? $order->office['name'] }}</td>
+                                        <td>{{ $order->customer['phone'] ??$order-> office['contact_numbers'] }}</td>
                                         <td class="text-start">
                                             <ul class="list-unstyled mb-0">
                                                 @foreach ($order->items as $item)
@@ -65,17 +65,21 @@
                                                 @endforeach
                                             </ul>
                                         </td>
-                                        <td><span class="badge bg-info">{{ ucfirst($order->address ?? 'N/A') }}</span></td>
+                                        <td><span class="badge bg-info">{{ ucfirst($order->order_type ?? 'N/A') }}</span></td>
                                         <td>
                                             <span class="badge bg-success px-3 py-2">
                                                 <i class="fas fa-check-circle me-1"></i> {{ ucfirst($order->status) }}
                                             </span>
                                         </td>
-                                        <td>
-                                            <a href="{{ route('restaurent.show', $order->id) }}" class="btn btn-outline-success btn-sm">
-                                                <i class="fa fa-eye"></i> View
-                                            </a>
-                                        </td>
+                                       <td>
+    <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this order?');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="fa fa-trash"></i> Delete
+        </button>
+    </form>
+</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -95,7 +99,7 @@
                                     <th>Items</th>
                                     <th>Type</th>
                                     <th>Status</th>
-                                    <th>View</th>
+                                    <th>Action</th>
                                 </tr>
                   </tfoot>
                 </table>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Modules\Restaurent\Models\OfficeRegister;
+use Modules\Restaurent\Models\OfficePayment;
 
 class OfficeRegisterController extends Controller
 {
@@ -62,11 +63,40 @@ class OfficeRegisterController extends Controller
 
     /**
      * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('restaurent::show');
-    }
+      */
+ public function show($id)
+{
+    $office = OfficeRegister::with('payments', 'orders')
+        ->findOrFail($id);
+
+    // Get all orders
+    $orders = $office->orders;
+
+    // Total ordered amount (grand_total)
+    $totalOrdered = $office->orders()->sum('grand_total');
+
+    // Total paid amount
+    $totalPaid = $office->payments()->sum('amount');
+
+    // Latest payment
+    $latestPayment = OfficePayment::where('office_id', $id)
+                                ->orderBy('created_at', 'desc')
+                                ->first();
+
+    $latestDue = $latestPayment->due_amount ?? 0;
+
+    return view('restaurent::offices.show', compact(
+        'office',
+        'orders',
+        'latestDue',
+        'latestPayment',
+        'totalOrdered',
+        'totalPaid',
+        
+    ));
+}
+
+
 
     /**
      * Show the form for editing the specified resource.

@@ -17,49 +17,50 @@
                           </ol>
                       </div>
 
-                      <section class="content">
-                          <div class="row">
-                              <div class="col-md-3">
-                                  <div class="card bg-info text-white p-3 h-100">
-                                      <div class="card-body d-flex flex-column justify-content-between">
-                                          <h4>All Received Orders</h4>
-                                          <p>{{ $allOrdersCount }}</p>
-                                          <a href="{{ route('orders.index') }}" class="btn btn-light mt-auto">View</a>
-                                      </div>
-                                  </div>
-                              </div>
+                    <section class="content">
+    <div class="row">
+        <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="card bg-info text-white p-3 h-100">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <h4>All Received Orders</h4>
+                    <p>{{ $allOrdersCount }}</p>
+                    <a href="{{ route('orders.index') }}" class="btn btn-light mt-auto">View</a>
+                </div>
+            </div>
+        </div>
 
-                              <div class="col-md-3">
-                                  <div class="card bg-warning text-white p-3 h-100">
-                                      <div class="card-body d-flex flex-column justify-content-between">
-                                          <h4>Reception Orders</h4>
-                                          <p>{{ $receptionOrdersCount }}</p>
-                                          <a href="{{ route('receptionorders') }}" class="btn btn-light mt-auto">View</a>
-                                      </div>
-                                  </div>
-                              </div>
+        <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="card bg-warning text-white p-3 h-100">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <h4>Reception Orders</h4>
+                    <p>{{ $receptionOrdersCount }}</p>
+                    <a href="{{ route('receptionorders') }}" class="btn btn-light mt-auto">View</a>
+                </div>
+            </div>
+        </div>
 
-                              <div class="col-md-3">
-                                  <div class="card bg-primary text-white p-3 h-100">
-                                      <div class="card-body d-flex flex-column justify-content-between">
-                                          <h4>Kitchen Orders</h4>
-                                          <p>{{ $kitchenOrdersCount }}</p>
-                                          <a href="{{ route('kitchenorders') }}" class="btn btn-light mt-auto">View</a>
-                                      </div>
-                                  </div>
-                              </div>
+        <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="card bg-primary text-white p-3 h-100">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <h4>Kitchen Orders</h4>
+                    <p>{{ $kitchenOrdersCount }}</p>
+                    <a href="{{ route('kitchenorders') }}" class="btn btn-light mt-auto">View</a>
+                </div>
+            </div>
+        </div>
 
-                              <div class="col-md-3">
-                                  <div class="card bg-success text-white p-3 h-100">
-                                      <div class="card-body d-flex flex-column justify-content-between">
-                                          <h4>Completed Orders</h4>
-                                          <p>{{ $completedOrdersCount }}</p>
-                                          <a href="{{ route('completedorders') }}" class="btn btn-light mt-auto">View</a>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      </section>
+        <div class="col-12 col-sm-6 col-md-3 mb-3">
+            <div class="card bg-success text-white p-3 h-100">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <h4>Completed Orders</h4>
+                    <p>{{ $completedOrdersCount }}</p>
+                    <a href="{{ route('completedorders') }}" class="btn btn-light mt-auto">View</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 
                   </div>
 
@@ -107,7 +108,7 @@
                                                   <td class="text-center">#RCO000{{ $res->id }}</td>
                                                   <td class="text-center">{{ $res->customer['name'] ?? 'N/A' }}</td>
 
-                                                  <td class="text-center">{{ $res->customer['phone'] }}</td>
+                                                  <td class="text-center">{{ $res->customer['phone']?? 'N/A' }}</td>
                                                   <td class="text-center">
                                                       <b>Iteams:</b>
                                                       <table>

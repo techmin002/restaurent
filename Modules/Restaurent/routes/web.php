@@ -42,6 +42,7 @@ Route::get('completed/orders', [OrderController::class, 'completedOrders'])->nam
     Route::get('categories/{id}/edit', [MenuController::class, 'categories_edit'])->name('categories.edit');
     Route::put('categories/{id}/update', [MenuController::class, 'categories_update'])->name('categories.update');
     Route::delete('categories/{id}/destroy', [MenuController::class, 'categories_destroy'])->name('categories.destroy');
+    
 
     // Order Management Routes
     Route::get('new/order', [OrderController::class, 'create'])->name('neworders');
@@ -91,6 +92,9 @@ Route::get('/duecustomers', [DueOrderController::class, 'index'])->name('duecust
     Route::post('/reception/restaurent/due/pay/{id}', [OrderController::class, 'payDue'])->name('due.pay');
     Route::post('/customers/pay-due', [CustomerController::class, 'payDue'])
      ->name('customers.payDue');
+Route::delete('payments/{id}', [PaymentController::class, 'destroy'])
+    ->name('payments.destroy');
+
 
     // for popup order
 

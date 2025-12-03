@@ -1352,6 +1352,8 @@
                                     <input type="hidden" name="customer_phone" id="customer_phone_input">
                                     <input type="hidden" name="office_id" id="office_id_input">
                                     <input type="hidden" name="table_number" id="table_number_input">
+                                    <!-- Store table ID for relations -->
+                                    <input type="hidden" name="table_id" id="table_id_input">
                                     <input type="hidden" name="discount_type" id="discount_type_input" value="flat">
                                     <input type="hidden" name="discount_value" id="discount_value_input"
                                         value="0">

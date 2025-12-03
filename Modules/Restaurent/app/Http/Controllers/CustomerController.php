@@ -9,9 +9,10 @@ use Modules\Restaurent\Models\Customer;
 use Modules\Restaurent\Models\Order;
 use Modules\Restaurent\Models\CustomerPayment;
 use Modules\Restaurent\Models\Payment;
+use Modules\Restaurent\Models\OfficePayment;
 
 class CustomerController extends Controller
-{
+{   
     protected $restaurent_id;
 
     public function __construct()
@@ -133,13 +134,14 @@ class CustomerController extends Controller
         $customer->delete();
         return back()->with('success', 'Customer Deleted Successfully');
     }
+
 // Pay Due
 public function payDue(Request $request)
 {
     // Validate input
     $request->validate([
         'customer_id' => 'nullable|exists:customers,id',
-        'office_id' => 'nullable|exists:offices,id',
+      'office_id' => 'nullable|exists:office_registers,id',
         'paying_amount.*' => 'required|numeric|min:0',
         'payment_method.*' => 'required|string',
         'remarks' => 'nullable|string',
@@ -200,6 +202,7 @@ public function payDue(Request $request)
         }
     }
 
+    
     // --- OFFICE PAYMENTS ---
     if ($request->office_id) {
 

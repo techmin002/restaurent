@@ -899,9 +899,6 @@
         </html>
     `);
 
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
+
     });
 </script>

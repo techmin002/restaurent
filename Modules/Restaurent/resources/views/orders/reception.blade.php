@@ -10,7 +10,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1>New Order Requests</h1>
+                        <h1>Reception Orders</h1>
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
@@ -45,6 +45,7 @@
                                                 <th>S.N</th>
                                                 <th>Order ID</th>
                                                 <th>Customer</th>
+                                                <th>TableID</th>
                                                 <th>Phone</th>
                                                 <th>Items</th>
                                                 <th>Type</th>
@@ -58,8 +59,16 @@
                                                 <tr>
                                                     <td class="text-center">{{ $loop->iteration }}</td>
                                                     <td class="text-center">#RCO000{{ $res->id }}</td>
-                                                    <td class="text-center">{{ $res->customer['name'] ?? 'N/A' }}</td>
-                                                    <td class="text-center">{{ $res->customer['phone'] ?? 'N/A' }}</td>
+                                                    <td class="text-center">
+                                                        {{ $res->customer['name'] ?? $res->office['name'] }}</td>
+                                                    <td class="text-center">
+                                                        {{ $res->table['table_number'] ?? 'N/A' }}
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        {{ $res->customer['phone'] ?? $res->office['contact_numbers'] }}
+                                                    </td>
+
                                                     <td>
                                                         <ul class="list-unstyled mb-0">
                                                             @foreach ($res->items as $item)
@@ -123,7 +132,7 @@
                                                             class="badge bg-{{ $statusBadge }}">{{ ucfirst($status) }}</span>
                                                     </td>
                                                     <td class="text-center">
-                                                        @if ($res->status === 'pending')
+                                                        @if ($res->status === 'accepted')
                                                             <form action="{{ route('orders.moveToKitchen', $res->id) }}"
                                                                 method="POST" class="d-inline">
                                                                 @csrf
@@ -185,7 +194,7 @@
                                                                                         #RCO000{{ $res->id }}</p>
                                                                                     <p class="mb-0">
                                                                                         <strong>Customer:</strong>
-                                                                                        {{ $res->customer['name'] ?? 'N/A' }}
+                                                                                        {{ $res->customer['name'] ?? $res->office['name'] }}
                                                                                     </p>
                                                                                 </div>
                                                                                 <hr class="my-2">
@@ -304,6 +313,10 @@
                                                                                                             type="hidden"
                                                                                                             name="customer_id"
                                                                                                             value="{{ $res->customer_id ?? ($res->customer['id'] ?? null) }}">
+                                                                                                        <input
+                                                                                                            type="hidden"
+                                                                                                            name="office_id"
+                                                                                                            value="{{ $res->office_id ?? ($res->office['id'] ?? null) }}">
 
                                                                                                         <!-- Header -->
                                                                                                         <div class="modal-header"
@@ -498,7 +511,8 @@
                                                                                                                                 Amount:
                                                                                                                             </span>
                                                                                                                             <span
-                                                                                                                                class="paid-amount total-paid fw-bold fs-6 text-success" id="paidAmount{{$res->id}}">
+                                                                                                                                class="paid-amount total-paid fw-bold fs-6 text-success"
+                                                                                                                                id="paidAmount{{ $res->id }}">
                                                                                                                                 Rs.
                                                                                                                                 0.00
                                                                                                                             </span>
@@ -519,36 +533,60 @@
                                                                                                                                     Amount:
                                                                                                                                 </span>
                                                                                                                                 @php
-                                                                                                                                    $cid =
+                                                                                                                                    // Get customer ID (if exists)
+                                                                                                                                    $customerId =
                                                                                                                                         $res->customer_id ??
                                                                                                                                         ($res
                                                                                                                                             ->customer[
                                                                                                                                             'id'
                                                                                                                                         ] ??
                                                                                                                                             null);
-                                                                                                                                    $due =
-                                                                                                                                        \Modules\Restaurent\Models\CustomerPayment::where(
-                                                                                                                                            'customer_id',
-                                                                                                                                            $cid,
+
+                                                                                                                                    // Get office ID (if exists)
+                                                                                                                                    $officeId =
+                                                                                                                                        $res->office_id ??
+                                                                                                                                        ($res
+                                                                                                                                            ->office[
+                                                                                                                                            'id'
+                                                                                                                                        ] ??
+                                                                                                                                            null);
+
+                                                                                                                                    // Check customer due
+                                                                                                                                    $customerDue = \Modules\Restaurent\Models\CustomerPayment::where(
+                                                                                                                                        'customer_id',
+                                                                                                                                        $customerId,
+                                                                                                                                    )->value(
+                                                                                                                                        'due_amount',
+                                                                                                                                    );
+
+                                                                                                                                    // If customer due is null or zero → check office due
+                                                                                                                                    if (
+                                                                                                                                        !$customerDue ||
+                                                                                                                                        $customerDue ==
+                                                                                                                                            0
+                                                                                                                                    ) {
+                                                                                                                                        $officeDue = \Modules\Restaurent\Models\OfficePayment::where(
+                                                                                                                                            'office_id',
+                                                                                                                                            $officeId,
                                                                                                                                         )->value(
                                                                                                                                             'due_amount',
-                                                                                                                                        ) ??
-                                                                                                                                        0;
-                                                                                                                                    $currentOrder =
-                                                                                                                                        \Modules\Restaurent\Models\Order::where(
-                                                                                                                                            'id',
-                                                                                                                                            $res->customer_id,
-                                                                                                                                        )->value(
-                                                                                                                                            'grand_total',
-                                                                                                                                        ) ??
-                                                                                                                                        0;
+                                                                                                                                        );
+
+                                                                                                                                        $due =
+                                                                                                                                            $officeDue ??
+                                                                                                                                            0;
+                                                                                                                                    } else {
+                                                                                                                                        $due = $customerDue;
+                                                                                                                                    }
                                                                                                                                 @endphp
+
                                                                                                                                 <span
                                                                                                                                     id="dueAmount{{ $res->id }}"
                                                                                                                                     data-old-due="{{ $due }}">
                                                                                                                                     Rs.
-                                                                                                                                    {{  $res->grand_total ?? 0 }}
+                                                                                                                                    {{ $due }}
                                                                                                                                 </span>
+
                                                                                                                             </div>
                                                                                                                             <small
                                                                                                                                 class="text-muted d-block">
@@ -570,54 +608,58 @@
 
                                                                                                         </div>
 
-                                                                                                        
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const paymentRows = document.querySelectorAll('#paymentRows{{ $res->id }} .payment-row, #paymentRows{{ $res->id }} .extra-payment-row');
-    const dueAmountSpan = document.getElementById('dueAmount{{ $res->id }}');
-    const paidAmountSpan = document.getElementById('paidAmount{{ $res->id }}'); // Add paid amount span
-    const currentOrder = parseFloat({{ $res->grand_total ?? 0 }});
 
-    function updateAmounts() {
-        let totalPaid = 0;
-        paymentRows.forEach(row => {
-            const input = row.querySelector('input[name="paying_amount[]"]');
-            if(input && input.value) {
-                totalPaid += parseFloat(input.value);
-            }
-        });
-        const due = currentOrder - totalPaid;
+                                                                                                        <script>
+                                                                                                            document.addEventListener('DOMContentLoaded', function() {
+                                                                                                                const paymentRows = document.querySelectorAll(
+                                                                                                                    '#paymentRows{{ $res->id }} .payment-row, #paymentRows{{ $res->id }} .extra-payment-row'
+                                                                                                                );
+                                                                                                                const dueAmountSpan = document.getElementById('dueAmount{{ $res->id }}');
+                                                                                                                const paidAmountSpan = document.getElementById(
+                                                                                                                    'paidAmount{{ $res->id }}'); // Add paid amount span
+                                                                                                                const currentOrder = parseFloat({{ $res->grand_total ?? 0 }});
 
-        // Update both paid and due amounts
-        dueAmountSpan.textContent = 'Rs. ' + due.toFixed(2);
-        paidAmountSpan.textContent = 'Rs. ' + totalPaid.toFixed(2);
-    }
+                                                                                                                function updateAmounts() {
+                                                                                                                    let totalPaid = 0;
+                                                                                                                    paymentRows.forEach(row => {
+                                                                                                                        const input = row.querySelector('input[name="paying_amount[]"]');
+                                                                                                                        if (input && input.value) {
+                                                                                                                            totalPaid += parseFloat(input.value);
+                                                                                                                        }
+                                                                                                                    });
+                                                                                                                    const due = currentOrder - totalPaid;
 
-    // Attach event listeners to all existing inputs
-    paymentRows.forEach(row => {
-        const input = row.querySelector('input[name="paying_amount[]"]');
-        if(input) input.addEventListener('input', updateAmounts);
-    });
+                                                                                                                    // Update both paid and due amounts
+                                                                                                                    dueAmountSpan.textContent = 'Rs. ' + due.toFixed(2);
+                                                                                                                    paidAmountSpan.textContent = 'Rs. ' + totalPaid.toFixed(2);
+                                                                                                                }
 
-    // Checkbox for extra row
-    const checkbox = document.getElementById('addPaymentRow{{ $res->id }}');
-    if(checkbox) {
-        checkbox.addEventListener('change', function() {
-            const extraRow = document.querySelector('#paymentRows{{ $res->id }} .extra-payment-row');
-            if(this.checked && extraRow) {
-                extraRow.style.display = 'block';
-                const input = extraRow.querySelector('input[name="paying_amount[]"]');
-                if(input) input.addEventListener('input', updateAmounts);
-            } else if(extraRow) {
-                extraRow.style.display = 'none';
-                const input = extraRow.querySelector('input[name="paying_amount[]"]');
-                if(input) input.value = '';
-                updateAmounts();
-            }
-        });
-    }
-});
-</script>
+                                                                                                                // Attach event listeners to all existing inputs
+                                                                                                                paymentRows.forEach(row => {
+                                                                                                                    const input = row.querySelector('input[name="paying_amount[]"]');
+                                                                                                                    if (input) input.addEventListener('input', updateAmounts);
+                                                                                                                });
+
+                                                                                                                // Checkbox for extra row
+                                                                                                                const checkbox = document.getElementById('addPaymentRow{{ $res->id }}');
+                                                                                                                if (checkbox) {
+                                                                                                                    checkbox.addEventListener('change', function() {
+                                                                                                                        const extraRow = document.querySelector(
+                                                                                                                            '#paymentRows{{ $res->id }} .extra-payment-row');
+                                                                                                                        if (this.checked && extraRow) {
+                                                                                                                            extraRow.style.display = 'block';
+                                                                                                                            const input = extraRow.querySelector('input[name="paying_amount[]"]');
+                                                                                                                            if (input) input.addEventListener('input', updateAmounts);
+                                                                                                                        } else if (extraRow) {
+                                                                                                                            extraRow.style.display = 'none';
+                                                                                                                            const input = extraRow.querySelector('input[name="paying_amount[]"]');
+                                                                                                                            if (input) input.value = '';
+                                                                                                                            updateAmounts();
+                                                                                                                        }
+                                                                                                                    });
+                                                                                                                }
+                                                                                                            });
+                                                                                                        </script>
 
 
                                                                                                         <!-- Footer -->
@@ -730,6 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <th>S.N</th>
                                                 <th>Order ID</th>
                                                 <th>Customer</th>
+                                                <th>TableID</th>
                                                 <th>Phone</th>
                                                 <th>Items</th>
                                                 <th>Type</th>
