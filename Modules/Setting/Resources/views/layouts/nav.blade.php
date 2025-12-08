@@ -772,7 +772,7 @@
     .counter-orders-table tbody tr:hover {
         background-color: #f8f9fa;
         transform: scale(1.002);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .counter-table-cell {
@@ -1002,11 +1002,11 @@
         .counter-modal-content {
             width: 95%;
         }
-        
+
         .counter-orders-table {
             font-size: 13px;
         }
-        
+
         .counter-orders-table th,
         .counter-orders-table td {
             padding: 10px 8px;
@@ -1044,11 +1044,11 @@
             gap: 10px;
             text-align: center;
         }
-        
+
         .counter-table-container {
             border-radius: 8px;
         }
-        
+
         .counter-orders-table {
             min-width: 1000px;
         }
@@ -1319,7 +1319,7 @@
                     const customer = order.customer_info || {};
                     const customerName = customer.name || 'Guest Customer';
                     const customerContact = customer.contact || '';
-                    
+
                     // Format items for display
                     const itemsList = order.items.map(item => {
                         return `${item.menu_name}${item.variant_name ? ` (${item.variant_name})` : ''} x${item.qty}`;

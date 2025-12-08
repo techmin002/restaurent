@@ -20,8 +20,8 @@
           <div class="user-panel mt-3 pb-3 mb-3 d-flex">
               <div class="">
 
-                  <img src="{{ asset('upload/images/settings/' . $profile->logo) }}" class="w-100 img-fluid"
-                      alt="User Image">
+                 <img src="{{ asset('images/company/' . $profile->logo) }}" class="img-circle elevation-2"
+                      alt="User Image" style="width: 40px; height: 40px;">
               </div>
               {{-- <div class="info">
           <a href="{{ route('home') }}" class="d-block" style="text-decoration: none;">{{ $profile->company_name }}</a>

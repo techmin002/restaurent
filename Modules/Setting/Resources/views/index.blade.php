@@ -885,10 +885,10 @@
         </style>
 
         <script>
-            // Auto refresh every 30 seconds
+            Auto refresh every 30 seconds
             setTimeout(function() {
                 window.location.reload();
-            }, 30000);
+            }, 600000);
 
             // Start cooking button handler
             document.querySelectorAll('.start-cooking-btn').forEach(button => {

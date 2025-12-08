@@ -9,7 +9,8 @@
         $profile = \Modules\Setting\Entities\CompanyProfile::first();
     @endphp
     <title>Office Orders || {{ $profile->company_name }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -141,7 +142,7 @@
             gap: 12px;
         }
 
-        .topbar > div:first-child {
+        .topbar>div:first-child {
             flex: 1;
             min-width: 200px;
         }
@@ -982,7 +983,7 @@
                 text-align: center;
             }
 
-            .order-summary > div {
+            .order-summary>div {
                 flex: 1;
             }
         }
@@ -1049,6 +1050,7 @@
             from {
                 transform: translateY(100%);
             }
+
             to {
                 transform: translateY(0);
             }
@@ -1150,7 +1152,7 @@
             </div>
         </div>
 
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -1207,7 +1209,7 @@
                 <input type="hidden" name="order_time" value="{{ now() }}">
                 <input type="hidden" id="order_id" name="order_id" value="">
                 <input type="hidden" name="orderType" value="office">
-                
+
                 <div class="order-container">
                     <!-- Menu Section -->
                     <div class="menu-section">
@@ -1240,13 +1242,21 @@
                         <!-- Menu Items Grid -->
                         <div class="menu-items-grid" id="menu-items">
                             @foreach ($menus as $item)
-                                <div class="menu-item"
-                                    data-category="{{ $item->category_id }}" 
-                                    data-name="{{ strtolower($item->name) }}">
+                                @php
+                                    $hasVariants = $item->variations && count($item->variations) > 0;
+                                @endphp
+                                <div class="menu-item" data-category="{{ $item->category_id }}"
+                                    data-name="{{ strtolower($item->name) }}"
+                                    data-has-variants="{{ $hasVariants ? 'true' : 'false' }}">
                                     <div class="card h-100">
                                         <div class="card-img-container">
                                             <img src="{{ asset('upload/images/menu/' . $item['image']) }}"
-                                                alt="{{ $item->name }}" class="item-image" data-id="{{ $item->id }}">
+                                                alt="{{ $item->name }}" class="item-image"
+                                                data-id="{{ $item->id }}" data-name="{{ $item->name }}"
+                                                data-price="{{ $item->price }}"
+                                                data-description="{{ $item->description }}"
+                                                data-image="{{ asset('upload/images/menu/' . $item['image']) }}"
+                                                data-has-variants="{{ $hasVariants ? 'true' : 'false' }}">
                                             <span class="category-badge">{{ $item->category_name }}</span>
                                             <span class="price-badge">Rs {{ number_format($item->price, 2) }}</span>
                                         </div>
@@ -1257,18 +1267,19 @@
                                         <div class="card-footer">
                                             <div class="d-flex flex-column align-items-center">
                                                 <div class="qty-control">
-                                                    <button class="qty-btn minus" data-id="{{ $item->id }}">-</button>
-                                                    <input type="number" min="1" value="1" class="qty-input"
-                                                        id="qty-{{ $item->id }}">
-                                                    <button class="qty-btn plus" data-id="{{ $item->id }}">+</button>
+                                                    <button class="qty-btn minus"
+                                                        data-id="{{ $item->id }}">-</button>
+                                                    <input type="number" min="1" value="1"
+                                                        class="qty-input" id="qty-{{ $item->id }}">
+                                                    <button class="qty-btn plus"
+                                                        data-id="{{ $item->id }}">+</button>
                                                 </div>
                                                 <button type="button" class="add-to-cart-btn"
-                                                    data-id="{{ $item->id }}" 
-                                                    data-name="{{ $item->name }}"
+                                                    data-id="{{ $item->id }}" data-name="{{ $item->name }}"
                                                     data-price="{{ $item->price }}"
                                                     data-description="{{ $item->description }}"
                                                     data-image="{{ asset('upload/images/menu/' . $item['image']) }}"
-                                                    data-has-variants="{{ $item->variations && count($item->variations) > 0 ? 'true' : 'false' }}">
+                                                    data-has-variants="{{ $hasVariants ? 'true' : 'false' }}">
                                                     <i class="fas fa-cart-plus me-1"></i> Add
                                                 </button>
                                             </div>
@@ -1297,17 +1308,20 @@
                             <div class="card-body">
                                 <div class="mb-3">
                                     <label class="form-label fw-600">Office Name</label>
-                                    <input type="text" class="form-control" value="{{ $office->name ?? 'N/A' }}" readonly>
+                                    <input type="text" class="form-control" value="{{ $office->name ?? 'N/A' }}"
+                                        readonly>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label class="form-label fw-600">Office Phone</label>
-                                    <input type="text" class="form-control" value="{{ $office->contact_numbers ?? 'N/A' }}" readonly>
+                                    <input type="text" class="form-control"
+                                        value="{{ $office->contact_numbers ?? 'N/A' }}" readonly>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label class="form-label fw-600">Location</label>
-                                    <input type="text" class="form-control" value="{{ $office->address ?? 'N/A' }}" readonly>
+                                    <input type="text" class="form-control"
+                                        value="{{ $office->address ?? 'N/A' }}" readonly>
                                 </div>
 
                                 <!-- Recent Orders Container -->
@@ -1316,7 +1330,8 @@
                                 <!-- Order Remarks -->
                                 <div class="mb-3">
                                     <label class="form-label fw-600">Order Remarks</label>
-                                    <textarea class="form-control" id="order_remarks" name="remarks" rows="2" placeholder="Any special instructions for this office order..."></textarea>
+                                    <textarea class="form-control" id="order_remarks" name="remarks" rows="2"
+                                        placeholder="Any special instructions for this office order..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1348,7 +1363,8 @@
                                     <span>Discount</span>
                                     <span id="cart-discount">Rs 0.00</span>
                                 </div>
-                                <div class="total-row" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                                <div class="total-row"
+                                    style="border-top: 1px solid var(--border-color); padding-top: 8px;">
                                     <strong>Total</strong>
                                     <strong id="cart-total">Rs 0.00</strong>
                                 </div>
@@ -1357,7 +1373,8 @@
                                 <div class="recent-orders-total" id="recent-orders-total">
                                     <div class="recent-orders-total-header">
                                         <span class="recent-orders-total-label">Recent Orders Total</span>
-                                        <span class="recent-orders-total-value" id="recent-orders-total-value">Rs 0.00</span>
+                                        <span class="recent-orders-total-value" id="recent-orders-total-value">Rs
+                                            0.00</span>
                                     </div>
                                     <div class="recent-orders-total-note">Total from previous orders</div>
                                 </div>
@@ -1378,17 +1395,19 @@
                                     </div>
                                     <div>
                                         <button type="submit" id="submitBtn" class="btn btn-primary btn-wide">
-                                            <i class="fa-solid fa-check me-1"></i> 
+                                            <i class="fa-solid fa-check me-1"></i>
                                             <span id="submitBtnText">Place Order</span>
                                         </button>
                                     </div>
                                 </div>
 
                                 <input type="hidden" name="sub_total" id="subTotalInput">
-                                <input type="hidden" name="discount_amount" id="discountAmountInput" value="0">
+                                <input type="hidden" name="discount_amount" id="discountAmountInput"
+                                    value="0">
                                 <input type="hidden" name="grand_total" id="grandTotalInput">
                                 <input type="hidden" name="order_items" id="orderItemsInput">
-                                <input type="hidden" name="recent_orders_total" id="recentOrdersTotalInput" value="0">
+                                <input type="hidden" name="recent_orders_total" id="recentOrdersTotalInput"
+                                    value="0">
                             </div>
                         </div>
                     </div>
@@ -1436,12 +1455,12 @@
                 <h4 id="modal-item-name" class="modal-title"></h4>
                 <div id="modal-item-price" class="modal-price"></div>
                 <p id="modal-item-description" class="modal-description"></p>
-                
+
                 <div id="variants-section" class="variants-section" style="display: none;">
                     <h6 class="variants-title">Select Variant</h6>
                     <div id="variants-container" class="variants-container"></div>
                 </div>
-                
+
                 <div class="modal-qty-control">
                     <div class="modal-qty-label">Quantity</div>
                     <div class="modal-qty-buttons">
@@ -1528,7 +1547,8 @@
 
                     if (data && data.length > 0) {
                         const incompleteOrder = data.find(order =>
-                            order.status === 'pending' || order.status === 'confirmed' || order.status === 'preparing' || order.status === 'accepted'
+                            order.status === 'pending' || order.status === 'confirmed' || order.status ===
+                            'preparing' || order.status === 'accepted'
                         );
 
                         if (incompleteOrder) {
@@ -1899,11 +1919,11 @@
         function updateOrderStats() {
             const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            
+
             $('#cart-items-count').text(totalItems);
             $('#cart-subtotal-value').text('Rs ' + subtotal.toFixed(2));
             $('#cart-total-value').text('Rs ' + subtotal.toFixed(2));
-            
+
             // Update mobile cart count
             $('#mobile-cart-count').text(totalItems);
         }
@@ -1941,9 +1961,46 @@
             });
         }
 
+        // Handle image click event
+        // Update the handleImageClick function (around line 1689) to:
+        function handleImageClick(e) {
+            e.stopPropagation(); // ADD THIS LINE - prevents event from bubbling up
+
+            // Don't trigger if clicking on quantity controls or add button
+            if ($(e.target).closest('.qty-control').length || $(e.target).closest('.add-to-cart-btn').length) {
+                return;
+            }
+
+            const card = $(e.target).closest('.menu-item');
+            const img = card.find('.item-image');
+            const id = img.data('id');
+            const name = img.data('name');
+            const price = parseFloat(img.data('price'));
+            const description = card.find('.card-text').text();
+            const imageSrc = img.attr('src');
+            const hasVariants = img.data('has-variants') === true;
+
+            // Check if item has variants
+            if (hasVariants) {
+                // Item has variants, open modal for variant selection
+                openModal(id, name, price, description, imageSrc);
+            } else {
+                // Item has no variants, add ONE quantity directly to cart (ignore input value)
+                const qty = 1; // Always add 1 when clicking image
+
+                addToCart(id, name, price, qty);
+                showNotification(`${name} added to cart!`);
+
+                // Reset quantity input to 1
+                $(`#qty-${id}`).val(1);
+            }
+        }
+
         // Quantity controls for menu items
         function setupQuantityControls() {
-            $(document).on('click', '.qty-btn', function() {
+            $(document).on('click', '.qty-btn', function(e) {
+                e.stopPropagation(); // Prevent triggering image click
+
                 const id = $(this).data('id');
                 const input = $(`#qty-${id}`);
                 let value = parseInt(input.val());
@@ -1958,7 +2015,9 @@
             });
 
             // Add to cart from menu items
-            $(document).on('click', '.add-to-cart-btn', function() {
+            $(document).on('click', '.add-to-cart-btn', function(e) {
+                e.stopPropagation(); // Prevent triggering image click
+
                 const id = $(this).data('id');
                 const name = $(this).data('name');
                 const price = parseFloat($(this).data('price'));
@@ -1989,6 +2048,25 @@
                     updateCartItemQty(index, -1);
                 } else if ($(this).hasClass('plus')) {
                     updateCartItemQty(index, 1);
+                }
+            });
+
+            // Handle clicks on the card image
+            $(document).on('click', '.item-image, .card-img-container', function(e) {
+                handleImageClick(e);
+            });
+
+            // Handle clicks on the card body (excluding quantity controls)
+            $(document).on('click', '.card-body', function(e) {
+                // If we're clicking on the image or its container, skip this handler
+                if ($(e.target).closest('.card-img-container').length ||
+                    $(e.target).hasClass('item-image')) {
+                    return;
+                }
+
+                // Only trigger if not clicking on text links or other interactive elements
+                if (!$(e.target).is('a, button, input, .qty-control, .add-to-cart-btn')) {
+                    handleImageClick(e);
                 }
             });
         }
@@ -2045,9 +2123,9 @@
             // Remove any existing notifications
             $('.notification').remove();
 
-            const icon = type === 'warning' ? 'fa-exclamation-triangle' : 
-                        type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
-            
+            const icon = type === 'warning' ? 'fa-exclamation-triangle' :
+                type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
+
             const notification = $(`
                 <div class="notification alert alert-${type}">
                     <div class="d-flex align-items-center">
@@ -2078,9 +2156,9 @@
             e.preventDefault();
             $('.mobile-nav-item').removeClass('active');
             $(this).addClass('active');
-            
+
             const target = $(this).find('span').text().toLowerCase();
-            
+
             if (target === 'cart') {
                 $('html, body').animate({
                     scrollTop: $('.cart-sidebar').offset().top - 20
@@ -2126,4 +2204,5 @@
         });
     </script>
 </body>
+
 </html>

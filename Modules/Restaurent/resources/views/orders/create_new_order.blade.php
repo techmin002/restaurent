@@ -2,7 +2,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @section('title', 'New Order Request')
 @section('content')
-     <style>
+    <style>
         /* New Order Specific Styles */
         .new-order-wrapper {
             background-color: #f5f7fb;
@@ -1038,27 +1038,34 @@
                         <div class="row" id="new-order-menu-items">
                             @foreach ($menus as $item)
                                 <div class="col-xl-3 col-lg-4 col-md-6 mb-4 new-order-menu-item"
-                                    data-category="{{ $item->category_id }}" data-name="{{ strtolower($item->name) }}">
+                                    data-category="{{ $item->category_id }}" data-name="{{ strtolower($item->name) }}"
+                                    data-has-variants="{{ $item->variations && count($item->variations) > 0 ? 'true' : 'false' }}">
                                     <div class="card h-100">
                                         <div class="new-order-card-img-container">
                                             <img src="{{ asset('upload/images/menu/' . $item['image']) }}"
-                                                alt="{{ $item->name }}" class="new-order-item-image" data-id="{{ $item->id }}">
+                                                alt="{{ $item->name }}" class="new-order-item-image"
+                                                data-id="{{ $item->id }}" data-name="{{ $item->name }}"
+                                                data-price="{{ $item->price }}">
                                             <span class="new-order-category-badge">{{ $item->category_name }}</span>
-                                            <span class="new-order-price-badge">Rs {{ number_format($item->price, 2) }}</span>
+                                            <span class="new-order-price-badge">Rs
+                                                {{ number_format($item->price, 2) }}</span>
                                         </div>
                                         <div class="new-order-card-body" style="height:auto; padding-bottom:0.4rem;">
-                                            <h5 class="new-order-card-title" style="margin-bottom:0.25rem;">{{ $item->name }}</h5>
+                                            <h5 class="new-order-card-title" style="margin-bottom:0.25rem;">
+                                                {{ $item->name }}</h5>
                                             <p class="new-order-card-text" style="margin-bottom:0.15rem;">
                                                 {{ Str::limit($item->description, 80) }}</p>
                                         </div>
                                         <div class="new-order-card-footer" style="padding-top:0.35rem;">
                                             <div class="d-flex flex-column align-items-center">
                                                 <div class="new-order-qty-control d-flex align-items-center mb-2">
-                                                    <button class="new-order-qty-btn minus" data-id="{{ $item->id }}">-</button>
-                                                    <input type="number" min="1" value="1" class="new-order-qty-input"
-                                                        id="new-order-qty-{{ $item->id }}"
+                                                    <button class="new-order-qty-btn minus"
+                                                        data-id="{{ $item->id }}">-</button>
+                                                    <input type="number" min="1" value="1"
+                                                        class="new-order-qty-input" id="new-order-qty-{{ $item->id }}"
                                                         style="width:64px;padding:6px 8px;text-align:center;">
-                                                    <button class="new-order-qty-btn plus" data-id="{{ $item->id }}">+</button>
+                                                    <button class="new-order-qty-btn plus"
+                                                        data-id="{{ $item->id }}">+</button>
                                                 </div>
 
                                                 <div class="w-100 d-flex justify-content-center">
@@ -1139,15 +1146,15 @@
                                     <!-- Customer Contact Number -->
                                     <div class="new-order-form-group">
                                         <label for="customerPhone" class="new-order-form-label">Phone Number</label>
-                                        <input type="text" class="form-control" id="customerPhone" name="customer_phone"
-                                            placeholder="Enter phone number">
+                                        <input type="text" class="form-control" id="customerPhone"
+                                            name="customer_phone" placeholder="Enter phone number">
                                     </div>
 
                                     <!-- Customer Name -->
                                     <div class="new-order-form-group">
                                         <label for="customerName" class="new-order-form-label">Customer Name</label>
-                                        <input type="text" class="form-control" id="customerName" name="customer_name"
-                                            placeholder="Enter customer name">
+                                        <input type="text" class="form-control" id="customerName"
+                                            name="customer_name" placeholder="Enter customer name">
                                     </div>
                                 </div>
 
@@ -1155,20 +1162,22 @@
                                 <div class="new-order-form-group">
                                     <label class="new-order-form-label">Discount</label>
                                     <div class="new-order-discount-controls">
-                                        <select class="form-select new-order-discount-type" id="discountType" name="discount_type">
+                                        <select class="form-select new-order-discount-type" id="discountType"
+                                            name="discount_type">
                                             <option value="flat">Flat (Rs)</option>
                                             <option value="percent">Percentage (%)</option>
                                         </select>
-                                        <input type="number" class="form-control new-order-discount-value" id="discountValue"
-                                            name="discount_value" placeholder="0.00" min="0" step="0.01">
+                                        <input type="number" class="form-control new-order-discount-value"
+                                            id="discountValue" name="discount_value" placeholder="0.00" min="0"
+                                            step="0.01">
                                     </div>
                                 </div>
 
                                 <!-- VAT Section -->
                                 <div class="new-order-form-group">
                                     <label for="vat" class="new-order-form-label">VAT (%)</label>
-                                    <input type="number" class="form-control" id="vat" name="vat" value="13"
-                                        min="0" max="100" step="0.01">
+                                    <input type="number" class="form-control" id="vat" name="vat"
+                                        value="13" min="0" max="100" step="0.01">
                                 </div>
                             </div>
                         </div>
@@ -1204,7 +1213,8 @@
                                     <span>VAT (<span id="new-order-vat-percent">13</span>%)</span>
                                     <span id="new-order-cart-vat">Rs 0.00</span>
                                 </div>
-                                <div class="new-order-total-row mb-2" style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                                <div class="new-order-total-row mb-2"
+                                    style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
                                     <strong>Total</strong>
                                     <strong id="new-order-cart-total">Rs 0.00</strong>
                                 </div>
@@ -1213,7 +1223,8 @@
                                 <div class="new-order-recent-orders-total" id="new-order-recent-orders-total">
                                     <div class="new-order-recent-orders-total-header">
                                         <span class="new-order-recent-orders-total-label">Recent Orders Total</span>
-                                        <span class="new-order-recent-orders-total-value" id="new-order-recent-orders-total-value">Rs
+                                        <span class="new-order-recent-orders-total-value"
+                                            id="new-order-recent-orders-total-value">Rs
                                             0.00</span>
                                     </div>
                                     <div class="new-order-recent-orders-total-note">Total from previous orders</div>
@@ -1223,23 +1234,29 @@
                                 <div class="new-order-combined-total" id="new-order-combined-total">
                                     <div class="new-order-combined-total-header">
                                         <span class="new-order-combined-total-label">Combined Total</span>
-                                        <span class="new-order-combined-total-value" id="new-order-combined-total-value">Rs 0.00</span>
+                                        <span class="new-order-combined-total-value"
+                                            id="new-order-combined-total-value">Rs 0.00</span>
                                     </div>
                                     <div class="new-order-combined-total-note">Current order + Recent orders</div>
                                 </div>
 
-                                <form id="new-order-checkout-form" action="{{ route('orders.menus.store') }}" method="POST">
+                                <form id="new-order-checkout-form" action="{{ route('orders.menus.store') }}"
+                                    method="POST">
                                     @csrf
                                     <input type="hidden" name="order_items" id="new-order-order-items-input">
-                                    <input type="hidden" name="order_type" id="new-order-order-type-input" value="dine_in">
+                                    <input type="hidden" name="order_type" id="new-order-order-type-input"
+                                        value="dine_in">
                                     <input type="hidden" name="customer_name" id="new-order-customer-name-input">
                                     <input type="hidden" name="customer_phone" id="new-order-customer-phone-input">
                                     <input type="hidden" name="office_id" id="new-order-office-id-input">
                                     <input type="hidden" name="table_number" id="new-order-table-number-input">
-                                    <input type="hidden" name="discount_type" id="new-order-discount-type-input" value="flat">
-                                    <input type="hidden" name="discount_value" id="new-order-discount-value-input" value="0">
+                                    <input type="hidden" name="discount_type" id="new-order-discount-type-input"
+                                        value="flat">
+                                    <input type="hidden" name="discount_value" id="new-order-discount-value-input"
+                                        value="0">
                                     <input type="hidden" name="vat" id="new-order-vat-input" value="13">
-                                    <input type="hidden" name="recent_orders_total" id="new-order-recent-orders-total-input" value="0">
+                                    <input type="hidden" name="recent_orders_total"
+                                        id="new-order-recent-orders-total-input" value="0">
                                     <button type="submit" class="btn new-order-checkout-btn">Place Order</button>
                                 </form>
                             </div>
@@ -1284,7 +1301,8 @@
                         <div class="new-order-modal-actions">
                             <div class="new-order-modal-qty-control">
                                 <button class="new-order-modal-qty-btn" id="new-order-modal-minus">-</button>
-                                <input type="number" min="1" value="1" class="new-order-modal-qty-input" id="new-order-modal-qty">
+                                <input type="number" min="1" value="1" class="new-order-modal-qty-input"
+                                    id="new-order-modal-qty">
                                 <button class="new-order-modal-qty-btn" id="new-order-modal-plus">+</button>
                             </div>
                             <button class="new-order-modal-add-btn" id="new-order-modal-add-to-cart">
@@ -1486,7 +1504,7 @@
             // Populate offices dropdown
             function populateOffices() {
                 elements.officeSelect.innerHTML = '<option value="">-- Select Office --</option>';
-                
+
                 if (officesData && officesData.length > 0) {
                     officesData.forEach(office => {
                         const option = document.createElement('option');
@@ -1530,7 +1548,7 @@
             function initializeOrderType() {
                 const selectedType = document.querySelector('input[name="orderType"]:checked').value;
                 elements.orderTypeInput.value = selectedType;
-                
+
                 if (selectedType === 'dine_in') {
                     elements.dineInField.classList.add('show');
                 }
@@ -1554,7 +1572,9 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({ phone })
+                        body: JSON.stringify({
+                            phone
+                        })
                     });
 
                     const data = await response.json();
@@ -1595,7 +1615,8 @@
                     // Check for incomplete orders
                     if (data && data.length > 0) {
                         const incompleteOrder = data.find(order =>
-                            order.status === 'pending' || order.status === 'confirmed' || order.status === 'accepted'
+                            order.status === 'pending' || order.status === 'confirmed' || order.status ===
+                            'accepted'
                         );
 
                         if (incompleteOrder) {
@@ -1618,7 +1639,8 @@
                 createRecentOrdersContainer();
 
                 if (!orders || orders.length === 0) {
-                    state.recentOrdersContainer.innerHTML = '<div class="text-center text-muted p-3">No recent orders found</div>';
+                    state.recentOrdersContainer.innerHTML =
+                        '<div class="text-center text-muted p-3">No recent orders found</div>';
                     state.recentOrdersContainer.style.display = 'block';
                     state.recentOrdersTotal = 0;
                     updateRecentOrdersTotalDisplay();
@@ -1674,9 +1696,10 @@
                 if (!state.recentOrdersContainer) {
                     state.recentOrdersContainer = document.createElement('div');
                     state.recentOrdersContainer.className = 'new-order-recent-orders';
-                    
+
                     const customerNameGroup = elements.customerNameField.closest('.new-order-form-group');
-                    customerNameGroup.parentNode.insertBefore(state.recentOrdersContainer, customerNameGroup.nextSibling);
+                    customerNameGroup.parentNode.insertBefore(state.recentOrdersContainer, customerNameGroup
+                        .nextSibling);
                 }
             }
 
@@ -1795,6 +1818,8 @@
 
             // Handle add to cart from card
             function handleAddToCartFromCard(e) {
+                e.stopPropagation(); // Prevent triggering the card click event
+
                 const btn = e.target.closest('.new-order-add-to-cart-btn');
                 if (!btn) return;
 
@@ -1807,11 +1832,13 @@
                 // Check if item has variants
                 const variants = variantsData[id];
                 if (variants && variants.length > 0) {
+                    // Item has variants, open modal for variant selection
                     const card = btn.closest('.new-order-menu-item');
                     const description = card.querySelector('.new-order-card-text').textContent;
                     const imageSrc = card.querySelector('.new-order-item-image').src;
                     openModal(id, name, price, description, imageSrc);
                 } else {
+                    // Item has no variants, add directly to cart
                     addToCart(id, name, price, qty);
                     qtyInput.value = 1;
                     showNotification(`${name} added to cart!`);
@@ -1819,20 +1846,41 @@
             }
 
             // Handle open modal click
+            // Handle open modal click - UPDATE THIS FUNCTION (around line 385-395)
             function handleOpenModalClick(e) {
-                if (e.target.closest('.new-order-qty-control') || e.target.closest('.new-order-add-to-cart-btn')) {
+                e.stopPropagation(); // ADD THIS LINE - prevents event from bubbling up
+
+                // Don't open modal if clicking on quantity controls or add button
+                if (e.target.closest('.new-order-qty-control') ||
+                    e.target.closest('.new-order-add-to-cart-btn') ||
+                    e.target.closest('.new-order-qty-btn')) {
                     return;
                 }
 
                 const card = e.target.closest('.new-order-menu-item');
-                const btn = card.querySelector('.new-order-add-to-cart-btn');
-                const id = btn.dataset.id;
-                const name = card.querySelector('.new-order-card-title').textContent;
-                const price = parseFloat(btn.dataset.price);
+                const img = card.querySelector('.new-order-item-image');
+                const id = img.dataset.id;
+                const name = img.dataset.name;
+                const price = parseFloat(img.dataset.price);
                 const description = card.querySelector('.new-order-card-text').textContent;
-                const imageSrc = card.querySelector('.new-order-item-image').src;
+                const imageSrc = img.src;
 
-                openModal(id, name, price, description, imageSrc);
+                // Check if item has variants
+                const variants = variantsData[id];
+                if (variants && variants.length > 0) {
+                    // Item has variants, open modal for variant selection
+                    openModal(id, name, price, description, imageSrc);
+                } else {
+                    // Item has no variants, get quantity and add directly to cart
+                    const qtyInput = document.getElementById(`new-order-qty-${id}`);
+                    const qty = Math.max(1, parseInt(qtyInput.value || 1, 10));
+
+                    addToCart(id, name, price, qty);
+                    showNotification(`${name} added to cart!`);
+
+                    // Reset quantity input to 1
+                    qtyInput.value = 1; // ADD THIS LINE
+                }
             }
 
             // Open modal
@@ -1996,7 +2044,12 @@
                 const vatAmount = (subtotal - discount) * (vatRate / 100);
                 const total = subtotal - discount + vatAmount;
 
-                return { subtotal, discount, vatAmount, total };
+                return {
+                    subtotal,
+                    discount,
+                    vatAmount,
+                    total
+                };
             }
 
             // Render cart
@@ -2024,7 +2077,12 @@
                 const totalItems = state.cart.reduce((sum, item) => sum + item.qty, 0);
                 elements.cartCount.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
 
-                const { subtotal, discount, vatAmount, total } = calculateOrder();
+                const {
+                    subtotal,
+                    discount,
+                    vatAmount,
+                    total
+                } = calculateOrder();
 
                 elements.cartItemsList.innerHTML = '';
 
@@ -2100,12 +2158,14 @@
                 const link = e.target.closest('.nav-link');
                 if (!link) return;
 
-                document.querySelectorAll('.new-order-category-nav .nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.new-order-category-nav .nav-link').forEach(l => l.classList.remove(
+                    'active'));
                 link.classList.add('active');
 
                 const categoryId = link.dataset.category;
                 document.querySelectorAll('.new-order-menu-item').forEach(card => {
-                    card.style.display = (categoryId === 'all' || card.dataset.category === categoryId) ? 'block' : 'none';
+                    card.style.display = (categoryId === 'all' || card.dataset.category === categoryId) ?
+                        'block' : 'none';
                 });
             }
 
@@ -2158,7 +2218,8 @@
                     const response = await fetch(form.action, {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content'),
                             'Accept': 'application/json',
                         },
                         body: formData
@@ -2167,7 +2228,8 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        const successMessage = state.isUpdateMode ? 'Order updated successfully!' : 'Order placed successfully!';
+                        const successMessage = state.isUpdateMode ? 'Order updated successfully!' :
+                            'Order placed successfully!';
                         showNotification(successMessage, 'success');
 
                         setTimeout(() => {
@@ -2215,13 +2277,30 @@
 
                 const feedback = document.createElement('div');
                 feedback.id = 'new-order-phone-feedback';
-                feedback.style.cssText = 'font-size: 0.85rem; margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px;';
+                feedback.style.cssText =
+                    'font-size: 0.85rem; margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px;';
 
                 const colors = {
-                    info: { bg: '#e3f2fd', text: '#1565c0', icon: 'fa-info-circle' },
-                    success: { bg: '#e8f5e8', text: '#2e7d32', icon: 'fa-check-circle' },
-                    error: { bg: '#ffebee', text: '#c62828', icon: 'fa-exclamation-triangle' },
-                    warning: { bg: '#fff3cd', text: '#856404', icon: 'fa-exclamation-triangle' }
+                    info: {
+                        bg: '#e3f2fd',
+                        text: '#1565c0',
+                        icon: 'fa-info-circle'
+                    },
+                    success: {
+                        bg: '#e8f5e8',
+                        text: '#2e7d32',
+                        icon: 'fa-check-circle'
+                    },
+                    error: {
+                        bg: '#ffebee',
+                        text: '#c62828',
+                        icon: 'fa-exclamation-triangle'
+                    },
+                    warning: {
+                        bg: '#fff3cd',
+                        text: '#856404',
+                        icon: 'fa-exclamation-triangle'
+                    }
                 };
 
                 const color = colors[type] || colors.info;
