@@ -87,7 +87,7 @@
                                                 <div class="btn-group">
                                                     <button class="btn btn-warning btn-sm" data-action="start"
                                                         data-id="{{ $res->id }}"
-                                                        data-url="{{ route('kitchen.start', $res->id) }}"
+                                                        data-url="{{ route('kitchen.start.cooking', $res->id) }}"
                                                         style="height:38px;"> <!-- match the default form button height -->
                                                         <i class="fas fa-fire me-1"></i>Start
                                                     </button>

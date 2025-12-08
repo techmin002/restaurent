@@ -4,8 +4,10 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{{-- @can('access_sidebar_management') --}}
 <!-- Your app.js or bootstrap.js script -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <ul class="navbar-nav">
@@ -37,40 +39,45 @@
                 <i class="fas fa-th-large"></i>
             </a>
         </li>
+        @can('access_counter_management')
+            <button id="counterBtn" class="counter-custom-btn" data-state="open">
+                <i class="fa-solid fa-toggle-on counter-btn-icon"></i>
+                <span class="counter-btn-text">Open Counter</span>
+            </button>
 
-        <!-- Counter Button -->
-        <button id="counterBtn" class="custom-btn" data-state="open">
-            <i class="fa-solid fa-toggle-on btn-icon"></i>
-            <span class="btn-text">Open Counter</span>
-        </button>
-
-        <!-- Close Counter Modal -->
-        <div id="closeCounterModal" class="close-counter-modal">
-            <div class="modal-content">
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <div class="header-icon" id="printModalBtn" style="cursor:pointer;">
-                        <i class="fas fa-print"></i>
+            <!-- Close Counter Modal -->
+            <div id="closeCounterModal" class="counter-close-modal">
+                <div class="counter-modal-content">
+                    <!-- Modal Header -->
+                    <div class="counter-modal-header">
+                        <div class="counter-header-icon" id="printModalBtn" style="cursor:pointer;">
+                            <i class="fas fa-print"></i>
+                        </div>
+                        <div class="counter-header-text">
+                            @php
+                                $profile = \Modules\Setting\Entities\CompanyProfile::first();
+                            @endphp
+                            <h2>{{ $branch->name ?? $profile->company_name }}</h2>
+                            <p>Daily Counter Summary</p>
+                            <p id="summaryDate" class="counter-summary-date"></p>
+                        </div>
+                        <button class="counter-close-btn" id="modalCloseBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <div class="header-text">
-                        @php
-                            $profile = \Modules\Setting\Entities\CompanyProfile::first();
-                        @endphp
-                        <h2>{{ $branch->name ?? $profile->company_name }} </h2>
-                        <p>Daily Counter Summary</p>
-                    </div>
-                    <button class="close-btn btn btn-danger btn-sm btn-icon btn-close" id="modalCloseBtn">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
 
-                <!-- Modal Body -->
-                <div class="modal-body">
-                    <div id="modalData"></div>
+                    <!-- Modal Body -->
+                    <div class="counter-modal-body">
+                        <div id="modalData"></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
+            <!-- Audio for notifications -->
+            <audio id="counterNotificationSound" preload="auto">
+                <source src="{{ asset('sounds/notification.mp3') }}" type="audio/mpeg">
+            </audio>
+        @endcan
 
         @guest
             @if (Route::has('login'))
@@ -126,7 +133,8 @@
                 <h5 class="modal-title">
                     <i class="fas fa-bell me-2"></i>New Orders Alert
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
 
             <div class="modal-body">
@@ -352,9 +360,11 @@
     }
 </style>
 
-{{-- counter --}}
+
+<!-- Counter Button -->
 <style>
-    .custom-btn {
+    /* Counter Button Styles - Unique Classes */
+    .counter-custom-btn {
         background: linear-gradient(135deg, #3490dc 0%, #2779bd 100%);
         border: none;
         padding: 12px 24px;
@@ -372,7 +382,7 @@
         overflow: hidden;
     }
 
-    .custom-btn::before {
+    .counter-custom-btn::before {
         content: '';
         position: absolute;
         top: 0;
@@ -383,54 +393,54 @@
         transition: left 0.5s;
     }
 
-    .custom-btn:hover::before {
+    .counter-custom-btn:hover::before {
         left: 100%;
     }
 
-    .custom-btn:hover {
+    .counter-custom-btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 25px rgba(52, 144, 220, 0.4);
     }
 
-    .custom-btn:active {
+    .counter-custom-btn:active {
         transform: translateY(-1px);
     }
 
-    .custom-btn[data-state="close"] {
+    .counter-custom-btn[data-state="close"] {
         background: linear-gradient(135deg, #e3342f 0%, #cc1f1a 100%);
         box-shadow: 0 4px 15px rgba(227, 52, 47, 0.3);
     }
 
-    .custom-btn[data-state="close"]:hover {
+    .counter-custom-btn[data-state="close"]:hover {
         box-shadow: 0 8px 25px rgba(227, 52, 47, 0.4);
     }
 
-    .btn-icon {
+    .counter-btn-icon {
         font-size: 18px;
         transition: transform 0.3s ease;
     }
 
-    .custom-btn:hover .btn-icon {
+    .counter-custom-btn:hover .counter-btn-icon {
         transform: scale(1.1);
     }
 
-    /* Modal Styles */
-    .close-counter-modal {
+    /* Modal Styles - Unique Classes */
+    .counter-close-modal {
         display: none;
         position: fixed;
         top: 0;
-        left: 100px;
+        left: 120px;
         width: 100%;
         height: 100%;
-        /* background: rgba(0, 0, 0, 0.7); */
-        backdrop-filter: blur(5px);
+        backdrop-filter: blur(8px);
         justify-content: center;
         align-items: center;
         z-index: 9999;
-        animation: fadeIn 0.3s ease;
+        animation: counterFadeIn 0.3s ease;
+        padding: 20px;
     }
 
-    @keyframes fadeIn {
+    @keyframes counterFadeIn {
         from {
             opacity: 0;
         }
@@ -440,18 +450,20 @@
         }
     }
 
-    .close-counter-modal .modal-content {
+    .counter-modal-content {
         background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         border-radius: 20px;
-        width: 95%;
-        max-width: 1000px;
+        width: 80%;
+        max-width: 1200px;
         max-height: 90vh;
         overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        animation: slideUp 0.4s ease;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: counterSlideUp 0.4s ease;
+        display: flex;
+        flex-direction: column;
     }
 
-    @keyframes slideUp {
+    @keyframes counterSlideUp {
         from {
             transform: translateY(50px);
             opacity: 0;
@@ -463,42 +475,62 @@
         }
     }
 
-    .modal-header {
-        padding-right: 70px !important;
+    .counter-modal-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         padding: 25px 30px;
-        display: flex;
-        align-items: center;
-        gap: 20px;
         position: relative;
     }
 
-    .header-icon {
+    .counter-header-icon {
+        position: absolute;
+        left: 30px;
+        top: 50%;
+        transform: translateY(-50%);
         background: rgba(255, 255, 255, 0.2);
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: 22px;
         backdrop-filter: blur(10px);
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
 
-    .header-text h2 {
-        margin-left: 0;
-        font-size: 24px;
+    .counter-header-icon:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .counter-header-text {
+        text-align: center;
+        padding: 0 60px;
+    }
+
+    .counter-header-text h2 {
+        margin: 0;
+        font-size: 28px;
         font-weight: 700;
+        margin-bottom: 5px;
     }
 
-    .header-text p {
-        margin-left: 0;
+    .counter-header-text p {
+        margin: 0;
         opacity: 0.9;
-        font-size: 14px;
+        font-size: 15px;
     }
 
-    .close-btn {
+    .counter-summary-date {
+        margin-top: 5px;
+        font-size: 14px;
+        opacity: 0.8;
+        font-weight: 500;
+    }
+
+    .counter-close-btn {
         position: absolute;
         top: 20px;
         right: 20px;
@@ -516,353 +548,852 @@
         backdrop-filter: blur(10px);
     }
 
-    .close-btn:hover {
+    .counter-close-btn:hover {
         background: rgba(255, 255, 255, 0.3);
         transform: rotate(90deg);
     }
 
-    .modal-body {
-        padding: 30px;
-        max-height: calc(90vh - 150px);
+    .counter-modal-body {
+        flex: 1;
         overflow-y: auto;
+        padding: 0;
     }
 
-    /* Cash Summary Styles */
-    .cash-summary {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 15px;
+    /* Summary Section - Unique Classes */
+    .counter-summary-section {
         padding: 25px;
-        margin-bottom: 30px;
-        border-left: 5px solid #28a745;
+        background: #f8f9fa;
     }
 
-    .cash-summary h3 {
-        color: #2c3e50;
-        margin-bottom: 20px;
-        font-size: 20px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .cash-summary h3 i {
-        color: #28a745;
-    }
-
-    .cash-cards {
+    .counter-summary-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 20px;
-        margin-top: 15px;
     }
 
-    .cash-card {
+    .counter-summary-card {
         background: white;
+        border-radius: 16px;
         padding: 20px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        border-top: 4px solid #3490dc;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        gap: 20px;
         transition: transform 0.3s ease;
     }
 
-    .cash-card:hover {
+    .counter-summary-card:hover {
         transform: translateY(-5px);
     }
 
-    .cash-card.closing {
-        border-top-color: #e3342f;
+    .counter-summary-card.counter-cash-card {
+        border-left: 4px solid #28a745;
     }
 
-    .cash-card .amount {
-        font-size: 28px;
+    .counter-summary-card.counter-bank-card {
+        border-left: 4px solid #007bff;
+    }
+
+    .counter-summary-card.counter-overall-card {
+        border-left: 4px solid #ff6b6b;
+    }
+
+    .counter-card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+
+    .counter-cash-card .counter-card-icon {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .counter-bank-card .counter-card-icon {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+
+    .counter-overall-card .counter-card-icon {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    }
+
+    .counter-card-content {
+        flex: 1;
+    }
+
+    .counter-card-content h4 {
+        margin: 0 0 15px 0;
+        color: #2c3e50;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .counter-amount-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .counter-amount-row:last-child {
+        border-bottom: none;
+    }
+
+    .counter-amount-row .counter-label {
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .counter-amount-row .counter-value {
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .counter-opening {
+        color: #6c757d;
+    }
+
+    .counter-closing {
+        color: #28a745;
+    }
+
+    .counter-revenue {
+        color: #ff6b6b;
+    }
+
+    .counter-total-row {
+        padding-top: 12px;
+        margin-top: 8px;
+        border-top: 2px dashed #dee2e6;
+    }
+
+    .counter-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .counter-stat-item {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .counter-stat-label {
+        font-size: 12px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+
+    .counter-stat-value {
+        font-size: 18px;
         font-weight: 700;
         color: #2c3e50;
-        margin: 10px 0 5px;
     }
 
-    .cash-card .label {
-        font-size: 14px;
-        color: #6c757d;
-        font-weight: 500;
+    /* Orders Section - Table Format */
+    .counter-orders-section {
+        padding: 25px;
     }
 
-    /* Orders Table Styles */
-    .orders-section {
-        margin-top: 30px;
+    .counter-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
     }
 
-    .orders-section h3 {
+    .counter-section-header h3 {
+        margin: 0;
         color: #2c3e50;
-        margin-bottom: 20px;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 600;
         display: flex;
         align-items: center;
         gap: 10px;
     }
 
-    .orders-section h3 i {
+    .counter-section-header h3 i {
         color: #667eea;
     }
 
-    .orders-table-container {
-        background: white;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    .counter-section-badge .counter-badge {
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 10px;
     }
 
-    .orders-table {
+    /* Table Container */
+    .counter-table-container {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        overflow-x: auto;
+    }
+
+    /* Table Styles */
+    .counter-orders-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 14px;
     }
 
-    .orders-table thead {
+    .counter-orders-table thead {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
 
-    .orders-table th {
+    .counter-orders-table th {
         padding: 15px 12px;
         text-align: left;
         font-weight: 600;
         font-size: 13px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        white-space: nowrap;
     }
 
-    .orders-table tbody tr {
+    .counter-orders-table tbody tr {
         border-bottom: 1px solid #f1f3f4;
-        transition: background-color 0.3s ease;
+        transition: all 0.3s ease;
     }
 
-    .orders-table tbody tr:hover {
+    .counter-orders-table tbody tr:hover {
         background-color: #f8f9fa;
+        transform: scale(1.002);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
-    .orders-table tbody tr:last-child {
-        border-bottom: none;
-    }
-
-    .orders-table td {
+    .counter-table-cell {
         padding: 12px;
         color: #495057;
+        vertical-align: top;
     }
 
-    .orders-table .order-id {
+    /* Table Cell Specific Styles */
+    .counter-order-id-cell {
         font-weight: 600;
         color: #3490dc;
+        min-width: 70px;
     }
 
-    .orders-table .customer-name {
+    .counter-time-cell {
+        color: #6c757d;
+        font-size: 13px;
+        min-width: 80px;
+    }
+
+    .counter-type-cell {
+        min-width: 80px;
+    }
+
+    .counter-customer-cell {
+        min-width: 180px;
+    }
+
+    .counter-items-cell {
+        min-width: 200px;
+        max-width: 250px;
+    }
+
+    .counter-qty-cell,
+    .counter-amount-cell,
+    .counter-discount-cell,
+    .counter-vat-cell,
+    .counter-total-cell {
+        text-align: right;
+        min-width: 90px;
+    }
+
+    .counter-payment-cell {
+        min-width: 120px;
+    }
+
+    /* Badge Styles */
+    .counter-order-type-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .counter-badge-dinein {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .counter-badge-office {
+        background: #ffc107;
+        color: #212529;
+    }
+
+    .counter-payment-method-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .counter-badge-cash {
+        background: #28a745;
+        color: white;
+    }
+
+    .counter-badge-card {
+        background: #007bff;
+        color: white;
+    }
+
+    /* Customer Info */
+    .counter-customer-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .counter-customer-name {
         font-weight: 500;
         color: #2c3e50;
     }
 
-    .orders-table .total-amount {
-        font-weight: 700;
-        color: #28a745;
-        text-align: right;
+    .counter-customer-contact {
+        font-size: 12px;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
-    .no-orders {
+    /* Items List */
+    .counter-items-list {
+        font-size: 13px;
+        line-height: 1.4;
+        max-height: 80px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .counter-items-list::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .counter-items-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .counter-items-list::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 2px;
+    }
+
+    /* Amount Cells */
+    .counter-total-qty {
+        background: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .counter-grand-total {
+        color: #28a745;
+        font-weight: 700;
+    }
+
+    .counter-discount-cell {
+        color: #dc3545;
+    }
+
+    .counter-vat-cell {
+        color: #6c757d;
+    }
+
+    /* Payment Info */
+    .counter-payment-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .counter-payment-amount {
+        font-size: 13px;
+        font-weight: 600;
+        color: #28a745;
+    }
+
+    /* No Orders */
+    .counter-no-orders {
         text-align: center;
         padding: 50px 20px;
-        color: #6c757d;
     }
 
-    .no-orders i {
-        font-size: 48px;
-        margin-bottom: 15px;
+    .counter-no-orders-icon {
+        font-size: 64px;
         color: #dee2e6;
+        margin-bottom: 20px;
     }
 
-    .no-orders h4 {
+    .counter-no-orders h4 {
         margin: 10px 0;
         color: #6c757d;
+        font-weight: 600;
+        font-size: 20px;
+    }
+
+    .counter-no-orders p {
+        color: #adb5bd;
+        font-size: 16px;
+    }
+
+    /* Toast Notification - Unique Classes */
+    .counter-toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateX(120%);
+        transition: transform 0.3s ease;
+    }
+
+    .counter-toast-notification.show {
+        transform: translateX(0);
+    }
+
+    .counter-toast-notification.success {
+        border-left: 4px solid #28a745;
+    }
+
+    .counter-toast-notification.error {
+        border-left: 4px solid #dc3545;
+    }
+
+    .counter-toast-icon {
+        font-size: 20px;
+    }
+
+    .counter-toast-message {
         font-weight: 500;
     }
 
     /* Responsive Design */
+    @media (max-width: 1024px) {
+        .counter-modal-content {
+            width: 95%;
+        }
+        
+        .counter-orders-table {
+            font-size: 13px;
+        }
+        
+        .counter-orders-table th,
+        .counter-orders-table td {
+            padding: 10px 8px;
+        }
+    }
+
     @media (max-width: 768px) {
-        .modal-header {
-            padding: 20px;
-            flex-direction: column;
-            text-align: center;
-            gap: 15px;
+        .counter-close-modal {
+            padding: 10px;
+            left: 0;
         }
 
-        .header-icon {
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-        }
-
-        .header-text h2 {
-            font-size: 20px;
-        }
-
-        .modal-body {
+        .counter-modal-header {
             padding: 20px;
         }
 
-        .cash-cards {
+        .counter-header-icon {
+            position: relative;
+            left: 0;
+            top: 0;
+            transform: none;
+            margin-bottom: 15px;
+        }
+
+        .counter-header-text {
+            padding: 0;
+        }
+
+        .counter-summary-grid {
             grid-template-columns: 1fr;
         }
 
-        .orders-table-container {
-            overflow-x: auto;
+        .counter-section-header {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
         }
-
-        .orders-table {
-            min-width: 800px;
+        
+        .counter-table-container {
+            border-radius: 8px;
+        }
+        
+        .counter-orders-table {
+            min-width: 1000px;
         }
     }
 
     /* Scrollbar Styling */
-    .modal-body::-webkit-scrollbar {
-        width: 6px;
+    .counter-modal-body::-webkit-scrollbar {
+        width: 8px;
     }
 
-    .modal-body::-webkit-scrollbar-track {
+    .counter-modal-body::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-radius: 10px;
     }
 
-    .modal-body::-webkit-scrollbar-thumb {
+    .counter-modal-body::-webkit-scrollbar-thumb {
         background: #c1c1c1;
         border-radius: 10px;
     }
 
-    .modal-body::-webkit-scrollbar-thumb:hover {
+    .counter-modal-body::-webkit-scrollbar-thumb:hover {
         background: #a8a8a8;
     }
 </style>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Get elements
         const counterBtn = document.getElementById("counterBtn");
-        const btnIcon = counterBtn.querySelector(".btn-icon");
-        const btnText = counterBtn.querySelector(".btn-text");
-
+        const btnIcon = counterBtn.querySelector(".counter-btn-icon");
+        const btnText = counterBtn.querySelector(".counter-btn-text");
         const modal = document.getElementById("closeCounterModal");
         const modalData = document.getElementById("modalData");
         const modalCloseBtn = document.getElementById("modalCloseBtn");
+        const summaryDate = document.getElementById("summaryDate");
+        const printBtn = document.getElementById("printModalBtn");
 
+        // Check initial counter state
+        checkCounterState();
+
+        // Function to check counter state
+        async function checkCounterState() {
+            try {
+                const response = await fetch("{{ route('getTodayCounter') }}");
+                const data = await response.json();
+
+                if (data.state === 'close') {
+                    btnIcon.className = "fa-solid fa-toggle-off counter-btn-icon";
+                    btnText.textContent = "Close Counter";
+                    counterBtn.dataset.state = "close";
+                } else {
+                    btnIcon.className = "fa-solid fa-toggle-on counter-btn-icon";
+                    btnText.textContent = "Open Counter";
+                    counterBtn.dataset.state = "open";
+                }
+            } catch (error) {
+                console.error('Error checking counter state:', error);
+            }
+        }
+
+        // Function to store counter state
         async function storeCounter(type) {
             try {
-                const res = await fetch(type === "open" ?
+                const url = type === "open" ?
                     "{{ route('openCounter') }}" :
-                    "{{ route('closeCounter') }}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                        }
-                    });
+                    "{{ route('closeCounter') }}";
+
+                const res = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    }
+                });
+
                 return await res.json();
             } catch (err) {
-                console.error(err);
+                console.error('Error in storeCounter:', err);
                 return null;
             }
         }
 
+        // Function to show toast notification
+        function showToast(message, type = 'success') {
+            const toastId = 'counter-toast-' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" class="counter-toast-notification ${type}">
+                    <i class="counter-toast-icon fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    <span class="counter-toast-message">${message}</span>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', toastHtml);
+            const toast = document.getElementById(toastId);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Counter button click handler
         counterBtn.addEventListener("click", async function(e) {
             e.preventDefault();
             const state = counterBtn.dataset.state;
+            const action = state === 'open' ? 'open' : 'close';
 
-            if (!confirm(`Are you sure you want to ${state} the counter?`)) return;
+            if (!confirm(`Are you sure you want to ${action} the counter?`)) {
+                return;
+            }
 
-            const data = await storeCounter(state);
-            if (!data || !data.success) return;
+            const data = await storeCounter(action);
 
-            if (state === "open") {
+            if (!data) {
+                showToast('Server error! Please try again.', 'error');
+                return;
+            }
+
+            if (!data.success) {
+                showToast(data.message || 'Failed to ' + action + ' counter!', 'error');
+                return;
+            }
+
+            showToast('Counter ' + action + 'ed successfully!', 'success');
+
+            if (action === "open") {
                 // Change button to Close
-                btnIcon.className = "fa-solid fa-toggle-off btn-icon";
+                btnIcon.className = "fa-solid fa-toggle-off counter-btn-icon";
                 btnText.textContent = "Close Counter";
                 counterBtn.dataset.state = "close";
             } else {
                 // Change button to Open
-                btnIcon.className = "fa-solid fa-toggle-on btn-icon";
+                btnIcon.className = "fa-solid fa-toggle-on counter-btn-icon";
                 btnText.textContent = "Open Counter";
                 counterBtn.dataset.state = "open";
 
-                // Show modal only when closing
-                let orders = data.orders || [];
-
-                let html = `
-                    <div class="cash-summary">
-                        <h3><i class="fas fa-chart-bar"></i>Cash Summary</h3>
-                        <div class="cash-cards">
-                            <div class="cash-card">
-                                <div class="label">Opening Balance</div>
-                                <div class="amount">Rs. ${parseFloat(data.cash_opening).toLocaleString()}</div>
-                                <div class="description">Starting amount</div>
-                            </div>
-                            <div class="cash-card closing">
-                                <div class="label">Closing Balance</div>
-                                <div class="amount">Rs. ${parseFloat(data.cash_closing).toLocaleString()}</div>
-                                <div class="description">End of day total</div>
-                            </div>
-                            <div class="cash-card">
-                                <div class="label">Daily Revenue</div>
-                                <div class="amount">Rs. ${(parseFloat(data.cash_closing) - parseFloat(data.cash_opening)).toLocaleString()}</div>
-                                <div class="description">Net earnings</div>
-                            </div>
-                        </div>
-                    </div>`;
-
-                if (orders.length > 0) {
-                    html += `
-                    <div class="orders-section">
-                        <h3><i class="fas fa-receipt"></i>Today's Orders (${orders.length})</h3>
-                        <div class="orders-table-container">
-                            <table class="orders-table">
-                                <thead>
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Table</th>
-                                        <th>Items</th>
-                                        <th>Qty</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
-
-                    orders.forEach(order => {
-                        const itemCount = order.items.length;
-                        const totalQty = order.items.reduce((sum, item) => sum + parseInt(
-                            item.qty), 0);
-
-                        html += `
-                            <tr>
-                                <td class="order-id">#${order.id}</td>
-                                <td class="customer-name">${order.customer?.name ?? 'Office-order'}</td>
-                                <td>${order.table ?? 'office'}</td>
-                                <td>${itemCount} item${itemCount !== 1 ? 's' : ''}</td>
-                                <td>${totalQty}</td>
-                                <td class="total-amount">Rs. ${parseFloat(order.grand_total).toLocaleString()}</td>
-                            </tr>`;
-                    });
-
-                    html += `</tbody></table></div></div>`;
-                } else {
-                    html += `
-                    <div class="no-orders">
-                        <i class="fas fa-clipboard-list"></i>
-                        <h4>No Orders Today</h4>
-                        <p>There were no orders processed for today.</p>
-                    </div>`;
-                }
-
-                modalData.innerHTML = html;
-                modal.style.display = "flex";
+                // Show modal with detailed summary
+                displayCounterSummary(data);
             }
         });
 
+        // Function to display counter summary in modal
+        function displayCounterSummary(data) {
+            const summary = data.summary || {};
+            const orders = data.orders || [];
+
+            // Set date
+            summaryDate.textContent = summary.date || new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            let html = `
+                <!-- Summary Section -->
+                <div class="counter-summary-section">
+                    <div class="counter-summary-grid">
+                        <!-- Cash Summary -->
+                        <div class="counter-summary-card counter-cash-card">
+                            <div class="counter-card-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="counter-card-content">
+                                <h4>Cash Summary</h4>
+                                <div class="counter-amount-row">
+                                    <span class="counter-label">Opening Balance:</span>
+                                    <span class="counter-value counter-opening">Rs. ${parseFloat(summary.cash_opening || 0).toFixed(2)}</span>
+                                </div>
+                                <div class="counter-amount-row">
+                                    <span class="counter-label">Today's Cash:</span>
+                                    <span class="counter-value">Rs. ${parseFloat(summary.cash_revenue || 0).toFixed(2)}</span>
+                                </div>
+                                <div class="counter-amount-row counter-total-row">
+                                    <span class="counter-label">Closing Balance:</span>
+                                    <span class="counter-value counter-closing">Rs. ${parseFloat(summary.cash_closing || 0).toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Summary -->
+                        <div class="counter-summary-card counter-bank-card">
+                            <div class="counter-card-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="counter-card-content">
+                                <h4>Bank Summary</h4>
+                                <div class="counter-amount-row">
+                                    <span class="counter-label">Opening Balance:</span>
+                                    <span class="counter-value counter-opening">Rs. ${parseFloat(summary.bank_opening || 0).toFixed(2)}</span>
+                                </div>
+                                <div class="counter-amount-row">
+                                    <span class="counter-label">Today's Bank:</span>
+                                    <span class="counter-value">Rs. ${parseFloat(summary.bank_revenue || 0).toFixed(2)}</span>
+                                </div>
+                                <div class="counter-amount-row counter-total-row">
+                                    <span class="counter-label">Closing Balance:</span>
+                                    <span class="counter-value counter-closing">Rs. ${parseFloat(summary.bank_closing || 0).toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Overall Summary -->
+                        <div class="counter-summary-card counter-overall-card">
+                            <div class="counter-card-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="counter-card-content">
+                                <h4>Overall Summary</h4>
+                                <div class="counter-stats-grid">
+                                    <div class="counter-stat-item">
+                                        <div class="counter-stat-label">Total Revenue</div>
+                                        <div class="counter-stat-value">Rs. ${parseFloat(summary.total_revenue || 0).toFixed(2)}</div>
+                                    </div>
+                                    <div class="counter-stat-item">
+                                        <div class="counter-stat-label">Total Orders</div>
+                                        <div class="counter-stat-value">${summary.total_orders || 0}</div>
+                                    </div>
+                                    <div class="counter-stat-item">
+                                        <div class="counter-stat-label">Total Items</div>
+                                        <div class="counter-stat-value">${summary.total_items || 0}</div>
+                                    </div>
+                                    <div class="counter-stat-item">
+                                        <div class="counter-stat-label">Day</div>
+                                        <div class="counter-stat-value">${summary.day || 'Today'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            // Orders Table Section
+            if (orders.length > 0) {
+                html += `
+                <div class="counter-orders-section">
+                    <div class="counter-section-header">
+                        <h3><i class="fas fa-receipt"></i> Today's Orders (${orders.length})</h3>
+                        <div class="counter-section-badge">
+                            <span class="counter-badge bg-primary">Total Revenue: Rs. ${parseFloat(summary.total_revenue || 0).toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="counter-table-container">
+                        <table class="counter-orders-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Time</th>
+                                    <th>Type</th>
+                                    <th>Customer/Office</th>
+                                  
+                                    <th>Items</th>
+                                    <th>Total Qty</th>
+                                    <th>Subtotal</th>
+                                    <th>Grand Total</th>
+                                    <th>Payment</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                orders.forEach((order, index) => {
+                    const customer = order.customer_info || {};
+                    const customerName = customer.name || 'Guest Customer';
+                    const customerContact = customer.contact || '';
+                    
+                    // Format items for display
+                    const itemsList = order.items.map(item => {
+                        return `${item.menu_name}${item.variant_name ? ` (${item.variant_name})` : ''} x${item.qty}`;
+                    }).join('<br>');
+
+                    html += `
+                    <tr class="counter-table-row">
+                        <td class="counter-table-cell counter-order-id-cell">
+                            <strong>#${order.id}</strong>
+                        </td>
+                        <td class="counter-table-cell counter-time-cell">
+                            ${order.created_at}
+                        </td>
+                        <td class="counter-table-cell counter-type-cell">
+                            <span class="counter-order-type-badge ${order.order_type === 'dinein' ? 'counter-badge-dinein' : 'counter-badge-office'}">
+                                ${order.order_type === 'dinein' ? 'Dine-in' : 'Office'}
+                            </span>
+                        </td>
+                        <td class="counter-table-cell counter-customer-cell">
+                            <div class="counter-customer-info">
+                                <div class="counter-customer-name">${customerName}</div>
+                                ${customerContact ? `<div class="counter-customer-contact"><i class="fas fa-phone"></i> ${customerContact}</div>` : ''}
+                            </div>
+                        </td>
+                      
+                        <td class="counter-table-cell counter-items-cell">
+                            <div class="counter-items-list">
+                                ${itemsList}
+                            </div>
+                        </td>
+                        <td class="counter-table-cell counter-qty-cell">
+                            <span class="counter-total-qty">${order.total_qty}</span>
+                        </td>
+                        <td class="counter-table-cell counter-amount-cell">
+                            Rs. ${parseFloat(order.sub_total || 0).toFixed(2)}
+                        </td>
+                      
+                        <td class="counter-table-cell counter-total-cell">
+                            <strong class="counter-grand-total">Rs. ${parseFloat(order.grand_total || 0).toFixed(2)}</strong>
+                        </td>
+                        <td class="counter-table-cell counter-payment-cell">
+                            <div class="counter-payment-info">
+                                <span class="counter-payment-method-badge ${order.payment_method === 'cash' ? 'counter-badge-cash' : 'counter-badge-card'}">
+                                    <i class="fas fa-${order.payment_method === 'cash' ? 'money-bill-wave' : 'credit-card'}"></i>
+                                    ${order.payment_method}
+                                </span>
+                                <div class="counter-payment-amount">
+                                    Rs. ${parseFloat(order.payment_amount || 0).toFixed(2)}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>`;
+                });
+
+                html += `</tbody>
+                        </table>
+                    </div>
+                </div>`;
+            } else {
+                html += `
+                <div class="counter-no-orders">
+                    <div class="counter-no-orders-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h4>No Orders Today</h4>
+                    <p>There were no orders processed for today.</p>
+                </div>`;
+            }
+
+            modalData.innerHTML = html;
+            modal.style.display = "flex";
+        }
+
+        // Close modal button
         modalCloseBtn.addEventListener("click", () => {
             modal.style.display = "none";
         });
@@ -873,33 +1404,138 @@
                 modal.style.display = "none";
             }
         });
-    });
 
-    // Print Modal
-    document.getElementById("printModalBtn").addEventListener("click", function() {
-        let modalContent = document.querySelector("#closeCounterModal .modal-content").innerHTML;
+        // Print modal content
+        printBtn.addEventListener("click", function() {
+            const modalContent = document.querySelector("#closeCounterModal .counter-modal-content")
+                .innerHTML;
 
-        let printWindow = window.open("", "", "width=900,height=700");
-        printWindow.document.write(`
-        <html>
-        <head>
-            <title>Print Summary</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                h2 { margin: 0; }
-                table { width: 100%; border-collapse: collapse; }
-                th, td { padding: 10px; border: 1px solid #ddd; }
-            </style>
-        </head>
-        <body>
-            ${modalContent}
-        </body>
-        </html>
-    `);
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Counter Summary - {{ $branch->name ?? ($profile->company_name ?? 'Restaurant') }}</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            color: #333;
+                        }
+                        .print-header {
+                            text-align: center;
+                            margin-bottom: 30px;
+                            padding-bottom: 20px;
+                            border-bottom: 2px solid #ccc;
+                        }
+                        .print-header h1 {
+                            margin: 0;
+                            color: #2c3e50;
+                        }
+                        .print-header p {
+                            margin: 5px 0;
+                            color: #666;
+                        }
+                        .summary-cards {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr);
+                            gap: 20px;
+                            margin-bottom: 30px;
+                        }
+                        .summary-card {
+                            border: 1px solid #ddd;
+                            padding: 15px;
+                            border-radius: 8px;
+                        }
+                        .summary-card h3 {
+                            margin-top: 0;
+                            color: #2c3e50;
+                            font-size: 16px;
+                        }
+                        .amount-row {
+                            display: flex;
+                            justify-content: space-between;
+                            margin: 8px 0;
+                        }
+                        .orders-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 20px 0;
+                        }
+                        .orders-table th {
+                            background: #f8f9fa;
+                            padding: 12px;
+                            text-align: left;
+                            border-bottom: 2px solid #dee2e6;
+                            font-weight: 600;
+                        }
+                        .orders-table td {
+                            padding: 12px;
+                            border-bottom: 1px solid #dee2e6;
+                        }
+                        .orders-table tr:hover {
+                            background: #f8f9fa;
+                        }
+                        .badge {
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            font-weight: 600;
+                        }
+                        .badge-dinein {
+                            background: #17a2b8;
+                            color: white;
+                        }
+                        .badge-office {
+                            background: #ffc107;
+                            color: #212529;
+                        }
+                        .badge-cash {
+                            background: #28a745;
+                            color: white;
+                        }
+                        .badge-card {
+                            background: #007bff;
+                            color: white;
+                        }
+                        @media print {
+                            body { margin: 0; padding: 20px; }
+                            .no-print { display: none; }
+                            .summary-cards { page-break-inside: avoid; }
+                            .orders-table { font-size: 12px; }
+                            .orders-table th, .orders-table td { padding: 8px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <h1>{{ $branch->name ?? ($profile->company_name ?? 'Restaurant') }}</h1>
+                        <p>Daily Counter Summary</p>
+                        <p id="printDate"></p>
+                    </div>
+                    ${modalContent}
+                    <script>
+                        document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        });
+                        window.print();
+                    <\/script>
+                </body>
+                </html>
+            `);
 
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
+            printWindow.document.close();
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            }
+        });
     });
 </script>
+{{-- @endcan --}}

@@ -39,6 +39,16 @@ class KitchenController extends Controller
         ]);
     }
 
+    public function preparing(Request $request, $id){
+ 
+          $order = Order::findOrFail($id);
+            $order->update([
+            'status' => 'preparing',
+        ]);
+      
+          return back()->with('success', ' Started cooking !');
+    }
+
     // Serve order (send back to reception)
     public function serve(Order $order)
     {

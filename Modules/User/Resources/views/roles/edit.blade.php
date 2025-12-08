@@ -91,6 +91,75 @@
                                             </div>
                                         </div>
 
+                                           {{-- new added --}}
+                                         <div class="col-lg-4 col-md-6 mb-3">
+                                            <div class="card h-100 border-0 shadow">
+                                                <div class="card-header">
+                                                   side-bar management
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="access_sidebar_management" name="permissions[]"
+                                                                    value="access_sidebar_management"
+                                                                    {{ $role->hasPermissionTo('access_sidebar_management') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="access_sidebar_management">Access</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                         {{-- Counter --}}
+                                         <div class="col-lg-4 col-md-6 mb-3">
+                                            <div class="card h-100 border-0 shadow">
+                                                <div class="card-header">
+                                                   Counter management
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="access_counter_management" name="permissions[]"
+                                                                    value="access_counter_management"
+                                                                    {{ $role->hasPermissionTo('access_counter_management') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="access_counter_management">Access</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                         {{-- kitchen --}}
+                                         <div class="col-lg-4 col-md-6 mb-3">
+                                            <div class="card h-100 border-0 shadow">
+                                                <div class="card-header">
+                                                   Kitchen management
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-6">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="access_kitchen_management" name="permissions[]"
+                                                                    value="access_kitchen_management"
+                                                                    {{ $role->hasPermissionTo('access_kitchen_management') ? 'checked' : '' }}>
+                                                                <label class="custom-control-label"
+                                                                    for="access_kitchen_management">Access</label> 
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <!-- Settings -->
                                         <div class="col-lg-4 col-md-6 mb-3">
                                             <div class="card h-100 border-0 shadow">

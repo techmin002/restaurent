@@ -1,4 +1,6 @@
-  <!-- Main Sidebar Container -->
+{{-- @can('access_sidebar_management') --}}
+@can('access_sidebar_management')
+<!-- Main Sidebar Container -->
   @php
       $profile = \Modules\Setting\Entities\CompanyProfile::first();
   @endphp
@@ -116,7 +118,7 @@
                       @endcan
                   @else
                   @endif
-                  @if (auth()->user()->access_type === 'Admin')
+                  @if (auth()->user()->access_type === 'Admin' || auth()->user()->access_type === 'Reception')
                       <li class="nav-item {{ request()->routeIs('tables.*') ? 'menu-is-opening menu-open' : '' }}">
                           <a href="#" class="nav-link" {{ request()->routeIs('tables.*') ? 'active' : '' }}>
                               <i class="nav-icon fas fa-store"></i>
@@ -528,3 +530,6 @@
       </div>
       <!-- /.sidebar -->
   </aside>
+
+@endcan
+{{-- @endcan --}}

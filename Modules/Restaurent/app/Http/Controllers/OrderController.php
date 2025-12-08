@@ -15,7 +15,8 @@ use Modules\Restaurent\Models\CustomerPayment;
 use Modules\Restaurent\Models\OfficePayment;
 use Modules\Restaurent\Models\Payment;
 use App\Events\OrderCreated;
-
+use DB;
+use app\Models\User;
 
 class OrderController extends Controller
 {
@@ -861,34 +862,58 @@ class OrderController extends Controller
      */
     public function checkLatestOrder(Request $request)
     {
-        $lastOrderId = $request->last_order_id ?? 0;
+        $lastOrderId = $request->input('last_order_id', 0);
 
-        // Fetch ALL pending orders (not only last one)
+        // Logged-in user and restaurant
+        $user = auth()->user();
+        $restaurant_id = $user->restaurent_id;
+        $user_type = $user->user_type;
+
+        // Decide which order status to show based on logged-in user's role
+        if ($user_type === 'reception') {
+            $statusToShow = 'pending';
+        } elseif ($user_type === 'kitchen') {
+            $statusToShow = 'sent to kitchen';
+        } else {
+            // If other user types shouldn't see orders, return empty
+            return response()->json([
+                'newOrders' => []
+            ]);
+        }
+
+        // Fetch orders for this restaurant with the chosen status
         $orders = Order::with(['table', 'customer', 'office', 'items.menu', 'items.variation'])
-            ->where('status', 'pending')
-            ->where('id', '>', $lastOrderId) // only get new ones
+            ->where('status', $statusToShow)
+            ->where('restaurent_id', $restaurant_id)
+            ->where('id', '>', $lastOrderId)
             ->orderBy('id', 'ASC')
             ->get();
 
-        // Add dynamic fields
+        // Add dynamic fields (use optional() to avoid null errors)
         foreach ($orders as $order) {
 
+            // --- Dine-in ---
             if ($order->order_type === 'dinein') {
                 $order->table_id = $order->table_id ?? null;
-                $order->customer_name = $order->customer->name ?? null;
-                $order->customer_contact = $order->customer->phone ?? null;
+                $order->customer_name = optional($order->customer)->name;
+                $order->customer_contact = optional($order->customer)->phone;
             }
 
+            // --- Office ---
             if ($order->order_type === 'office') {
-                $order->office_name = $order->office->name ?? null;
-                $order->office_contact = $order->office->contact_numbers ?? null;
-                $order->office_address = $order->office->address ?? null;
+                $order->office_name = optional($order->office)->name;
+                $order->office_contact = optional($order->office)->contact_numbers;
+                $order->office_address = optional($order->office)->address;
             }
 
+            // --- Menu Items ---
             foreach ($order->items as $item) {
-                $menuName = $item->menu->name ?? null;
-                $variantName = $item->variation->name ?? null; // get variant name if exists
-                $item->menu_name = $menuName . ($variantName ? " ({$variantName})" : "");
+                $menuName = optional($item->menu)->name;
+                $variantName = optional($item->variation)->name;
+
+                $item->menu_name = $variantName
+                    ? "{$menuName} ({$variantName})"
+                    : $menuName;
             }
         }
 
@@ -896,6 +921,8 @@ class OrderController extends Controller
             'newOrders' => $orders
         ]);
     }
+
+
     public function kitchenOrders()
     {
 
@@ -917,35 +944,53 @@ class OrderController extends Controller
     {
         $restaurant_id = auth()->user()->restaurent_id;
 
+        // Validate common fields
         $request->validate([
             'order_items' => 'required|json',
-            'order_type' => 'required|in:dineIn,takeAway,office',
-            'customer_name' => 'required',
-            'customer_phone' => 'required',
+            'order_type' => 'required|in:dine_in,take_away,office',
             'vat' => 'required|numeric|min:0|max:100',
         ]);
 
-        // Additional validation for office orders
+        // Conditional validation based on order type
         if ($request->order_type === 'office') {
             $request->validate([
                 'office_id' => 'required|exists:office_registers,id',
             ]);
+        } else {
+            // For dine_in and take_away, require customer details
+            $request->validate([
+                'customer_name' => 'required|string|max:255',
+                'customer_phone' => 'required|string|max:20',
+            ]);
+
+            // For dine_in only, require table number
+            if ($request->order_type === 'dine_in') {
+                $request->validate([
+                    'table_number' => 'required|string',
+                ]);
+            }
         }
 
         try {
-            // Handle customer creation/retrieval
-            $customer = Customer::where('phone', $request->customer_phone)
-                ->where('restaurent_id', $restaurant_id)
-                ->first();
+            DB::beginTransaction();
 
-            if (!$customer) {
-                // Create new customer for this restaurant
-                $customer = Customer::create([
-                    'name' => $request->customer_name,
-                    'phone' => $request->customer_phone,
-                    'email' => $request->customer_email ?? null,
-                    'restaurent_id' => $restaurant_id,
-                ]);
+            // Handle customer creation/retrieval for dine_in and take_away
+            $customer_id = null;
+            if ($request->order_type !== 'office') {
+                $customer = Customer::where('phone', $request->customer_phone)
+                    ->where('restaurent_id', $restaurant_id)
+                    ->first();
+
+                if (!$customer) {
+                    // Create new customer for this restaurant
+                    $customer = Customer::create([
+                        'name' => $request->customer_name,
+                        'phone' => $request->customer_phone,
+                        'email' => $request->customer_email ?? null,
+                        'restaurent_id' => $restaurant_id,
+                    ]);
+                }
+                $customer_id = $customer->id;
             }
 
             // Parse order items from JSON
@@ -977,18 +1022,33 @@ class OrderController extends Controller
             // Calculate grand total
             $grandTotal = $subTotal - $discountAmount + $vatAmount;
 
-            // Handle table number for dineIn orders
+            // Handle table for dine_in orders
             $tableId = null;
-            if ($request->order_type === 'dineIn' && $request->table_number) {
+            if ($request->order_type === 'dine_in' && $request->table_number) {
                 $table = RestaurentTable::where('table_number', $request->table_number)
                     ->where('restaurent_id', $restaurant_id)
                     ->first();
-                $tableId = $table ? $table->id : null;
+
+                if (!$table) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected table does not exist'
+                    ], 422);
+                }
+
+                if ($table->booking_status === 'yes') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected table is already occupied'
+                    ], 422);
+                }
+
+                $tableId = $table->id;
             }
 
             // Create order
             $order = Order::create([
-                'customer_id'    => $customer->id,
+                'customer_id'    => $customer_id,
                 'order_type'     => $request->order_type,
                 'restaurent_id'  => $restaurant_id,
                 'created_by'     => auth()->user()->id,
@@ -1003,7 +1063,7 @@ class OrderController extends Controller
                 'vat_amount'     => $vatAmount,
                 'grand_total'    => $grandTotal,
                 'delivery_charge' => $request->delivery_charge ?? 0,
-                'remarks'        => $request->remarks,
+                'remarks'        => $request->remarks ?? null,
                 'status'         => 'accepted',
                 'order_from'     => 'web_menu',
             ]);
@@ -1019,9 +1079,11 @@ class OrderController extends Controller
             }
 
             // Update table status if it's a dine-in order
-            if ($request->order_type === 'dineIn' && $tableId) {
+            if ($request->order_type === 'dine_in' && $tableId) {
                 RestaurentTable::where('id', $tableId)->update(['booking_status' => 'yes']);
             }
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -1029,10 +1091,12 @@ class OrderController extends Controller
                 'order_id' => $order->id
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error creating menu order: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to place order. Please try again.'
+                'message' => 'Failed to place order. Please try again.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

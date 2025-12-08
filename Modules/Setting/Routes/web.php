@@ -62,5 +62,5 @@ Route::group(['middleware' => 'auth'], function () {
     // Counter Module Routes
     Route::post('/open-counter', [CounterController::class, 'open'])->name('openCounter');
     Route::post('/close-counter', [CounterController::class, 'close'])->name('closeCounter');
-    Route::get('/counter/today-state', [CounterController::class, 'getTodayCounter'])->name('todayCounterState');
+    Route::get('/counter/today-state', [CounterController::class, 'getTodayCounter'])->name('getTodayCounter');
 });

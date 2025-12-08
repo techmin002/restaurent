@@ -65,9 +65,9 @@ class Order extends Model
         return $this->belongsTo(Menu::class);
     }
     public function payments()
-    {
-        return $this->hasMany(Payment::class, 'order_id', 'id');
-    }
+{
+    return $this->hasMany(Payment::class);
+}
     // protected static function newFactory(): OrderFactory
     // {
     //     // return OrderFactory::new();

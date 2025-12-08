@@ -34,6 +34,7 @@ class HomeController extends Controller
 
         $servingOrdersCount = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'serve')
+            ->limit(5)
             ->count();
 
         $completedOrdersCount = Order::where('restaurent_id', $restaurant_id)
@@ -43,8 +44,10 @@ class HomeController extends Controller
         // --- Orders Lists ---
         $kitchenOrders = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'sent to kitchen')
+            ->orwhere('status', 'preparing')
             ->with('items.menu')
             ->latest()
+            ->limit(5)
             ->get();
 
         $servedOrders = Order::where('restaurent_id', $restaurant_id)
@@ -81,6 +84,18 @@ class HomeController extends Controller
         $popularLabels = $popularItems->pluck('menu.name');
         $popularData = $popularItems->pluck('total_sold');
 
+        $kitchenOrdersdash = Order::where('restaurent_id', $restaurant_id)
+            ->where('status', 'sent to kitchen')
+             ->orWhere('status', 'preparing')
+            ->with([
+                'customer',
+                'office',
+                'items.menu',
+                'items.variation' // Assuming you have a variants relationship
+            ])
+            ->get();
+
+
         return view('setting::index', compact(
             'todaysOrders',
             'kitchenOrdersCount',
@@ -91,7 +106,8 @@ class HomeController extends Controller
             'completedOrders',
             'recentOrders',
             'popularLabels',
-            'popularData'
+            'popularData',
+            'kitchenOrdersdash'
         ));
     }
 }

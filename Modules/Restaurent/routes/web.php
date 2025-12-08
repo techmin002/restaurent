@@ -82,6 +82,7 @@ Route::get('completed/orders', [OrderController::class, 'completedOrders'])->nam
     Route::post('/reception/serve/{id}', [ReceptionController::class, 'markServed']);
     Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen.index');
     Route::post('/kitchen/start/{order}', [KitchenController::class, 'start'])->name('kitchen.start');
+     Route::post('/kitchen/start/{order}', [KitchenController::class, 'preparing'])->name('kitchen.start.cooking');
 Route::post('/kitchen/served/{id}', [KitchenController::class, 'markServed'])->name('kitchen.markServed');
 
 Route::post('/orders/update-payment', [OrderController::class, 'updatePayment'])->name('orders.updatePayment');
