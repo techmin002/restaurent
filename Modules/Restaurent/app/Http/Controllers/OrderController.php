@@ -17,23 +17,31 @@ use Modules\Restaurent\Models\Payment;
 use App\Events\OrderCreated;
 use DB;
 use app\Models\User;
+use Carbon\Carbon;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+
     public function index()
     {
+        // All orders (overall)
         $allOrdersCount = Order::count();
+
+        // All reception orders (overall)
         $receptionOrdersCount = Order::where('order_source', 'Reception')
-            ->where('status', 'pending') // or whatever status means "new/in-reception"
+            ->where('status', 'pending') // or adjust your desired status
             ->count();
 
-        $kitchenOrdersCount = Order::whereIn('status', ['Sent to Kitchen', 'Cooking'])->count();
+        // All kitchen orders (overall)
+        $kitchenOrdersCount = Order::whereIn('status', ['Sent to Kitchen', 'Cooking'])
+            ->count();
 
-        $completedOrdersCount = Order::where('status', 'Completed')->count();
+        // All completed orders (overall)
+        $completedOrdersCount = Order::where('status', 'Completed')
+            ->count();
 
+        // Fetch all orders with relations (overall)
         $orders = Order::with('items', 'customer')->get();
 
         return view('restaurent::orders.index', compact(
@@ -44,6 +52,7 @@ class OrderController extends Controller
             'orders'
         ));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -219,6 +228,7 @@ class OrderController extends Controller
 
     public function office_orders_update(Request $request)
     {
+
         $restaurant_id = auth()->user()->restaurent_id;
 
         $request->validate([
@@ -270,6 +280,7 @@ class OrderController extends Controller
                 'delivery_charge' => $request->delivery_charge ?? 0,
                 'order_time'     => now(),
                 'updated_at'     => now(),
+                'grand_total'    => $request->grand_total,
             ];
 
             // Update remarks if provided (append to existing remarks)
@@ -436,10 +447,6 @@ class OrderController extends Controller
         }
     }
 
-
-    /**
-     * Update table order with new items (add to existing order)
-     */
     public function table_orders_update(Request $request)
     {
         $restaurant_id = auth()->user()->restaurent_id;
@@ -450,14 +457,25 @@ class OrderController extends Controller
             'customer_phone' => 'required',
             'customer_name' => 'required',
             'order_items' => 'required|json',
+            'sub_total' => 'required|numeric',
+            'grand_total' => 'required|numeric',
         ]);
 
         try {
+            // Debug logging
+            \Log::info('UPDATE ORDER - Request Data:', $request->all());
+
             // Find the existing order
             $existingOrder = Order::where('id', $request->order_id)
                 ->where('restaurent_id', $restaurant_id)
-                ->with('items') // Load existing items
                 ->firstOrFail();
+
+            \Log::info('UPDATE ORDER - Found Order:', [
+                'id' => $existingOrder->id,
+                'old_sub_total' => $existingOrder->sub_total,
+                'old_grand_total' => $existingOrder->grand_total,
+                'old_customer_id' => $existingOrder->customer_id
+            ]);
 
             // Handle customer creation/retrieval
             $customer = Customer::where('phone', $request->customer_phone)
@@ -465,18 +483,15 @@ class OrderController extends Controller
                 ->first();
 
             if (!$customer) {
-                // Create new customer for this restaurant
                 $customer = Customer::create([
                     'name' => $request->customer_name,
                     'phone' => $request->customer_phone,
                     'email' => $request->customer_email,
                     'restaurent_id' => auth()->user()->restaurent_id,
                 ]);
-            }
-
-            // Update customer ID if different
-            if ($existingOrder->customer_id != $customer->id) {
-                $existingOrder->customer_id = $customer->id;
+                \Log::info('UPDATE ORDER - Created new customer:', ['customer_id' => $customer->id]);
+            } else {
+                \Log::info('UPDATE ORDER - Found existing customer:', ['customer_id' => $customer->id]);
             }
 
             // Decode the JSON order items
@@ -486,7 +501,35 @@ class OrderController extends Controller
                 return redirect()->back()->with('error', 'Invalid order items format or empty cart');
             }
 
-            // Add new items to the existing order (don't delete existing ones)
+            \Log::info('UPDATE ORDER - New Items to Add:', $newOrderItems);
+
+            // Calculate new items total
+            $newItemsTotal = collect($newOrderItems)->sum('item_total');
+
+            // Get current order items total from database
+            // $currentItemsTotal = OrderMenu::where('order_id', $existingOrder->id)->sum('item_total');
+
+
+            // Calculate new sub_total (current items + new items)
+            // $newSubTotal = $currentItemsTotal + $newItemsTotal;
+
+            // Get the recent orders total from form
+            // $recentOrdersTotal = $request->recent_orders_total ?? 0;
+
+            // Calculate new grand_total (new subtotal + recent orders total - discount)
+            // $newGrandTotal = $newSubTotal + $recentOrdersTotal - ($request->discount_amount ?? 0);
+            // dd("Debug stop before calculations");
+            // \Log::info('UPDATE ORDER - Calculations:', [
+            //     'newItemsTotal' => $newItemsTotal,
+            //     'currentItemsTotal' => $currentItemsTotal,
+            //     'newSubTotal' => $newSubTotal,
+            //     'recentOrdersTotal' => $recentOrdersTotal,
+            //     'discountAmount' => $request->discount_amount ?? 0,
+            //     'newGrandTotal' => $newGrandTotal,
+            //     'form_grand_total' => $request->grand_total
+            // ]);
+
+            // Add new items to the existing order
             foreach ($newOrderItems as $item) {
                 OrderMenu::create([
                     'order_id'     => $existingOrder->id,
@@ -497,66 +540,68 @@ class OrderController extends Controller
                     'item_total'   => $item['item_total'],
                 ]);
             }
-
-            // Update order totals including both existing and new items
-            $this->updateTableOrderTotals($existingOrder, $request);
-
-            // Update order timestamp and other fields
+            // dd("Debug stop before calculations");
+            \Log::info('UPDATE ORDER - Items added to order_menu table');
+            // dd('Debug stop after adding items');
+            // Prepare update data
             $updateData = [
+                'customer_id'    => $customer->id,
                 'order_type'     => $request->orderType,
-                'table_id'       => $request->table_id,
-                'office_id'      => $request->office_id,
-                'discount_type'  => $request->discountType,
-                'discount_value' => $request->discountValue,
-                'delivery_charge' => $request->delivery_charge ?? 0,
+                'table_id'       => $request->table_id ?? $existingOrder->table_id,
+                'office_id'      => $request->office_id ?? $existingOrder->office_id,
+                'sub_total'      => $newSubTotal ?? $request->sub_total,
+                'grand_total'    => $newGrandTotal ?? $request->grand_total,
+                'discount_type'  => $request->discountType ?? $existingOrder->discount_type,
+                'discount_value' => $request->discountValue ?? $existingOrder->discount_value,
+                'discount_amount' => $request->discount_amount ?? $existingOrder->discount_amount,
+                'delivery_charge' => $request->delivery_charge ?? $existingOrder->delivery_charge,
                 'order_time'     => now(),
                 'updated_at'     => now(),
+                'status'         => 'pending', // Reset status to pending when updating
             ];
 
-            // Update remarks if provided (append to existing remarks)
-            if ($request->remarks) {
+            // Update remarks if provided
+            if ($request->filled('remarks')) {
                 $updateData['remarks'] = $existingOrder->remarks ?
-                    $existingOrder->remarks . "\nAdditional items: " . $request->remarks :
-                    "Additional items: " . $request->remarks;
+                    $existingOrder->remarks . "\nAdditional items on " . now()->format('Y-m-d H:i:s') . ": " . $request->remarks :
+                    "Additional items on " . now()->format('Y-m-d H:i:s') . ": " . $request->remarks;
             }
 
-            $existingOrder->update($updateData);
+            \Log::info('UPDATE ORDER - Data to update:', $updateData);
+
+            // Update the order using Query Builder to bypass any model events
+            $updated = DB::table('orders')
+                ->where('id', $existingOrder->id)
+                ->where('restaurent_id', $restaurant_id)
+                ->update($updateData);
+
+            \Log::info('UPDATE ORDER - Rows affected:', ['updated' => $updated]);
+
+            // Refresh and verify
+            $updatedOrder = Order::find($existingOrder->id);
+            \Log::info('UPDATE ORDER - After update:', [
+                'id' => $updatedOrder->id,
+                'new_sub_total' => $updatedOrder->sub_total,
+                'new_grand_total' => $updatedOrder->grand_total,
+                'customer_id' => $updatedOrder->customer_id,
+                'updated_at' => $updatedOrder->updated_at
+            ]);
+
+            // Log all items in the order
+            $allItems = OrderMenu::where('order_id', $existingOrder->id)->get();
+            \Log::info('UPDATE ORDER - All items in order:', [
+                'count' => $allItems->count(),
+                'total_sum' => $allItems->sum('item_total')
+            ]);
 
             return redirect()->back()->with('success', 'Order updated successfully with new items!');
         } catch (\Exception $e) {
-            \Log::error('Error updating table order: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to update order. Please try again.');
+            \Log::error('UPDATE ORDER - Error: ' . $e->getMessage());
+            \Log::error('UPDATE ORDER - Trace: ' . $e->getTraceAsString());
+            return redirect()->back()->with('error', 'Failed to update order: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Update table order totals including both existing and new items
-     */
-    private function updateTableOrderTotals($order, $request)
-    {
-        // Reload items to include newly added ones
-        $order->load('items');
-
-        // Calculate new subtotal from ALL items (existing + new)
-        $subTotal = $order->items->sum('item_total');
-
-        // Calculate discount
-        $discountAmount = $this->calculateDiscountAmount(
-            $subTotal,
-            $request->discountType ?? 'flat',
-            $request->discountValue ?? 0
-        );
-
-        // Calculate grand total
-        $grandTotal = $subTotal - $discountAmount;
-
-        // Update order with new totals
-        $order->update([
-            'sub_total' => $subTotal,
-            'discount_amount' => $discountAmount,
-            'grand_total' => $grandTotal
-        ]);
-    }
 
 
     public function show($id)
@@ -1337,31 +1382,47 @@ class OrderController extends Controller
         return back()->with('success', "Notification set for table $table_number");
     }
 
+
+
     public function receptionOrders()
     {
-        $orders = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office')
+        $start = Carbon::now('Asia/Kathmandu')->startOfDay();
+        $end   = Carbon::now('Asia/Kathmandu')->endOfDay();
+
+        $query = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office')
             ->where('restaurent_id', auth()->user()->restaurent_id)
             ->where('order_source', 'Reception')
+            ->whereBetween('created_at', [$start, $end])
+            ->whereIn('status', ['pending', 'serve', 'cooking', 'accepted']);
 
-            ->where('status', 'pending') // pending orders
-            ->orwhere('status', 'serve')
-            ->orwhere('status', 'cooking')
-            ->orwhere('status', 'accepted')
-            ->get();
+        // debug: uncomment to inspect SQL & bindings
+        // dd($query->toSql(), $query->getBindings());
 
+        $orders = $query->get();
 
         return view('restaurent::orders.reception', compact('orders'));
     }
 
 
+
     public function completedOrders()
     {
+        $start = Carbon::now('Asia/Kathmandu')->startOfDay();
+        $end   = Carbon::now('Asia/Kathmandu')->endOfDay();
 
-        $orders = \Modules\Restaurent\Models\Order::with('items', 'customer')
+        $query = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office')
+            ->where('restaurent_id', auth()->user()->restaurent_id)
+            ->where('order_source', 'Reception')
+            ->whereBetween('created_at', [$start, $end])
             ->where('status', 'Completed')
-            ->orderBy('id', 'desc')
-            ->get();
-        return redirect()->back()->with('success', 'Order sent to kitchen!');
+            ->orWhere('status', 'Due');
+
+        // debug: uncomment to inspect SQL & bindings
+        // dd($query->toSql(), $query->getBindings());
+
+        $orders = $query->get();
+
+        return view('restaurent::orders.completed', compact('orders'));
     }
 
     //move to kitchen

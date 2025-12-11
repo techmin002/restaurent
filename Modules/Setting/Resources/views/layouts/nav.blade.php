@@ -1,12 +1,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 {{-- @can('access_sidebar_management') --}}
 <!-- Your app.js or bootstrap.js script -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -202,32 +200,33 @@
 <audio id="newOrderSound" src="{{ asset('sounds/order_received_audio.mp3') }}" preload="auto"></audio>
 
 
-{{-- Notification popups container --}}
-<div id="popupContainer"></div>
-<audio id="notifySound">
-    <source src="{{ asset('sounds/order_completed_audio.mp3') }}" type="audio/mpeg">
-</audio>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let lastTables = [];
-        const popupContainer = document.getElementById('popupContainer');
+@can('access_counter_management')
+    {{-- Notification popups container --}}
+    <div id="popupContainer"></div>
+    <audio id="notifySound">
+        <source src="{{ asset('sounds/order_completed_audio.mp3') }}" type="audio/mpeg">
+    </audio>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let lastTables = [];
+            const popupContainer = document.getElementById('popupContainer');
 
-        function checkNotification() {
-            fetch('/check-notification')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.notify == 1 && data.tables.length > 0) {
-                        // Remove existing popups
-                        popupContainer.innerHTML = '';
+            function checkNotification() {
+                fetch('/check-notification')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.notify == 1 && data.tables.length > 0) {
+                            // Remove existing popups
+                            popupContainer.innerHTML = '';
 
-                        // Create separate popup for each table
-                        data.tables.forEach((table, index) => {
-                            const popup = document.createElement('div');
-                            popup.className = 'popup';
-                            popup.id = `popup-${table}`;
-                            popup.style.top = `${20 + (index * 120)}px`; // Stack popups vertically
+                            // Create separate popup for each table
+                            data.tables.forEach((table, index) => {
+                                const popup = document.createElement('div');
+                                popup.className = 'popup';
+                                popup.id = `popup-${table}`;
+                                popup.style.top = `${20 + (index * 120)}px`; // Stack popups vertically
 
-                            popup.innerHTML = `
+                                popup.innerHTML = `
                                 <div class="popup-icon">🔔</div>
                                 <div class="popup-content">
                                     <h4>Table ${table} Needs Attention</h4>
@@ -237,128 +236,129 @@
                                 <span class="popup-close" data-table="${table}">&times;</span>
                             `;
 
-                            popupContainer.appendChild(popup);
+                                popupContainer.appendChild(popup);
 
-                            // Show popup with delay for visual effect
-                            setTimeout(() => {
-                                popup.classList.add('show');
-                            }, 100 * index);
+                                // Show popup with delay for visual effect
+                                setTimeout(() => {
+                                    popup.classList.add('show');
+                                }, 100 * index);
 
-                            // Add event listeners
-                            const closeBtn = popup.querySelector('.popup-close');
-                            const okBtn = popup.querySelector('.popup-btn');
+                                // Add event listeners
+                                const closeBtn = popup.querySelector('.popup-close');
+                                const okBtn = popup.querySelector('.popup-btn');
 
-                            closeBtn.addEventListener('click', () => closeSinglePopup(table));
-                            okBtn.addEventListener('click', () => closeSinglePopup(table));
-                        });
+                                closeBtn.addEventListener('click', () => closeSinglePopup(table));
+                                okBtn.addEventListener('click', () => closeSinglePopup(table));
+                            });
 
-                        // Play sound if new tables arrived
-                        if (JSON.stringify(data.tables) !== JSON.stringify(lastTables)) {
-                            document.getElementById('notifySound').play();
+                            // Play sound if new tables arrived
+                            if (JSON.stringify(data.tables) !== JSON.stringify(lastTables)) {
+                                document.getElementById('notifySound').play();
+                            }
+
+                            lastTables = data.tables;
+
+                        } else {
+                            // No notifications, remove all popups
+                            popupContainer.innerHTML = '';
+                            lastTables = [];
                         }
-
-                        lastTables = data.tables;
-
-                    } else {
-                        // No notifications, remove all popups
-                        popupContainer.innerHTML = '';
-                        lastTables = [];
-                    }
-                })
-                .catch(err => console.error(err));
-        }
-
-        function closeSinglePopup(tableNumber) {
-            const popup = document.getElementById(`popup-${tableNumber}`);
-            if (popup) {
-                popup.classList.remove('show');
-                setTimeout(() => {
-                    popup.remove();
-                }, 400);
-
-                // Reset notification for this specific table
-                fetch('/reset-single-notification', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        table_number: tableNumber
                     })
-                });
+                    .catch(err => console.error(err));
             }
+
+            function closeSinglePopup(tableNumber) {
+                const popup = document.getElementById(`popup-${tableNumber}`);
+                if (popup) {
+                    popup.classList.remove('show');
+                    setTimeout(() => {
+                        popup.remove();
+                    }, 400);
+
+                    // Reset notification for this specific table
+                    fetch('/reset-single-notification', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            table_number: tableNumber
+                        })
+                    });
+                }
+            }
+
+            setInterval(checkNotification, 3000);
+            checkNotification();
+        });
+    </script>
+    <style>
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: -350px;
+            width: 300px;
+            background: #ff4b4b;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 99999;
+            transition: right 0.4s ease;
+            font-family: Arial, sans-serif;
+            margin-bottom: 10px;
         }
 
-        setInterval(checkNotification, 3000);
-        checkNotification();
-    });
-</script>
-<style>
-    .popup {
-        position: fixed;
-        top: 20px;
-        right: -350px;
-        width: 300px;
-        background: #ff4b4b;
-        color: white;
-        padding: 20px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-        z-index: 99999;
-        transition: right 0.4s ease;
-        font-family: Arial, sans-serif;
-        margin-bottom: 10px;
-    }
+        .popup.show {
+            right: 20px;
+        }
 
-    .popup.show {
-        right: 20px;
-    }
+        .popup-icon {
+            font-size: 30px;
+        }
 
-    .popup-icon {
-        font-size: 30px;
-    }
+        .popup-content h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
 
-    .popup-content h4 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: bold;
-    }
+        .popup-content p {
+            margin: 0;
+            font-size: 14px;
+        }
 
-    .popup-content p {
-        margin: 0;
-        font-size: 14px;
-    }
+        .popup-close {
+            margin-left: auto;
+            font-size: 22px;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-    .popup-close {
-        margin-left: auto;
-        font-size: 22px;
-        cursor: pointer;
-        font-weight: bold;
-    }
+        .popup-close:hover {
+            color: #000;
+        }
 
-    .popup-close:hover {
-        color: #000;
-    }
+        .popup-btn {
+            background: white;
+            color: #ff4b4b;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-    .popup-btn {
-        background: white;
-        color: #ff4b4b;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        margin-top: 10px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    .popup-btn:hover {
-        background: #ffe1e1;
-    }
-</style>
+        .popup-btn:hover {
+            background: #ffe1e1;
+        }
+    </style>
+@endcan
 
 
 <!-- Counter Button -->
@@ -1539,3 +1539,175 @@
     });
 </script>
 {{-- @endcan --}}
+
+@can('access_counter_management')
+    {{-- Reception Orders sent from kitchen --}}
+    <div class="modal fade" id="kitchenModal" tabindex="-1" aria-labelledby="kitchenModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="kitchenModalLabel">New Orders Alert!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Order Type</th>
+                                <th>Table / Office / Location</th>
+                                <th>Customer Name</th>
+                                <th>Customer Phone</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Orders populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <audio id="kitchenAlertSound">
+        <source src="{{ asset('sounds/order_completed_audio.mp3') }}" preload="auto" type="audio/mpeg">
+    </audio>
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get modal element
+            var kitchenModalEl = document.getElementById('kitchenModal');
+            
+            // Check if Bootstrap modal is available
+            if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+                console.error('Bootstrap JavaScript not loaded properly');
+                return;
+            }
+            
+            // Initialize modal with proper options
+            var kitchenModal = new bootstrap.Modal(kitchenModalEl, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+            
+            var modalShown = false;
+            var alertSound = document.getElementById('kitchenAlertSound');
+
+            // Manual close function
+            function closeModalManually() {
+                kitchenModal.hide();
+                modalShown = false;
+            }
+
+            // Add manual close event listener to Close button
+            document.addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('btn-secondary') && 
+                    e.target.closest('#kitchenModal') && 
+                    e.target.getAttribute('data-bs-dismiss') === 'modal') {
+                    closeModalManually();
+                }
+            });
+
+            function checkOrders() {
+                fetch('{{ route('check.kitchen') }}')
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data.showModal && !modalShown) {
+                            var tbody = document.querySelector('#ordersTable tbody');
+                            tbody.innerHTML = '';
+
+                            data.orders.forEach(order => {
+                                let row = `<tr>
+                                    <td>${order.id}</td>
+                                    <td>${order.order_type}</td>
+                                    <td>${order.location}</td>
+                                    <td>${order.customer_name}</td>
+                                    <td>${order.customer_phone}</td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm serve-btn" data-id="${order.id}">OK</button>
+                                    </td>
+                                </tr>`;
+                                tbody.innerHTML += row;
+                            });
+
+                            // Play alert sound
+                            alertSound.play().catch(err => console.log('Audio play error:', err));
+
+                            // Show modal
+                            kitchenModal.show();
+                            modalShown = true;
+
+                            // Add click event to OK buttons
+                            document.querySelectorAll('.serve-btn').forEach(btn => {
+                                btn.addEventListener('click', function() {
+                                    let orderId = this.dataset.id;
+                                    fetch(`/orders/serve/${orderId}`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Content-Type': 'application/json',
+                                                'Accept': 'application/json'
+                                            }
+                                        })
+                                        .then(res => {
+                                            if (!res.ok) {
+                                                throw new Error('Network response was not ok');
+                                            }
+                                            return res.json();
+                                        })
+                                        .then(resp => {
+                                            checkOrders(); // refresh modal
+                                        })
+                                        .catch(error => {
+                                            console.error('Error serving order:', error);
+                                            // Show error using toastr if available
+                                            if (typeof toastr !== 'undefined') {
+                                                toastr.error('Failed to mark order as served. Please try again.');
+                                            } else {
+                                                alert('Failed to mark order as served. Please try again.');
+                                            }
+                                        });
+                                });
+                            });
+
+                        } else if (!data.showModal && modalShown) {
+                            // Hide modal if no orders
+                            closeModalManually();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error checking orders:', err);
+                    });
+            }
+
+            // Initial check
+            checkOrders();
+            
+            // Set up interval for checking orders
+            setInterval(checkOrders, 10000);
+
+            // Reset modalShown flag when modal is hidden
+            kitchenModalEl.addEventListener('hidden.bs.modal', function() {
+                modalShown = false;
+            });
+
+            // Debug: Log modal events
+            kitchenModalEl.addEventListener('hide.bs.modal', function() {
+                console.log('Modal hide event triggered');
+            });
+            
+            kitchenModalEl.addEventListener('show.bs.modal', function() {
+                console.log('Modal show event triggered');
+            });
+        });
+    </script>
+@endcan

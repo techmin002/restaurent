@@ -272,7 +272,7 @@
             const showButtons = (order.status === 'pending'); // show only for pending
 
             const totalAmount = Number(order.grand_total || 0).toFixed(2);
-            
+
             // Get kitchen route URL (you'll need to adjust this based on your route)
             const kitchenStartRoute = `/kitchen/start/${order.id}`; // Default route
             // Or if you have a named route in your blade:
@@ -376,15 +376,15 @@
             e.preventDefault();
             const id = $(this).data('id');
             const url = $(this).data('url');
-            
+
             if (!id || !url) return;
-            
+
             // Change button state
             const $btn = $(this);
             const originalHtml = $btn.html();
             $btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Starting...');
             $btn.prop('disabled', true).removeClass('btn-warning').addClass('btn-secondary');
-            
+
             // Send AJAX request
             $.ajax({
                 url: url,
@@ -399,10 +399,10 @@
                         $btn.html('<i class="fas fa-fire mr-1"></i> Cooking');
                         $btn.removeClass('btn-secondary').addClass('btn-danger');
                         $btn.prop('disabled', true);
-                        
+
                         // Show success notification
                         showToast('Order started cooking!', 'success');
-                        
+
                         // Optionally remove the row after a delay
                         setTimeout(() => {
                             $('#orderRow' + id).fadeOut(500, function() {
@@ -413,16 +413,21 @@
                     } else {
                         // Reset button on error
                         $btn.html(originalHtml);
-                        $btn.prop('disabled', false).removeClass('btn-secondary').addClass('btn-warning');
+                        $btn.prop('disabled', false).removeClass('btn-secondary').addClass(
+                            'btn-warning');
                         showToast(response.message || 'Failed to start cooking', 'error');
                     }
                 },
                 error: function(xhr, status, error) {
                     // Reset button on error
                     $btn.html(originalHtml);
-                    $btn.prop('disabled', false).removeClass('btn-secondary').addClass('btn-warning');
-                    // showToast('Error starting order. Please try again.', 'error');
+                    $btn.prop('disabled', false).removeClass('btn-secondary').addClass(
+                        'btn-warning');
+                    showToast('Started preparing',);
                     // console.error('Error starting order:', error);
+                    // setInterval(function() {
+                    //     location.reload();
+                    // }, 2000); // 10 seconds
                 }
             });
         });
@@ -442,16 +447,18 @@
                     </div>
                 </div>
             `;
-            
+
             $('body').append(toastHtml);
             const toastEl = document.getElementById(toastId);
-            
+
             if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                const toast = new bootstrap.Toast(toastEl, {
+                    delay: 3000
+                });
                 toast.show();
-                
+
                 // Remove after hide
-                toastEl.addEventListener('hidden.bs.toast', function () {
+                toastEl.addEventListener('hidden.bs.toast', function() {
                     $(this).remove();
                 });
             } else {

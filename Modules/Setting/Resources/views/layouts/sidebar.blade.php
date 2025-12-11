@@ -11,7 +11,10 @@
           {{-- <img src="{{ asset('backend/dist/img/AdminLTELogo.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8"> --}}
           {{-- <i class="fa fa-paw"></i> --}}
           @php($branch = Session::get('branch'))
-          <span class="brand-text font-weight-bold ">{{ $branch->name ?? $profile->company_name }} </span>
+          <span class="brand-text font-weight-bold ">
+            {{-- <img src="{{ asset('upload/images/settings/' . $profile->logo) }}" class="img-circle elevation-2"
+                      alt="User Image" style="width: 40px; height: 40px; margin-right: 10px;"> --}}
+            {{ $branch->name ?? $profile->company_name }} </span>
       </a>
 
       <!-- Sidebar -->
@@ -20,7 +23,7 @@
           <div class="user-panel mt-3 pb-3 mb-3 d-flex">
               <div class="">
 
-                 <img src="{{ asset('images/company/' . $profile->logo) }}" class="img-circle elevation-2"
+                 <img src="{{ asset('upload/images/settings/' . $profile->logo) }}" class="img-circle elevation-2"
                       alt="User Image" style="width: 40px; height: 40px;">
               </div>
               {{-- <div class="info">
@@ -93,8 +96,8 @@
                   @endcan
 
 
-                  @if (auth()->user()->access_type === 'Super Admin')
-                      @can('access_restaurent')
+                  @if (auth()->user()->access_type == 'Super Admin')
+                      {{-- @can('access_restaurent_management') --}}
                           <li class="nav-item {{ request()->routeIs('restaurent.*') ? 'menu-is-opening menu-open' : '' }}">
                               <a href="#" class="nav-link" {{ request()->routeIs('restaurent.*') ? 'active' : '' }}>
                                   <i class="nav-icon fas fa-store"></i>
@@ -115,8 +118,8 @@
 
                               </ul>
                           </li>
-                      @endcan
-                  @else
+                      {{-- @endcan --}}
+                  {{-- @else --}}
                   @endif
                   @if (auth()->user()->access_type === 'Admin' || auth()->user()->access_type === 'Reception')
                       <li class="nav-item {{ request()->routeIs('tables.*') ? 'menu-is-opening menu-open' : '' }}">

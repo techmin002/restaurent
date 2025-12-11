@@ -144,7 +144,7 @@
                                             @forelse ($servedOrders as $order)
                                                 <tr>
                                                     <td>#ORD-{{ $order->id }}</td>
-                                                    <td>{{ $order->customer->name ?? 'Guest' }}</td>
+                                                    <td>{{ $order->customer->name ?? 'office' }}</td>
                                                     <td>
                                                         <small>
                                                             @foreach ($order->items as $item)

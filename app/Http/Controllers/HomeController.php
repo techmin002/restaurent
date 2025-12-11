@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Session;
 use Modules\Branch\Entities\Branch;
 use Modules\Restaurent\Models\Order;
 use Modules\Restaurent\Models\OrderMenu;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -17,6 +18,10 @@ class HomeController extends Controller
 
     public function index()
     {
+
+        $start = Carbon::now('Asia/Kathmandu')->startOfDay();
+        $end   = Carbon::now('Asia/Kathmandu')->endOfDay();
+
         $branch = Branch::find(auth()->user()->branch_id);
         Session::put('branch', $branch);
 
@@ -45,6 +50,7 @@ class HomeController extends Controller
         $kitchenOrders = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'sent to kitchen')
             ->orwhere('status', 'preparing')
+             ->whereBetween('created_at', [$start, $end])
             ->with('items.menu')
             ->latest()
             ->limit(5)
@@ -52,12 +58,14 @@ class HomeController extends Controller
 
         $servedOrders = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'serve')
+             ->whereBetween('created_at', [$start, $end])
             ->with(['customer', 'items.menu'])
             ->latest()
             ->get();
 
         $completedOrders = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'completed')
+            ->orwhere('status', 'Due')
             ->with(['customer', 'items.menu'])
             ->latest()
             ->limit(5)
@@ -65,6 +73,7 @@ class HomeController extends Controller
 
         $recentOrders = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'accepted')
+             ->whereBetween('created_at', [$start, $end])
             ->with(['customer', 'items.menu'])
             ->latest()
             ->limit(5)
@@ -84,16 +93,22 @@ class HomeController extends Controller
         $popularLabels = $popularItems->pluck('menu.name');
         $popularData = $popularItems->pluck('total_sold');
 
+
+
         $kitchenOrdersdash = Order::where('restaurent_id', $restaurant_id)
-            ->where('status', 'sent to kitchen')
-             ->orWhere('status', 'preparing')
+            ->whereDate('created_at', Carbon::today()) // Only today's orders
+            ->where(function ($q) {
+                $q->where('status', 'sent to kitchen')
+                    ->orWhere('status', 'preparing');
+            })
             ->with([
                 'customer',
                 'office',
                 'items.menu',
-                'items.variation' // Assuming you have a variants relationship
+                'items.variation'
             ])
             ->get();
+
 
 
         return view('setting::index', compact(
