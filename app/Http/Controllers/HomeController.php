@@ -66,6 +66,7 @@ class HomeController extends Controller
         $completedOrders = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'completed')
             ->orwhere('status', 'Due')
+                ->whereBetween('created_at', [$start, $end])
             ->with(['customer', 'items.menu'])
             ->latest()
             ->limit(5)

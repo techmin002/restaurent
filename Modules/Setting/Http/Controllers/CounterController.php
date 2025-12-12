@@ -147,7 +147,7 @@ class CounterController extends Controller
                 }
 
                 // Get payment information
-                $paymentMethod = 'Online';
+                $paymentMethod = 'Not paid';
                 $paymentAmount = 0;
 
                 if ($order->payments && $order->payments->isNotEmpty()) {

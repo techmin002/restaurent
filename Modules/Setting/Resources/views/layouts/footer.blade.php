@@ -423,11 +423,11 @@
                     $btn.html(originalHtml);
                     $btn.prop('disabled', false).removeClass('btn-secondary').addClass(
                         'btn-warning');
-                    showToast('Started preparing',);
-                    // console.error('Error starting order:', error);
-                    // setInterval(function() {
-                    //     location.reload();
-                    // }, 2000); // 10 seconds
+                    showToast('Started preparing', );
+                    // 💥 Reload the page
+                    setTimeout(() => {
+                        location.reload();
+                    }, 5000); // small delay so toast shows briefly
                 }
             });
         });

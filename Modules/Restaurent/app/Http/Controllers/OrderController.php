@@ -331,6 +331,7 @@ class OrderController extends Controller
             $orders = Order::with(['items.menu', 'items.variation'])
                 ->where('office_id', $officeId)
                 ->where('restaurent_id', auth()->user()->restaurent_id)
+                ->where('created_at', '>=', now()->subDays(1)) // 1 day
                 ->whereIn('status', ['pending', 'accepted', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
                 ->orderBy('order_time', 'DESC')
                 ->limit(5)
@@ -827,6 +828,7 @@ class OrderController extends Controller
             $orders = Order::with(['table', 'items.menu', 'items.variation'])
                 ->where('customer_id', $customerId)
                 ->where('restaurent_id', auth()->user()->restaurent_id)
+                ->where('created_at', '>=', now()->subDays(1)) // 1 day
                 ->whereIn('status', ['pending', 'accepted', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
                 ->orderBy('order_time', 'DESC')
                 ->limit(5)
