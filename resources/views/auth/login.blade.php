@@ -1,1 +1,1 @@
-@include('welcome')
+@include('frontend.body.login')

@@ -319,7 +319,7 @@
                                                   </a>
                                                   <ul class="nav nav-treeview">
                                                       <li class="nav-item">
-                                                          <a href="{{ route('blogs.index') }}"
+                                                          <a href="#"
                                                               class="nav-link {{ request()->routeIs('blogs.index') ? 'active' : '' }}">
                                                               {{-- <i class="far fa-circle nav-icon"></i> --}}
                                                               <p>Blog</p>
@@ -519,10 +519,67 @@
                                   </a>
                               </li>
                           </ul>
+                          <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                  <a href="{{ route('features') }}"
+                                      class="nav-link {{ request()->routeIs('features') ? 'active' : '' }}">
+                                      {{-- <i class="far fa-circle nav-icon"></i> --}}
+                                      <p>Features</p>
+                                  </a>
+                              </li>
+                          </ul>
+                          <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                  <a href="{{ route('plans') }}"
+                                      class="nav-link {{ request()->routeIs('plans') ? 'active' : '' }}">
+                                      {{-- <i class="far fa-circle nav-icon"></i> --}}
+                                      <p>Pricing Plans</p>
+                                  </a>
+                              </li>
+                          </ul>
+                          <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                  <a href="{{ route('askedQuestions') }}"
+                                      class="nav-link {{ request()->routeIs('askedQuestions') ? 'active' : '' }}">
+                                      {{-- <i class="far fa-circle nav-icon"></i> --}}
+                                      <p>Frequently Asked Questions</p>
+                                  </a>
+                              </li>
+                          </ul>
+                          <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                  <a href="{{ route('customerSays') }}"
+                                      class="nav-link {{ request()->routeIs('customerSays') ? 'active' : '' }}">
+                                      {{-- <i class="far fa-circle nav-icon"></i> --}}
+                                      <p>What Customers says</p>
+                                  </a>
+                              </li>
+                          </ul>
+                          <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                  <a href="{{ route('Interface') }}"
+                                      class="nav-link {{ request()->routeIs('Interface') ? 'active' : '' }}">
+                                      {{-- <i class="far fa-circle nav-icon"></i> --}}
+                                      <p>Beautiful Interface</p>
+                                  </a>
+                              </li>
+                          </ul>
+                          <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                  <a href="{{ route('Video') }}"
+                                      class="nav-link {{ request()->routeIs('Video') ? 'active' : '' }}">
+                                      {{-- <i class="far fa-circle nav-icon"></i> --}}
+                                      <p>Videos</p>
+                                  </a>
+                              </li>
+                          </ul>
                       </li>
                   @endcan
+                    
 
               </ul>
+
+              
           </nav>
           <!-- /.sidebar-menu -->
       </div>
