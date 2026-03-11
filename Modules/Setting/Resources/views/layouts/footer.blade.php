@@ -11,7 +11,7 @@
 </div>
 
 <!-- Required Scripts -->
- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="{{ asset('backend/plugins/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('backend/plugins/jquery-ui/jquery-ui.min.js') }}"></script>
@@ -269,16 +269,49 @@
             const total = (typeof order.total !== 'undefined') ? Number(order.total) :
                 (order.order_items ? computeTotalFromItems(order.order_items) : 0);
 
+            const showButtons = (order.status === 'pending'); // show only for pending
+
+            const totalAmount = Number(order.grand_total || 0).toFixed(2);
+
+            // Get kitchen route URL (you'll need to adjust this based on your route)
+            const kitchenStartRoute = `/kitchen/start/${order.id}`; // Default route
+            // Or if you have a named route in your blade:
+            // const kitchenStartRoute = "{{ route('kitchen.start.cooking', ':id') }}".replace(':id', order.id);
+
+            const actionButtons = showButtons ? `
+        <button class="btn btn-sm btn-success btn-accept" data-id="${order.id}" title="Accept order ${order.id}">
+            Accept
+        </button>
+        <button class="btn btn-sm btn-danger btn-reject ms-2" data-id="${order.id}" title="Reject order ${order.id}">
+            Reject
+        </button>
+    ` : `
+        <button class="btn btn-sm btn-warning btn-preparing" 
+                data-id="${order.id}" 
+                data-url="${kitchenStartRoute}"
+                title="Start preparing order ${order.id}">
+            <i class="fas fa-fire mr-1"></i> Preparing
+        </button>
+    `;
+
+            // Build items list with variations
+            let itemsHtml = 'N/A';
+            if (order.items && order.items.length > 0) {
+                itemsHtml = order.items.map(item => {
+                    let itemText = `${escapeHtml(item.menu_name || 'N/A')} (Qty: ${item.qty || 0})`;
+                    if (item.variation_name) {
+                        itemText += ` - ${escapeHtml(item.variation_name)}`;
+                    }
+                    return itemText;
+                }).join('<br>');
+            }
+
             const rowHtml = `
             <tr id="orderRow${order.id}">
                 <td>#${escapeHtml(order.id.toString())}</td>
                 <td>${escapeHtml(order.order_type.toString())}</td>
                 <td>Rs. ${Number(order.grand_total).toFixed(2)}</td>
-                 <td>
-    ${order.items && order.items.length > 0 
-    ? order.items.map(item => `${escapeHtml(item.menu_name || 'N/A')} (Qty: ${item.qty || 0})`).join(', ')
-    : 'N/A'}
-</td>
+                <td>${itemsHtml}</td>
                 <td>${order.order_type === 'dinein' ? escapeHtml(order.table_id || 'N/A') : '-'}</td>
                 <td>${order.order_type === 'dinein' ? escapeHtml(order.customer_name || 'N/A') : '-'}</td>
                 <td>${order.order_type === 'dinein' ? escapeHtml(order.customer_contact || 'N/A') : '-'}</td>
@@ -286,12 +319,7 @@
                 <td>${order.order_type === 'office' ? escapeHtml(order.office_contact || 'N/A') : '-'}</td>
                 <td>${order.order_type === 'office' ? escapeHtml(order.office_address || 'N/A') : '-'}</td>
                 <td>
-                    <button class="btn btn-sm btn-success btn-accept" data-id="${order.id}" title="Accept order ${order.id}">
-                        Accept
-                    </button>
-                    <button class="btn btn-sm btn-danger btn-reject ms-2" data-id="${order.id}" title="Reject order ${order.id}">
-                        Reject
-                    </button>
+                    ${actionButtons}
                 </td>
             </tr>
         `;
@@ -342,6 +370,104 @@
             $('body').append(form);
             form.submit();
         });
+
+        // --- Preparing Button Handler ---
+        $(document).on('click', '.btn-preparing', function(e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+            const url = $(this).data('url');
+
+            if (!id || !url) return;
+
+            // Change button state
+            const $btn = $(this);
+            const originalHtml = $btn.html();
+            $btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Starting...');
+            $btn.prop('disabled', true).removeClass('btn-warning').addClass('btn-secondary');
+
+            // Send AJAX request
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: csrfToken
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Update button to show cooking in progress
+                        $btn.html('<i class="fas fa-fire mr-1"></i> Cooking');
+                        $btn.removeClass('btn-secondary').addClass('btn-danger');
+                        $btn.prop('disabled', true);
+
+                        // Show success notification
+                        showToast('Order started cooking!', 'success');
+
+                        // Optionally remove the row after a delay
+                        setTimeout(() => {
+                            $('#orderRow' + id).fadeOut(500, function() {
+                                $(this).remove();
+                                checkIfNoRowsHideModal();
+                            });
+                        }, 2000);
+                    } else {
+                        // Reset button on error
+                        $btn.html(originalHtml);
+                        $btn.prop('disabled', false).removeClass('btn-secondary').addClass(
+                            'btn-warning');
+                        showToast(response.message || 'Failed to start cooking', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Reset button on error
+                    $btn.html(originalHtml);
+                    $btn.prop('disabled', false).removeClass('btn-secondary').addClass(
+                        'btn-warning');
+                    showToast('Started preparing', );
+                    // 💥 Reload the page
+                    setTimeout(() => {
+                        location.reload();
+                    }, 5000); // small delay so toast shows briefly
+                }
+            });
+        });
+
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toastId = 'toast-' + Date.now();
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 position-fixed" 
+                     style="top: 20px; right: 20px; z-index: 9999;" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+
+            $('body').append(toastHtml);
+            const toastEl = document.getElementById(toastId);
+
+            if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+                const toast = new bootstrap.Toast(toastEl, {
+                    delay: 3000
+                });
+                toast.show();
+
+                // Remove after hide
+                toastEl.addEventListener('hidden.bs.toast', function() {
+                    $(this).remove();
+                });
+            } else {
+                // Fallback if Bootstrap not available
+                $(toastEl).fadeIn().delay(3000).fadeOut(500, function() {
+                    $(this).remove();
+                });
+            }
+        }
 
         function checkIfNoRowsHideModal() {
             if ($('#newOrdersBody tr').length === 0) {

@@ -1362,13 +1362,21 @@
                         <!-- Menu Items Grid -->
                         <div class="menu-items-grid" id="menu-items">
                             @foreach ($menus as $item)
+                                @php
+                                    $hasVariants = $item->variations && count($item->variations) > 0;
+                                @endphp
                                 <div class="menu-item" data-category="{{ $item->category_id }}"
-                                    data-name="{{ strtolower($item->name) }}">
+                                    data-name="{{ strtolower($item->name) }}"
+                                    data-has-variants="{{ $hasVariants ? 'true' : 'false' }}">
                                     <div class="card h-100">
                                         <div class="card-img-container">
                                             <img src="{{ asset('upload/images/menu/' . $item['image']) }}"
                                                 alt="{{ $item->name }}" class="item-image"
-                                                data-id="{{ $item->id }}">
+                                                data-id="{{ $item->id }}" data-name="{{ $item->name }}"
+                                                data-price="{{ $item->price }}"
+                                                data-description="{{ $item->description }}"
+                                                data-image="{{ asset('upload/images/menu/' . $item['image']) }}"
+                                                data-has-variants="{{ $hasVariants ? 'true' : 'false' }}">
                                             <span class="category-badge">{{ $item->category_name }}</span>
                                             <span class="price-badge">Rs {{ number_format($item->price, 2) }}</span>
                                         </div>
@@ -1391,7 +1399,7 @@
                                                     data-price="{{ $item->price }}"
                                                     data-description="{{ $item->description }}"
                                                     data-image="{{ asset('upload/images/menu/' . $item['image']) }}"
-                                                    data-has-variants="{{ $item->variations && count($item->variations) > 0 ? 'true' : 'false' }}">
+                                                    data-has-variants="{{ $hasVariants ? 'true' : 'false' }}">
                                                     <i class="fas fa-cart-plus me-1"></i> Add
                                                 </button>
                                             </div>
@@ -1419,7 +1427,7 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <input type="hidden" id="customer_id" name="customer_id">
+                                <input type="hidden" id="customer_id" name="customer_id" value="">
 
                                 <div class="mb-3">
                                     <label class="form-label fw-600">Customer Phone *</label>
@@ -1840,15 +1848,15 @@
                                 <strong>Order Total: Rs. ${orderTotal.toFixed(2)}</strong>
                             </div>
                             ${order.table_number ? `
-                                                                                                                            <div class="order-location small text-muted mt-1">
-                                                                                                                                <i class="fas fa-table me-1"></i>Table: ${order.table_number}
-                                                                                                                            </div>
-                                                                                                                        ` : ''}
+                                                                                                                                <div class="order-location small text-muted mt-1">
+                                                                                                                                    <i class="fas fa-table me-1"></i>Table: ${order.table_number}
+                                                                                                                                </div>
+                                                                                                                            ` : ''}
                             ${order.order_type ? `
-                                                                                                                            <div class="order-type small text-muted mt-1">
-                                                                                                                                <span class="badge order-type-badge bg-secondary">${order.order_type}</span>
-                                                                                                                            </div>
-                                                                                                                        ` : ''}
+                                                                                                                                <div class="order-type small text-muted mt-1">
+                                                                                                                                    <span class="badge order-type-badge bg-secondary">${order.order_type}</span>
+                                                                                                                                </div>
+                                                                                                                            ` : ''}
                         </div>
                     `;
             });
@@ -2215,9 +2223,46 @@
             });
         }
 
+        // Handle image click event
+        // Update the handleImageClick function (around line 1689) to:
+        function handleImageClick(e) {
+            e.stopPropagation(); // ADD THIS LINE - prevents event from bubbling up
+
+            // Don't trigger if clicking on quantity controls or add button
+            if ($(e.target).closest('.qty-control').length || $(e.target).closest('.add-to-cart-btn').length) {
+                return;
+            }
+
+            const card = $(e.target).closest('.menu-item');
+            const img = card.find('.item-image');
+            const id = img.data('id');
+            const name = img.data('name');
+            const price = parseFloat(img.data('price'));
+            const description = card.find('.card-text').text();
+            const imageSrc = img.attr('src');
+            const hasVariants = img.data('has-variants') === true;
+
+            // Check if item has variants
+            if (hasVariants) {
+                // Item has variants, open modal for variant selection
+                openModal(id, name, price, description, imageSrc);
+            } else {
+                // Item has no variants, add ONE quantity directly to cart (ignore input value)
+                const qty = 1; // Always add 1 when clicking image
+
+                addToCart(id, name, price, qty);
+                showNotification(`${name} added to cart!`);
+
+                // Reset quantity input to 1
+                $(`#qty-${id}`).val(1);
+            }
+        }
+
         // Quantity controls for menu items
         function setupQuantityControls() {
-            $(document).on('click', '.qty-btn', function() {
+            $(document).on('click', '.qty-btn', function(e) {
+                e.stopPropagation(); // Prevent triggering image click
+
                 const id = $(this).data('id');
                 const input = $(`#qty-${id}`);
                 let value = parseInt(input.val());
@@ -2232,7 +2277,9 @@
             });
 
             // Add to cart from menu items
-            $(document).on('click', '.add-to-cart-btn', function() {
+            $(document).on('click', '.add-to-cart-btn', function(e) {
+                e.stopPropagation(); // Prevent triggering image click
+
                 const id = $(this).data('id');
                 const name = $(this).data('name');
                 const price = parseFloat($(this).data('price'));
@@ -2263,6 +2310,19 @@
                     updateCartItemQty(index, -1);
                 } else if ($(this).hasClass('plus')) {
                     updateCartItemQty(index, 1);
+                }
+            });
+
+            // Handle clicks on the card image
+            $(document).on('click', '.item-image, .card-img-container', function(e) {
+                handleImageClick(e);
+            });
+
+            // Handle clicks on the card body (excluding quantity controls)
+            $(document).on('click', '.card-body', function(e) {
+                // Only trigger if not clicking on text links or other interactive elements
+                if (!$(e.target).is('a, button, input, .qty-control, .add-to-cart-btn')) {
+                    handleImageClick(e);
                 }
             });
         }

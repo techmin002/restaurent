@@ -107,6 +107,7 @@ Route::post('company-profile/videos/store', [CompanyProfileController::class, 'V
 
 
 
+    Route::get('/counter/today-state', [CounterController::class, 'getTodayCounter'])->name('getTodayCounter');
 });
 
 

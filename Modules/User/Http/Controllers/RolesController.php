@@ -35,7 +35,8 @@ class RolesController extends Controller
         ]);
 
         $role = Role::create([
-            'name' => $request->name
+            'name' => $request->name,
+            'guard_name' => 'web'
         ]);
 
         $role->givePermissionTo($request->permissions);

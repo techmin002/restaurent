@@ -40,7 +40,6 @@ class UsersController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         abort_if(Gate::denies('access_user_management'), 403);
 
         $request->validate([

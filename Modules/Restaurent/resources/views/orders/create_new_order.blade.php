@@ -3,34 +3,18 @@
 @section('title', 'New Order Request')
 @section('content')
     <style>
-        :root {
-            --primary-color: #2d3748;
-            --secondary-color: #4a5568;
-            --accent-color: #e53e3e;
-            --success-color: #38a169;
-            --warning-color: #dd6b20;
-            --info-color: #3182ce;
-            --light-bg: #f7fafc;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        body {
+        /* New Order Specific Styles */
+        .new-order-wrapper {
             background-color: #f5f7fb;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        .content-wrapper {
-            background-color: #f5f7fb;
-        }
-
         /* Menu Items Styling */
-        .menu-item .card {
+        .new-order-menu-item .card {
             border: 0;
             border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
             height: 100%;
             background: white;
@@ -38,29 +22,29 @@
             cursor: pointer;
         }
 
-        .menu-item .card:hover {
+        .new-order-menu-item .card:hover {
             transform: translateY(-5px);
-            box-shadow: var(--card-shadow-hover);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        .menu-item .card-img-container {
+        .new-order-menu-item .card-img-container {
             position: relative;
             overflow: hidden;
             height: 160px;
         }
 
-        .menu-item img {
+        .new-order-menu-item img {
             object-fit: cover;
             width: 100%;
             height: 100%;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .menu-item .card:hover img {
+        .new-order-menu-item .card:hover img {
             transform: scale(1.08);
         }
 
-        .category-badge {
+        .new-order-category-badge {
             position: absolute;
             top: 10px;
             left: 10px;
@@ -70,18 +54,18 @@
             border-radius: 20px;
             font-size: 0.7rem;
             font-weight: 600;
-            color: var(--primary-color);
+            color: #2d3748;
             z-index: 2;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .price-badge {
+        .new-order-price-badge {
             position: absolute;
             top: 10px;
             right: 10px;
             font-weight: 700;
             color: #fff;
-            background: linear-gradient(135deg, var(--accent-color), #c53030);
+            background: linear-gradient(135deg, #e53e3e, #c53030);
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -89,14 +73,14 @@
             box-shadow: 0 4px 10px rgba(229, 62, 62, 0.3);
         }
 
-        .card-body {
+        .new-order-card-body {
             padding: 1rem;
             display: flex;
             flex-direction: column;
             height: calc(100% - 160px);
         }
 
-        .card-title {
+        .new-order-card-title {
             font-weight: 700;
             color: #2d3748;
             margin-bottom: 0.5rem;
@@ -104,7 +88,7 @@
             line-height: 1.4;
         }
 
-        .card-text {
+        .new-order-card-text {
             color: #718096;
             font-size: 0.85rem;
             line-height: 1.5;
@@ -112,19 +96,19 @@
             margin-bottom: 0.75rem;
         }
 
-        .card-footer {
+        .new-order-card-footer {
             background: transparent;
             border-top: 1px solid #edf2f7;
             padding: 0.75rem 1rem;
         }
 
-        .qty-control {
+        .new-order-qty-control {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .qty-btn {
+        .new-order-qty-btn {
             width: 28px;
             height: 28px;
             border-radius: 50%;
@@ -135,16 +119,16 @@
             background: white;
             font-weight: bold;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 0.8rem;
         }
 
-        .qty-btn:hover {
+        .new-order-qty-btn:hover {
             background: #edf2f7;
             border-color: #cbd5e0;
         }
 
-        .qty-input {
+        .new-order-qty-input {
             width: 42px;
             text-align: center;
             border: 1px solid #e2e8f0;
@@ -154,13 +138,13 @@
             font-size: 0.85rem;
         }
 
-        .add-to-cart-btn {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        .new-order-add-to-cart-btn {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
             border: none;
             border-radius: 8px;
             padding: 6px 12px;
             font-weight: 600;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -168,23 +152,23 @@
             color: white;
         }
 
-        .add-to-cart-btn:hover {
+        .new-order-add-to-cart-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(45, 55, 72, 0.3);
             color: white;
         }
 
-        /* Category Navigation - IMPROVED DESIGN */
-        .category-nav-container {
+        /* Category Navigation */
+        .new-order-category-nav-container {
             background: white;
             border-radius: 12px;
             padding: 1.5rem;
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             margin-bottom: 1.5rem;
             border: 1px solid #e2e8f0;
         }
 
-        .category-scroll {
+        .new-order-category-scroll {
             display: flex;
             overflow-x: auto;
             padding-bottom: 5px;
@@ -193,21 +177,21 @@
             gap: 8px;
         }
 
-        .category-scroll::-webkit-scrollbar {
+        .new-order-category-scroll::-webkit-scrollbar {
             height: 6px;
         }
 
-        .category-scroll::-webkit-scrollbar-track {
+        .new-order-category-scroll::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 10px;
         }
 
-        .category-scroll::-webkit-scrollbar-thumb {
+        .new-order-category-scroll::-webkit-scrollbar-thumb {
             background: #cbd5e0;
             border-radius: 10px;
         }
 
-        .category-nav {
+        .new-order-category-nav {
             display: flex;
             gap: 8px;
             margin: 0;
@@ -215,12 +199,12 @@
             list-style: none;
         }
 
-        .category-nav .nav-link {
+        .new-order-category-nav .nav-link {
             padding: 12px 20px;
             border-radius: 10px;
             color: #4a5568;
             font-weight: 600;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             white-space: nowrap;
             font-size: 0.9rem;
@@ -230,26 +214,26 @@
             display: block;
         }
 
-        .category-nav .nav-link.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        .new-order-category-nav .nav-link.active {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
             color: white;
-            border-color: var(--primary-color);
+            border-color: #2d3748;
             box-shadow: 0 4px 12px rgba(45, 55, 72, 0.2);
         }
 
-        .category-nav .nav-link:not(.active):hover {
+        .new-order-category-nav .nav-link:not(.active):hover {
             background: #edf2f7;
             border-color: #cbd5e0;
             transform: translateY(-2px);
         }
 
         /* Search Bar */
-        .search-container {
+        .new-order-search-container {
             position: relative;
             margin-bottom: 1.5rem;
         }
 
-        .search-icon {
+        .new-order-search-icon {
             position: absolute;
             left: 12px;
             top: 50%;
@@ -258,7 +242,7 @@
             z-index: 3;
         }
 
-        .search-input {
+        .new-order-search-input {
             padding-left: 40px;
             border-radius: 10px;
             border: 1px solid #e2e8f0;
@@ -266,60 +250,60 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        .search-input:focus {
-            border-color: var(--primary-color);
+        .new-order-search-input:focus {
+            border-color: #2d3748;
             box-shadow: 0 0 0 3px rgba(45, 55, 72, 0.1);
         }
 
         /* Cart Sidebar */
-        #cart-sidebar {
+        .new-order-cart-sidebar {
             position: sticky;
             top: 90px;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             border: none;
         }
 
-        .cart-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        .new-order-cart-header {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
             color: white;
             padding: 1.25rem;
         }
 
-        .cart-item {
+        .new-order-cart-item {
             border-bottom: 1px solid #edf2f7;
             padding: 12px 15px;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .cart-item:hover {
+        .new-order-cart-item:hover {
             background: #f7fafc;
         }
 
-        .cart-item:last-child {
+        .new-order-cart-item:last-child {
             border-bottom: none;
         }
 
-        .cart-item-name {
+        .new-order-cart-item-name {
             font-weight: 600;
             color: #2d3748;
             margin-bottom: 4px;
             font-size: 0.9rem;
         }
 
-        .cart-item-details {
+        .new-order-cart-item-details {
             color: #718096;
             font-size: 0.8rem;
         }
 
-        .cart-controls {
+        .new-order-cart-controls {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .cart-qty-btn {
+        .new-order-cart-qty-btn {
             width: 24px;
             height: 24px;
             border-radius: 50%;
@@ -330,80 +314,80 @@
             background: white;
             font-size: 0.7rem;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .cart-qty-btn:hover {
+        .new-order-cart-qty-btn:hover {
             background: #edf2f7;
         }
 
-        .remove-btn {
+        .new-order-remove-btn {
             color: #e53e3e;
             background: none;
             border: none;
             cursor: pointer;
             padding: 4px;
             border-radius: 4px;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 0.8rem;
         }
 
-        .remove-btn:hover {
+        .new-order-remove-btn:hover {
             background: #fed7d7;
         }
 
-        .empty-cart {
+        .new-order-empty-cart {
             color: #a0aec0;
             text-align: center;
             padding: 2rem 1rem;
         }
 
-        .empty-cart-icon {
+        .new-order-empty-cart-icon {
             font-size: 2.5rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
 
-        .cart-footer {
+        .new-order-cart-footer {
             background: #f7fafc;
             padding: 1.25rem;
             border-top: 1px solid #edf2f7;
         }
 
-        .total-row {
+        .new-order-total-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 6px 0;
         }
 
-        .checkout-btn {
-            background: linear-gradient(135deg, var(--success-color), #2f855a);
+        .new-order-checkout-btn {
+            background: linear-gradient(135deg, #38a169, #2f855a);
             border: none;
             border-radius: 10px;
             padding: 12px;
             font-weight: 600;
             width: 100%;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-top: 1rem;
             color: white;
         }
 
-        .checkout-btn:hover {
+        .new-order-checkout-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(56, 161, 105, 0.3);
             color: white;
         }
 
         /* Order Details Section */
-        .order-details-card {
+        .new-order-details-card {
             border-radius: 12px;
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             border: none;
             margin-bottom: 1.5rem;
         }
 
-        .order-details-header {
+        .new-order-details-header {
             background: #f7fafc;
             padding: 1rem 1.25rem;
             border-bottom: 1px solid #edf2f7;
@@ -411,84 +395,70 @@
             color: #2d3748;
         }
 
-        .order-details-body {
+        .new-order-details-body {
             padding: 1.25rem;
         }
 
-        .form-group {
+        .new-order-form-group {
             margin-bottom: 1rem;
         }
 
-        .form-label {
+        .new-order-form-label {
             font-weight: 600;
             color: #4a5568;
             margin-bottom: 0.5rem;
             font-size: 0.9rem;
         }
 
-        .form-control,
-        .form-select {
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(45, 55, 72, 0.1);
-        }
-
-        .radio-group {
+        .new-order-radio-group {
             display: flex;
             gap: 1rem;
         }
 
-        .radio-option {
+        .new-order-radio-option {
             flex: 1;
         }
 
-        .radio-option input {
+        .new-order-radio-option input {
             display: none;
         }
 
-        .radio-option label {
+        .new-order-radio-option label {
             display: block;
             padding: 10px;
             text-align: center;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
             font-size: 0.9rem;
         }
 
-        .radio-option input:checked+label {
-            background: var(--primary-color);
+        .new-order-radio-option input:checked+label {
+            background: #2d3748;
             color: white;
-            border-color: var(--primary-color);
+            border-color: #2d3748;
         }
 
-        .radio-option label:hover {
-            border-color: var(--primary-color);
+        .new-order-radio-option label:hover {
+            border-color: #2d3748;
         }
 
-        .discount-controls {
+        .new-order-discount-controls {
             display: flex;
             gap: 10px;
         }
 
-        .discount-type {
+        .new-order-discount-type {
             flex: 0 0 100px;
         }
 
-        .discount-value {
+        .new-order-discount-value {
             flex: 1;
         }
 
-        .section-title {
+        .new-order-section-title {
             color: #2d3748;
             font-weight: 700;
             margin-bottom: 1rem;
@@ -497,33 +467,33 @@
             font-size: 1.1rem;
         }
 
-        .section-title:after {
+        .new-order-section-title:after {
             content: '';
             position: absolute;
             bottom: 0;
             left: 0;
             width: 40px;
             height: 3px;
-            background: var(--primary-color);
+            background: #2d3748;
             border-radius: 3px;
         }
 
         /* Order Type Specific Fields */
-        .order-type-field {
+        .new-order-type-field {
             display: none;
             opacity: 0;
             transform: translateY(-10px);
             transition: all 0.3s ease;
         }
 
-        .order-type-field.show {
+        .new-order-type-field.show {
             display: block;
             opacity: 1;
             transform: translateY(0);
         }
 
         /* Customer Details Section */
-        .customer-details-section {
+        .new-order-customer-details {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 1rem;
@@ -531,14 +501,8 @@
             border: 1px solid #e9ecef;
         }
 
-        .customer-details-section h6 {
-            color: #495057;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-        }
-
         /* Modal Styles */
-        .modal-overlay {
+        .new-order-modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -551,15 +515,15 @@
             z-index: 9999;
             opacity: 0;
             visibility: hidden;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .modal-overlay.active {
+        .new-order-modal-overlay.active {
             opacity: 1;
             visibility: visible;
         }
 
-        .item-modal {
+        .new-order-item-modal {
             background: white;
             border-radius: 16px;
             width: 90%;
@@ -568,16 +532,16 @@
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             transform: translateY(20px);
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
 
-        .modal-overlay.active .item-modal {
+        .new-order-modal-overlay.active .new-order-item-modal {
             transform: translateY(0);
         }
 
-        .modal-header {
+        .new-order-modal-header {
             padding: 1.5rem;
             border-bottom: 1px solid #edf2f7;
             display: flex;
@@ -585,20 +549,20 @@
             align-items: center;
         }
 
-        .modal-title {
+        .new-order-modal-title {
             font-weight: 700;
             color: #2d3748;
             margin: 0;
             font-size: 1.5rem;
         }
 
-        .close-modal {
+        .new-order-close-modal {
             background: none;
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
             color: #a0aec0;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -607,12 +571,12 @@
             justify-content: center;
         }
 
-        .close-modal:hover {
+        .new-order-close-modal:hover {
             background: #f7fafc;
             color: #4a5568;
         }
 
-        .modal-body {
+        .new-order-modal-body {
             padding: 0;
             display: flex;
             flex-direction: column;
@@ -620,103 +584,103 @@
             flex-grow: 1;
         }
 
-        .modal-content {
+        .new-order-modal-content {
             display: flex;
             flex-direction: column;
             height: 100%;
             overflow: auto;
         }
 
-        .modal-image-section {
+        .new-order-modal-image-section {
             position: relative;
             height: 300px;
             overflow: hidden;
         }
 
-        .modal-image {
+        .new-order-modal-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .modal-details {
+        .new-order-modal-details {
             padding: 1.5rem;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
 
-        .item-name {
+        .new-order-modal-item-name {
             font-size: 1.75rem;
             font-weight: 700;
             color: #2d3748;
             margin-bottom: 0.5rem;
         }
 
-        .item-price {
+        .new-order-modal-item-price {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--accent-color);
+            color: #e53e3e;
             margin-bottom: 1rem;
         }
 
-        .item-description {
+        .new-order-modal-item-description {
             color: #718096;
             line-height: 1.6;
             margin-bottom: 1.5rem;
             font-size: 1rem;
         }
 
-        .variants-section {
+        .new-order-variants-section {
             margin-bottom: 1.5rem;
         }
 
-        .variants-title {
+        .new-order-variants-title {
             font-weight: 600;
             color: #4a5568;
             margin-bottom: 0.75rem;
             font-size: 1rem;
         }
 
-        .variants-container {
+        .new-order-variants-container {
             display: flex;
             flex-wrap: wrap;
             gap: 0.75rem;
         }
 
-        .variant-option {
+        .new-order-variant-option {
             flex: 1;
             min-width: 120px;
         }
 
-        .variant-option input {
+        .new-order-variant-option input {
             display: none;
         }
 
-        .variant-option label {
+        .new-order-variant-option label {
             display: block;
             padding: 10px 15px;
             text-align: center;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
             font-size: 0.9rem;
             background: white;
         }
 
-        .variant-option input:checked+label {
-            background: var(--primary-color);
+        .new-order-variant-option input:checked+label {
+            background: #2d3748;
             color: white;
-            border-color: var(--primary-color);
+            border-color: #2d3748;
         }
 
-        .variant-option label:hover {
-            border-color: var(--primary-color);
+        .new-order-variant-option label:hover {
+            border-color: #2d3748;
         }
 
-        .modal-actions {
+        .new-order-modal-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -725,13 +689,13 @@
             border-top: 1px solid #edf2f7;
         }
 
-        .modal-qty-control {
+        .new-order-modal-qty-control {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .modal-qty-btn {
+        .new-order-modal-qty-btn {
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -742,16 +706,16 @@
             background: white;
             font-weight: bold;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 1rem;
         }
 
-        .modal-qty-btn:hover {
+        .new-order-modal-qty-btn:hover {
             background: #edf2f7;
             border-color: #cbd5e0;
         }
 
-        .modal-qty-input {
+        .new-order-modal-qty-input {
             width: 60px;
             text-align: center;
             border: 1px solid #e2e8f0;
@@ -761,13 +725,13 @@
             font-size: 1rem;
         }
 
-        .modal-add-btn {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        .new-order-modal-add-btn {
+            background: linear-gradient(135deg, #2d3748, #4a5568);
             border: none;
             border-radius: 10px;
             padding: 12px 24px;
             font-weight: 600;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -775,21 +739,14 @@
             color: white;
         }
 
-        .modal-add-btn:hover {
+        .new-order-modal-add-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(45, 55, 72, 0.3);
             color: white;
         }
 
-        .modal-add-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
         /* Recent Orders Styling */
-        .recent-orders {
+        .new-order-recent-orders {
             max-height: 200px;
             overflow-y: auto;
             padding: 16px;
@@ -801,7 +758,7 @@
             display: none;
         }
 
-        .recent-orders-header {
+        .new-order-recent-orders-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -810,15 +767,8 @@
             border-bottom: 1px solid #e1e5ff;
         }
 
-        .recent-orders-header h6 {
-            margin: 0;
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .recent-orders-count {
-            background: var(--primary-color);
+        .new-order-recent-orders-count {
+            background: #2d3748;
             color: white;
             padding: 2px 8px;
             border-radius: 12px;
@@ -826,22 +776,22 @@
             font-weight: 600;
         }
 
-        .recent-orders .order-item {
+        .new-order-recent-orders .order-item {
             padding: 12px;
             border-radius: 10px;
             background: white;
             margin-bottom: 10px;
-            border-left: 4px solid var(--primary-color);
+            border-left: 4px solid #2d3748;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .recent-orders .order-item:hover {
+        .new-order-recent-orders .order-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
-        .recent-orders .order-header {
+        .new-order-recent-orders .order-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -849,60 +799,35 @@
             font-weight: 600;
         }
 
-        .recent-orders .order-id {
-            font-size: 0.85rem;
-            color: var(--primary-color);
-        }
-
-        .recent-orders .order-status {
+        .new-order-recent-orders .order-status {
             font-size: 0.7rem;
             padding: 4px 8px;
             border-radius: 20px;
             font-weight: 600;
         }
 
-        .recent-orders .status-pending {
+        .new-order-recent-orders .status-pending {
             background: #fff3cd;
             color: #856404;
         }
 
-        .recent-orders .status-preparing {
+        .new-order-recent-orders .status-preparing {
             background: #cce7ff;
             color: #004085;
         }
 
-        .recent-orders .status-ready {
+        .new-order-recent-orders .status-ready {
             background: #d1ecf1;
             color: #0c5460;
         }
 
-        .recent-orders .status-completed {
+        .new-order-recent-orders .status-completed {
             background: #d1f7e4;
             color: #0f5132;
         }
 
-        .recent-orders .order-time {
-            font-size: 0.75rem;
-            color: var(--muted);
-            margin-bottom: 8px;
-        }
-
-        .recent-orders .order-items {
-            font-size: 0.8rem;
-            color: var(--muted);
-            line-height: 1.4;
-            margin-bottom: 8px;
-        }
-
-        .recent-orders .order-total {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            text-align: right;
-        }
-
         /* Recent Orders Total Display */
-        .recent-orders-total {
+        .new-order-recent-orders-total {
             background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
             border-radius: 10px;
             padding: 12px 16px;
@@ -912,33 +837,33 @@
             display: none;
         }
 
-        .recent-orders-total-header {
+        .new-order-recent-orders-total-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
 
-        .recent-orders-total-label {
+        .new-order-recent-orders-total-label {
             font-weight: 600;
             color: #1565c0;
             font-size: 0.9rem;
         }
 
-        .recent-orders-total-value {
+        .new-order-recent-orders-total-value {
             font-weight: 700;
             color: #0d47a1;
             font-size: 1rem;
         }
 
-        .recent-orders-total-note {
+        .new-order-recent-orders-total-note {
             font-size: 0.75rem;
             color: #1976d2;
             font-style: italic;
         }
 
         /* Combined Total Display */
-        .combined-total {
+        .new-order-combined-total {
             background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
             border-radius: 10px;
             padding: 12px 16px;
@@ -948,120 +873,52 @@
             display: none;
         }
 
-        .combined-total-header {
+        .new-order-combined-total-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
 
-        .combined-total-label {
+        .new-order-combined-total-label {
             font-weight: 600;
             color: #2e7d32;
             font-size: 0.9rem;
         }
 
-        .combined-total-value {
+        .new-order-combined-total-value {
             font-weight: 700;
             color: #1b5e20;
             font-size: 1.1rem;
         }
 
-        .combined-total-note {
+        .new-order-combined-total-note {
             font-size: 0.75rem;
             color: #388e3c;
             font-style: italic;
         }
 
         /* Update Mode Button */
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning-color), #b45309) !important;
+        .new-order-update-btn {
+            background: linear-gradient(135deg, #dd6b20, #b45309) !important;
             border: none;
             border-radius: 10px;
             padding: 12px;
             font-weight: 600;
             width: 100%;
-            transition: var(--transition);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-top: 1rem;
             color: white;
         }
 
-        .btn-warning:hover {
+        .new-order-update-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(221, 107, 32, 0.3);
             color: white;
         }
 
-        @media (min-width: 768px) {
-            .modal-content {
-                flex-direction: row;
-            }
-
-            .modal-image-section {
-                flex: 0 0 45%;
-                height: auto;
-            }
-
-            .modal-details {
-                flex: 0 0 55%;
-                overflow-y: auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .menu-item {
-                margin-bottom: 1.5rem;
-            }
-
-            .category-nav .nav-link {
-                margin-bottom: 8px;
-            }
-
-            .radio-group {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .modal-actions {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .modal-qty-control {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .modal-add-btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* Enhanced Table Dropdown Styling */
-        .table-dropdown-container {
-            position: relative;
-        }
-
-        .table-dropdown-container .form-select {
-            border-radius: 10px;
-            border: 2px solid #e2e8f0;
-            padding: 12px 16px;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 12px center;
-            background-repeat: no-repeat;
-            background-size: 16px;
-        }
-
-        .table-dropdown-container .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(45, 55, 72, 0.1);
-        }
-
         /* Table Status Indicators */
-        .table-status {
+        .new-order-table-status {
             display: inline-block;
             width: 8px;
             height: 8px;
@@ -1069,39 +926,66 @@
             margin-right: 8px;
         }
 
-        .table-status-available {
-            background-color: var(--success-color);
+        .new-order-table-status-available {
+            background-color: #38a169;
         }
 
-        .table-status-occupied {
-            background-color: var(--accent-color);
+        .new-order-table-status-occupied {
+            background-color: #e53e3e;
         }
 
-        .table-status-reserved {
-            background-color: var(--warning-color);
+        .new-order-table-status-reserved {
+            background-color: #dd6b20;
         }
 
-        /* Table Option Styling */
-        .table-option {
-            display: flex;
-            align-items: center;
-            padding: 8px 12px;
+        @media (min-width: 768px) {
+            .new-order-modal-content {
+                flex-direction: row;
+            }
+
+            .new-order-modal-image-section {
+                flex: 0 0 45%;
+                height: auto;
+            }
+
+            .new-order-modal-details {
+                flex: 0 0 55%;
+                overflow-y: auto;
+            }
         }
 
-        .table-info {
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
-        }
+        @media (max-width: 768px) {
+            .new-order-menu-item {
+                margin-bottom: 1.5rem;
+            }
 
-        .table-capacity {
-            font-size: 0.8rem;
-            color: #718096;
-            margin-left: auto;
+            .new-order-category-nav .nav-link {
+                margin-bottom: 8px;
+            }
+
+            .new-order-radio-group {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .new-order-modal-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .new-order-modal-qty-control {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .new-order-modal-add-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 
-    <div class="content-wrapper">
+    <div class="content-wrapper new-order-wrapper">
         <!-- Content Header -->
         <section class="content-header">
             <div class="container-fluid">
@@ -1126,17 +1010,17 @@
                     <!-- Left Column - Menu Items -->
                     <div class="col-lg-8">
                         <!-- Search Bar -->
-                        <div class="search-container">
-                            <i class="fas fa-search search-icon" style="left:16px;"></i>
-                            <input id="search-input" class="form-control search-input" type="search"
+                        <div class="new-order-search-container">
+                            <i class="fas fa-search new-order-search-icon" style="left:16px;"></i>
+                            <input id="new-order-search-input" class="form-control new-order-search-input" type="search"
                                 placeholder="Search menu items..." aria-label="Search" style="padding-left:48px;">
                         </div>
 
-                        <!-- Categories Navigation - IMPROVED DESIGN -->
-                        <div class="category-nav-container">
-                            <h5 class="section-title">Categories</h5>
-                            <div class="category-scroll">
-                                <ul class="category-nav">
+                        <!-- Categories Navigation -->
+                        <div class="new-order-category-nav-container">
+                            <h5 class="new-order-section-title">Categories</h5>
+                            <div class="new-order-category-scroll">
+                                <ul class="new-order-category-nav">
                                     <li>
                                         <a class="nav-link active" data-category="all">All Items</a>
                                     </li>
@@ -1151,34 +1035,41 @@
                         </div>
 
                         <!-- Menu Items Grid -->
-                        <div class="row" id="menu-items">
+                        <div class="row" id="new-order-menu-items">
                             @foreach ($menus as $item)
-                                <div class="col-xl-3 col-lg-4 col-md-6 mb-4 menu-item"
-                                    data-category="{{ $item->category_id }}" data-name="{{ strtolower($item->name) }}">
+                                <div class="col-xl-3 col-lg-4 col-md-6 mb-4 new-order-menu-item"
+                                    data-category="{{ $item->category_id }}" data-name="{{ strtolower($item->name) }}"
+                                    data-has-variants="{{ $item->variations && count($item->variations) > 0 ? 'true' : 'false' }}">
                                     <div class="card h-100">
-                                        <div class="card-img-container">
+                                        <div class="new-order-card-img-container">
                                             <img src="{{ asset('upload/images/menu/' . $item['image']) }}"
-                                                alt="{{ $item->name }}" class="item-image" data-id="{{ $item->id }}">
-                                            <span class="category-badge">{{ $item->category_name }}</span>
-                                            <span class="price-badge">Rs {{ number_format($item->price, 2) }}</span>
+                                                alt="{{ $item->name }}" class="new-order-item-image"
+                                                data-id="{{ $item->id }}" data-name="{{ $item->name }}"
+                                                data-price="{{ $item->price }}">
+                                            <span class="new-order-category-badge">{{ $item->category_name }}</span>
+                                            <span class="new-order-price-badge">Rs
+                                                {{ number_format($item->price, 2) }}</span>
                                         </div>
-                                        <div class="card-body" style="height:auto; padding-bottom:0.4rem;">
-                                            <h5 class="card-title" style="margin-bottom:0.25rem;">{{ $item->name }}</h5>
-                                            <p class="card-text" style="margin-bottom:0.15rem;">
+                                        <div class="new-order-card-body" style="height:auto; padding-bottom:0.4rem;">
+                                            <h5 class="new-order-card-title" style="margin-bottom:0.25rem;">
+                                                {{ $item->name }}</h5>
+                                            <p class="new-order-card-text" style="margin-bottom:0.15rem;">
                                                 {{ Str::limit($item->description, 80) }}</p>
                                         </div>
-                                        <div class="card-footer" style="padding-top:0.35rem;">
+                                        <div class="new-order-card-footer" style="padding-top:0.35rem;">
                                             <div class="d-flex flex-column align-items-center">
-                                                <div class="qty-control d-flex align-items-center mb-2">
-                                                    <button class="qty-btn minus" data-id="{{ $item->id }}">-</button>
-                                                    <input type="number" min="1" value="1" class="qty-input"
-                                                        id="qty-{{ $item->id }}"
+                                                <div class="new-order-qty-control d-flex align-items-center mb-2">
+                                                    <button class="new-order-qty-btn minus"
+                                                        data-id="{{ $item->id }}">-</button>
+                                                    <input type="number" min="1" value="1"
+                                                        class="new-order-qty-input" id="new-order-qty-{{ $item->id }}"
                                                         style="width:64px;padding:6px 8px;text-align:center;">
-                                                    <button class="qty-btn plus" data-id="{{ $item->id }}">+</button>
+                                                    <button class="new-order-qty-btn plus"
+                                                        data-id="{{ $item->id }}">+</button>
                                                 </div>
 
                                                 <div class="w-100 d-flex justify-content-center">
-                                                    <button type="button" class="btn btn-primary add-to-cart-btn"
+                                                    <button type="button" class="btn btn-primary new-order-add-to-cart-btn"
                                                         data-id="{{ $item->id }}" data-name="{{ $item->name }}"
                                                         data-price="{{ $item->price }}" style="white-space:nowrap;">
                                                         <i class="fas fa-cart-plus me-1"></i> Add
@@ -1195,24 +1086,24 @@
                     <!-- Right Column - Cart and Order Details -->
                     <div class="col-lg-4">
                         <!-- Order Details Card -->
-                        <div class="card order-details-card">
-                            <div class="order-details-header">
+                        <div class="card new-order-details-card">
+                            <div class="new-order-details-header">
                                 Order Details
                             </div>
-                            <div class="order-details-body">
+                            <div class="new-order-details-body">
                                 <!-- Order Type -->
-                                <div class="form-group">
-                                    <label class="form-label">Order Type</label>
-                                    <div class="radio-group">
-                                        <div class="radio-option">
-                                            <input type="radio" id="dineIn" name="orderType" value="dineIn" checked>
+                                <div class="new-order-form-group">
+                                    <label class="new-order-form-label">Order Type</label>
+                                    <div class="new-order-radio-group">
+                                        <div class="new-order-radio-option">
+                                            <input type="radio" id="dineIn" name="orderType" value="dine_in" checked>
                                             <label for="dineIn">Dine In</label>
                                         </div>
-                                        <div class="radio-option">
-                                            <input type="radio" id="takeAway" name="orderType" value="takeAway">
+                                        <div class="new-order-radio-option">
+                                            <input type="radio" id="takeAway" name="orderType" value="take_away">
                                             <label for="takeAway">Take Away</label>
                                         </div>
-                                        <div class="radio-option">
+                                        <div class="new-order-radio-option">
                                             <input type="radio" id="office" name="orderType" value="office">
                                             <label for="office">Office</label>
                                         </div>
@@ -1220,8 +1111,8 @@
                                 </div>
 
                                 <!-- Dine In Table Number Field -->
-                                <div class="form-group order-type-field show" id="dineInField">
-                                    <label for="tableNumber" class="form-label">Select Table</label>
+                                <div class="new-order-form-group new-order-type-field show" id="dineInField">
+                                    <label for="tableNumber" class="new-order-form-label">Select Table</label>
                                     <select class="form-control" id="tableNumber" name="table_number">
                                         <option value="">-- Select Table --</option>
                                         @foreach ($tables as $table)
@@ -1240,8 +1131,8 @@
                                 </div>
 
                                 <!-- Office Selection Field -->
-                                <div class="form-group order-type-field" id="officeField">
-                                    <label for="officeSelect" class="form-label">Select Office</label>
+                                <div class="new-order-form-group new-order-type-field" id="officeField">
+                                    <label for="officeSelect" class="new-order-form-label">Select Office</label>
                                     <select class="form-control" id="officeSelect" name="office_id">
                                         <option value="">-- Select Office --</option>
                                         <!-- Offices will be populated dynamically -->
@@ -1249,56 +1140,58 @@
                                 </div>
 
                                 <!-- Customer Details Section - Hidden for Office orders -->
-                                <div class="customer-details-section" id="customerDetails">
+                                <div class="new-order-customer-details" id="customerDetails">
                                     <h6><i class="fas fa-user me-2"></i>Customer Details</h6>
 
                                     <!-- Customer Contact Number -->
-                                    <div class="form-group">
-                                        <label for="customerPhone" class="form-label">Phone Number</label>
+                                    <div class="new-order-form-group">
+                                        <label for="customerPhone" class="new-order-form-label">Phone Number</label>
                                         <input type="text" class="form-control" id="customerPhone"
-                                            placeholder="Enter phone number">
+                                            name="customer_phone" placeholder="Enter phone number">
                                     </div>
 
                                     <!-- Customer Name -->
-                                    <div class="form-group">
-                                        <label for="customerName" class="form-label">Customer Name</label>
+                                    <div class="new-order-form-group">
+                                        <label for="customerName" class="new-order-form-label">Customer Name</label>
                                         <input type="text" class="form-control" id="customerName"
-                                            placeholder="Enter customer name">
+                                            name="customer_name" placeholder="Enter customer name">
                                     </div>
                                 </div>
 
                                 <!-- Discount Section -->
-                                <div class="form-group">
-                                    <label class="form-label">Discount</label>
-                                    <div class="discount-controls">
-                                        <select class="form-select discount-type" id="discountType">
+                                <div class="new-order-form-group">
+                                    <label class="new-order-form-label">Discount</label>
+                                    <div class="new-order-discount-controls">
+                                        <select class="form-select new-order-discount-type" id="discountType"
+                                            name="discount_type">
                                             <option value="flat">Flat (Rs)</option>
                                             <option value="percent">Percentage (%)</option>
                                         </select>
-                                        <input type="number" class="form-control discount-value" id="discountValue"
-                                            placeholder="0.00" min="0" step="0.01">
+                                        <input type="number" class="form-control new-order-discount-value"
+                                            id="discountValue" name="discount_value" placeholder="0.00" min="0"
+                                            step="0.01">
                                     </div>
                                 </div>
 
                                 <!-- VAT Section -->
-                                <div class="form-group">
-                                    <label for="vat" class="form-label">VAT (%)</label>
-                                    <input type="number" class="form-control" id="vat" value="13"
-                                        min="0" max="100" step="0.01">
+                                <div class="new-order-form-group">
+                                    <label for="vat" class="new-order-form-label">VAT (%)</label>
+                                    <input type="number" class="form-control" id="vat" name="vat"
+                                        value="13" min="0" max="100" step="0.01">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Cart Sidebar -->
-                        <div id="cart-sidebar" class="card">
-                            <div class="cart-header">
+                        <div id="new-order-cart-sidebar" class="card new-order-cart-sidebar">
+                            <div class="new-order-cart-header">
                                 <h5 class="card-title mb-1">Current Order</h5>
-                                <small id="cart-count">0 items</small>
+                                <small id="new-order-cart-count">0 items</small>
                             </div>
                             <div class="card-body p-0">
-                                <div id="cart-items-list" style="max-height: 300px; overflow-y: auto;">
-                                    <div class="empty-cart">
-                                        <div class="empty-cart-icon">
+                                <div id="new-order-cart-items-list" style="max-height: 300px; overflow-y: auto;">
+                                    <div class="new-order-empty-cart">
+                                        <div class="new-order-empty-cart-icon">
                                             <i class="fas fa-shopping-cart"></i>
                                         </div>
                                         <p>Your cart is empty</p>
@@ -1307,60 +1200,64 @@
                                 </div>
                             </div>
 
-                            <div class="cart-footer">
-                                <div class="total-row">
+                            <div class="new-order-cart-footer">
+                                <div class="new-order-total-row">
                                     <span>Subtotal</span>
-                                    <span id="cart-subtotal">Rs 0.00</span>
+                                    <span id="new-order-cart-subtotal">Rs 0.00</span>
                                 </div>
-                                <div class="total-row">
+                                <div class="new-order-total-row">
                                     <span>Discount</span>
-                                    <span id="cart-discount">Rs 0.00</span>
+                                    <span id="new-order-cart-discount">Rs 0.00</span>
                                 </div>
-                                <div class="total-row">
-                                    <span>VAT (<span id="vat-percent">13</span>%)</span>
-                                    <span id="cart-vat">Rs 0.00</span>
+                                <div class="new-order-total-row">
+                                    <span>VAT (<span id="new-order-vat-percent">13</span>%)</span>
+                                    <span id="new-order-cart-vat">Rs 0.00</span>
                                 </div>
-                                <div class="total-row mb-2" style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                                <div class="new-order-total-row mb-2"
+                                    style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
                                     <strong>Total</strong>
-                                    <strong id="cart-total">Rs 0.00</strong>
+                                    <strong id="new-order-cart-total">Rs 0.00</strong>
                                 </div>
 
                                 <!-- Recent Orders Total Display -->
-                                <div class="recent-orders-total" id="recent-orders-total">
-                                    <div class="recent-orders-total-header">
-                                        <span class="recent-orders-total-label">Recent Orders Total</span>
-                                        <span class="recent-orders-total-value" id="recent-orders-total-value">Rs
+                                <div class="new-order-recent-orders-total" id="new-order-recent-orders-total">
+                                    <div class="new-order-recent-orders-total-header">
+                                        <span class="new-order-recent-orders-total-label">Recent Orders Total</span>
+                                        <span class="new-order-recent-orders-total-value"
+                                            id="new-order-recent-orders-total-value">Rs
                                             0.00</span>
                                     </div>
-                                    <div class="recent-orders-total-note">Total from previous orders</div>
+                                    <div class="new-order-recent-orders-total-note">Total from previous orders</div>
                                 </div>
 
                                 <!-- Combined Total Display -->
-                                <div class="combined-total" id="combined-total">
-                                    <div class="combined-total-header">
-                                        <span class="combined-total-label">Combined Total</span>
-                                        <span class="combined-total-value" id="combined-total-value">Rs 0.00</span>
+                                <div class="new-order-combined-total" id="new-order-combined-total">
+                                    <div class="new-order-combined-total-header">
+                                        <span class="new-order-combined-total-label">Combined Total</span>
+                                        <span class="new-order-combined-total-value"
+                                            id="new-order-combined-total-value">Rs 0.00</span>
                                     </div>
-                                    <div class="combined-total-note">Current order + Recent orders</div>
+                                    <div class="new-order-combined-total-note">Current order + Recent orders</div>
                                 </div>
 
-                                <form id="checkout-form" action="{{ route('orders.menus.store') }}" method="POST">
+                                <form id="new-order-checkout-form" action="{{ route('orders.menus.store') }}"
+                                    method="POST">
                                     @csrf
-                                    <input type="hidden" name="order_items" id="order_items_input">
-                                    <input type="hidden" name="order_type" id="order_type_input" value="dineIn">
-                                    <input type="hidden" name="customer_name" id="customer_name_input">
-                                    <input type="hidden" name="customer_phone" id="customer_phone_input">
-                                    <input type="hidden" name="office_id" id="office_id_input">
-                                    <input type="hidden" name="table_number" id="table_number_input">
-                                    <!-- Store table ID for relations -->
-                                    <input type="hidden" name="table_id" id="table_id_input">
-                                    <input type="hidden" name="discount_type" id="discount_type_input" value="flat">
-                                    <input type="hidden" name="discount_value" id="discount_value_input"
+                                    <input type="hidden" name="order_items" id="new-order-order-items-input">
+                                    <input type="hidden" name="order_type" id="new-order-order-type-input"
+                                        value="dine_in">
+                                    <input type="hidden" name="customer_name" id="new-order-customer-name-input">
+                                    <input type="hidden" name="customer_phone" id="new-order-customer-phone-input">
+                                    <input type="hidden" name="office_id" id="new-order-office-id-input">
+                                    <input type="hidden" name="table_number" id="new-order-table-number-input">
+                                    <input type="hidden" name="discount_type" id="new-order-discount-type-input"
+                                        value="flat">
+                                    <input type="hidden" name="discount_value" id="new-order-discount-value-input"
                                         value="0">
-                                    <input type="hidden" name="vat" id="vat_input" value="13">
-                                    <input type="hidden" name="recent_orders_total" id="recent_orders_total_input"
-                                        value="0">
-                                    <button type="submit" class="btn checkout-btn">Place Order</button>
+                                    <input type="hidden" name="vat" id="new-order-vat-input" value="13">
+                                    <input type="hidden" name="recent_orders_total"
+                                        id="new-order-recent-orders-total-input" value="0">
+                                    <button type="submit" class="btn new-order-checkout-btn">Place Order</button>
                                 </form>
                             </div>
                         </div>
@@ -1375,40 +1272,40 @@
     </div>
 
     <!-- Item Modal -->
-    <div class="modal-overlay" id="item-modal">
-        <div class="item-modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Item Details</h3>
-                <button class="close-modal" id="close-modal">
+    <div class="new-order-modal-overlay" id="new-order-item-modal">
+        <div class="new-order-item-modal">
+            <div class="new-order-modal-header">
+                <h3 class="new-order-modal-title">Item Details</h3>
+                <button class="new-order-close-modal" id="new-order-close-modal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="modal-content">
-                    <div class="modal-image-section">
-                        <img src="" alt="Item Image" class="modal-image" id="modal-image">
+            <div class="new-order-modal-body">
+                <div class="new-order-modal-content">
+                    <div class="new-order-modal-image-section">
+                        <img src="" alt="Item Image" class="new-order-modal-image" id="new-order-modal-image">
                     </div>
-                    <div class="modal-details">
-                        <h2 class="item-name" id="modal-item-name"></h2>
-                        <div class="item-price" id="modal-item-price"></div>
-                        <p class="item-description" id="modal-item-description"></p>
+                    <div class="new-order-modal-details">
+                        <h2 class="new-order-modal-item-name" id="new-order-modal-item-name"></h2>
+                        <div class="new-order-modal-item-price" id="new-order-modal-item-price"></div>
+                        <p class="new-order-modal-item-description" id="new-order-modal-item-description"></p>
 
                         <!-- Variants Section -->
-                        <div class="variants-section" id="variants-section" style="display: none;">
-                            <h4 class="variants-title">Choose Variant</h4>
-                            <div class="variants-container" id="variants-container">
+                        <div class="new-order-variants-section" id="new-order-variants-section" style="display: none;">
+                            <h4 class="new-order-variants-title">Choose Variant</h4>
+                            <div class="new-order-variants-container" id="new-order-variants-container">
                                 <!-- Variants will be dynamically added here -->
                             </div>
                         </div>
 
-                        <div class="modal-actions">
-                            <div class="modal-qty-control">
-                                <button class="modal-qty-btn" id="modal-minus">-</button>
-                                <input type="number" min="1" value="1" class="modal-qty-input"
-                                    id="modal-qty">
-                                <button class="modal-qty-btn" id="modal-plus">+</button>
+                        <div class="new-order-modal-actions">
+                            <div class="new-order-modal-qty-control">
+                                <button class="new-order-modal-qty-btn" id="new-order-modal-minus">-</button>
+                                <input type="number" min="1" value="1" class="new-order-modal-qty-input"
+                                    id="new-order-modal-qty">
+                                <button class="new-order-modal-qty-btn" id="new-order-modal-plus">+</button>
                             </div>
-                            <button class="modal-add-btn" id="modal-add-to-cart">
+                            <button class="new-order-modal-add-btn" id="new-order-modal-add-to-cart">
                                 <i class="fas fa-cart-plus"></i> Add Item!
                             </button>
                         </div>
@@ -1419,69 +1316,62 @@
     </div>
 
     <script>
-        (function() {
-            const cart = [];
-            const menuContainer = document.getElementById('menu-items');
-            const cartItemsList = document.getElementById('cart-items-list');
-            const cartCount = document.getElementById('cart-count');
-            const cartSubtotal = document.getElementById('cart-subtotal');
-            const cartDiscount = document.getElementById('cart-discount');
-            const cartVat = document.getElementById('cart-vat');
-            const cartTotal = document.getElementById('cart-total');
-            const vatPercent = document.getElementById('vat-percent');
-            const orderItemsInput = document.getElementById('order_items_input');
+        // New Order JavaScript Module
+        const NewOrderApp = (function() {
+            // DOM Elements
+            const elements = {
+                menuContainer: document.getElementById('new-order-menu-items'),
+                cartItemsList: document.getElementById('new-order-cart-items-list'),
+                cartCount: document.getElementById('new-order-cart-count'),
+                cartSubtotal: document.getElementById('new-order-cart-subtotal'),
+                cartDiscount: document.getElementById('new-order-cart-discount'),
+                cartVat: document.getElementById('new-order-cart-vat'),
+                cartTotal: document.getElementById('new-order-cart-total'),
+                vatPercent: document.getElementById('new-order-vat-percent'),
+                orderItemsInput: document.getElementById('new-order-order-items-input'),
+                orderTypeInput: document.getElementById('new-order-order-type-input'),
+                customerNameInput: document.getElementById('new-order-customer-name-input'),
+                customerPhoneInput: document.getElementById('new-order-customer-phone-input'),
+                officeIdInput: document.getElementById('new-order-office-id-input'),
+                tableNumberInput: document.getElementById('new-order-table-number-input'),
+                discountTypeInput: document.getElementById('new-order-discount-type-input'),
+                discountValueInput: document.getElementById('new-order-discount-value-input'),
+                vatInput: document.getElementById('new-order-vat-input'),
+                recentOrdersTotalInput: document.getElementById('new-order-recent-orders-total-input'),
+                customerNameField: document.getElementById('customerName'),
+                customerPhoneField: document.getElementById('customerPhone'),
+                customerDetailsSection: document.getElementById('customerDetails'),
+                dineInField: document.getElementById('dineInField'),
+                officeField: document.getElementById('officeField'),
+                tableNumberSelect: document.getElementById('tableNumber'),
+                officeSelect: document.getElementById('officeSelect'),
+                recentOrdersTotalValue: document.getElementById('new-order-recent-orders-total-value'),
+                combinedTotalValue: document.getElementById('new-order-combined-total-value'),
+                modalOverlay: document.getElementById('new-order-item-modal'),
+                closeModalBtn: document.getElementById('new-order-close-modal'),
+                modalImage: document.getElementById('new-order-modal-image'),
+                modalItemName: document.getElementById('new-order-modal-item-name'),
+                modalItemPrice: document.getElementById('new-order-modal-item-price'),
+                modalItemDescription: document.getElementById('new-order-modal-item-description'),
+                variantsSection: document.getElementById('new-order-variants-section'),
+                variantsContainer: document.getElementById('new-order-variants-container'),
+                modalMinusBtn: document.getElementById('new-order-modal-minus'),
+                modalPlusBtn: document.getElementById('new-order-modal-plus'),
+                modalQtyInput: document.getElementById('new-order-modal-qty'),
+                modalAddToCartBtn: document.getElementById('new-order-modal-add-to-cart')
+            };
 
-            // Order details inputs
-            const orderTypeInput = document.getElementById('order_type_input');
-            const customerNameInput = document.getElementById('customer_name_input');
-            const customerPhoneInput = document.getElementById('customer_phone_input');
-            const officeIdInput = document.getElementById('office_id_input');
-            const tableNumberInput = document.getElementById('table_number_input');
-            const discountTypeInput = document.getElementById('discount_type_input');
-            const discountValueInput = document.getElementById('discount_value_input');
-            const vatInput = document.getElementById('vat_input');
-            const recentOrdersTotalInput = document.getElementById('recent_orders_total_input');
+            // State
+            const state = {
+                cart: [],
+                currentModalItem: null,
+                existingOrderId: null,
+                isUpdateMode: false,
+                recentOrdersTotal: 0,
+                recentOrdersContainer: null
+            };
 
-            // Customer form elements
-            const customerNameField = document.getElementById('customerName');
-            const customerPhoneField = document.getElementById('customerPhone');
-            const customerDetailsSection = document.getElementById('customerDetails');
-
-            // Order type specific fields
-            const dineInField = document.getElementById('dineInField');
-            const officeField = document.getElementById('officeField');
-            const tableNumberSelect = document.getElementById('tableNumber');
-            const officeSelect = document.getElementById('officeSelect');
-
-            // Recent orders total display
-            const recentOrdersTotalDisplay = document.getElementById('recent-orders-total');
-            const recentOrdersTotalValue = document.getElementById('recent-orders-total-value');
-            const combinedTotalDisplay = document.getElementById('combined-total');
-            const combinedTotalValue = document.getElementById('combined-total-value');
-
-            // Modal elements
-            const modalOverlay = document.getElementById('item-modal');
-            const closeModalBtn = document.getElementById('close-modal');
-            const modalImage = document.getElementById('modal-image');
-            const modalItemName = document.getElementById('modal-item-name');
-            const modalItemPrice = document.getElementById('modal-item-price');
-            const modalItemDescription = document.getElementById('modal-item-description');
-            const variantsSection = document.getElementById('variants-section');
-            const variantsContainer = document.getElementById('variants-container');
-            const modalMinusBtn = document.getElementById('modal-minus');
-            const modalPlusBtn = document.getElementById('modal-plus');
-            const modalQtyInput = document.getElementById('modal-qty');
-            const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
-
-            // Current item being viewed in modal
-            let currentModalItem = null;
-
-            // Update mode variables
-            let existingOrderId = null;
-            let isUpdateMode = false;
-            let recentOrdersTotal = 0;
-
-            // Variants data from backend - passed via data attributes
+            // Variants data from backend
             const variantsData = {};
             @foreach ($menus as $item)
                 @if ($item->variations && count($item->variations) > 0)
@@ -1507,81 +1397,175 @@
                 @endforeach
             ];
 
-            // Debug: Check offices data
-            console.log('Offices data from backend:', officesData);
-            console.log('Number of offices:', officesData.length);
+            // Initialize
+            function init() {
+                setupEventListeners();
+                populateOffices();
+                initializeOrderType();
+                renderCart();
+                setNewOrderMode();
+            }
 
-            // Recent orders container (will be dynamically created)
-            let recentOrdersContainer = null;
+            // Setup Event Listeners
+            function setupEventListeners() {
+                // Order type change
+                document.querySelectorAll('input[name="orderType"]').forEach(radio => {
+                    radio.addEventListener('change', handleOrderTypeChange);
+                });
+
+                // Office selection
+                elements.officeSelect.addEventListener('change', () => {
+                    elements.officeIdInput.value = elements.officeSelect.value;
+                });
+
+                // Table number selection
+                elements.tableNumberSelect.addEventListener('change', () => {
+                    elements.tableNumberInput.value = elements.tableNumberSelect.value;
+                });
+
+                // Phone input with debounce
+                const debouncedCheckCustomer = debounce(checkCustomerByPhone, 800);
+                elements.customerPhoneField.addEventListener('input', function() {
+                    const phone = this.value.trim();
+                    elements.customerPhoneInput.value = phone;
+
+                    if (phone.length >= 10) {
+                        debouncedCheckCustomer(phone);
+                    } else {
+                        hideRecentOrders();
+                        setNewOrderMode();
+                        showPhoneFeedback('Enter phone number to check customer', 'info');
+                    }
+                });
+
+                // Customer name input
+                elements.customerNameField.addEventListener('input', function() {
+                    elements.customerNameInput.value = this.value;
+                });
+
+                // Quantity controls for card items
+                document.querySelectorAll('.new-order-qty-btn').forEach(btn => {
+                    btn.addEventListener('click', handleCardQtyClick);
+                });
+
+                // Add to cart from card
+                document.querySelectorAll('.new-order-add-to-cart-btn').forEach(btn => {
+                    btn.addEventListener('click', handleAddToCartFromCard);
+                });
+
+                // Open modal when clicking on item
+                document.querySelectorAll('.new-order-item-image, .new-order-menu-item .card').forEach(element => {
+                    element.addEventListener('click', handleOpenModalClick);
+                });
+
+                // Modal controls
+                elements.closeModalBtn.addEventListener('click', closeModal);
+                elements.modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === elements.modalOverlay) closeModal();
+                });
+                elements.modalMinusBtn.addEventListener('click', handleModalMinus);
+                elements.modalPlusBtn.addEventListener('click', handleModalPlus);
+                elements.modalAddToCartBtn.addEventListener('click', handleModalAddToCart);
+
+                // Cart item controls
+                elements.cartItemsList.addEventListener('click', handleCartItemClick);
+
+                // Category filter
+                document.querySelectorAll('.new-order-category-nav .nav-link').forEach(link => {
+                    link.addEventListener('click', handleCategoryFilter);
+                });
+
+                // Search functionality
+                document.getElementById('new-order-search-input').addEventListener('input', handleSearch);
+
+                // Discount controls
+                document.getElementById('discountType').addEventListener('change', () => {
+                    elements.discountTypeInput.value = document.getElementById('discountType').value;
+                    renderCart();
+                });
+
+                document.getElementById('discountValue').addEventListener('input', () => {
+                    elements.discountValueInput.value = document.getElementById('discountValue').value;
+                    renderCart();
+                });
+
+                // VAT control
+                document.getElementById('vat').addEventListener('input', () => {
+                    const vatValue = parseFloat(document.getElementById('vat').value) || 0;
+                    elements.vatInput.value = vatValue;
+                    elements.vatPercent.textContent = vatValue;
+                    renderCart();
+                });
+
+                // Form submission
+                document.getElementById('new-order-checkout-form').addEventListener('submit', handleFormSubmit);
+            }
 
             // Populate offices dropdown
             function populateOffices() {
-                console.log('Populating offices dropdown...');
-                console.log('Offices data:', officesData);
-
-                officeSelect.innerHTML = '<option value="">-- Select Office --</option>';
+                elements.officeSelect.innerHTML = '<option value="">-- Select Office --</option>';
 
                 if (officesData && officesData.length > 0) {
                     officesData.forEach(office => {
-                        console.log('Adding office:', office);
                         const option = document.createElement('option');
                         option.value = office.id;
                         option.textContent = office.name;
-                        officeSelect.appendChild(option);
+                        elements.officeSelect.appendChild(option);
                     });
-
-                    console.log('Offices dropdown populated with', officesData.length, 'offices');
-                } else {
-                    console.warn('No offices data available');
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = 'No offices available';
-                    option.disabled = true;
-                    officeSelect.appendChild(option);
                 }
             }
 
             // Handle order type change
-            function handleOrderTypeChange(selectedType) {
-                orderTypeInput.value = selectedType;
+            function handleOrderTypeChange(e) {
+                const selectedType = e.target.value;
+                elements.orderTypeInput.value = selectedType;
 
-                // Hide all order type specific fields first
-                dineInField.classList.remove('show');
-                officeField.classList.remove('show');
+                // Hide all order type specific fields
+                elements.dineInField.classList.remove('show');
+                elements.officeField.classList.remove('show');
 
                 // Show/hide customer details section
                 if (selectedType === 'office') {
-                    customerDetailsSection.style.display = 'none';
-                    officeField.classList.add('show');
-                    officeSelect.required = true;
-                    tableNumberSelect.required = false;
+                    elements.customerDetailsSection.style.display = 'none';
+                    elements.officeField.classList.add('show');
+                    elements.tableNumberSelect.required = false;
+                    elements.tableNumberInput.value = '';
                 } else {
-                    customerDetailsSection.style.display = 'block';
-                    officeSelect.required = false;
+                    elements.customerDetailsSection.style.display = 'block';
+                    elements.officeIdInput.value = '';
 
-                    if (selectedType === 'dineIn') {
-                        dineInField.classList.add('show');
-                        tableNumberSelect.required = true;
+                    if (selectedType === 'dine_in') {
+                        elements.dineInField.classList.add('show');
+                        elements.tableNumberSelect.required = true;
                     } else {
-                        tableNumberSelect.required = false;
+                        elements.tableNumberSelect.required = false;
+                        elements.tableNumberInput.value = '';
                     }
                 }
             }
 
+            // Initialize order type
+            function initializeOrderType() {
+                const selectedType = document.querySelector('input[name="orderType"]:checked').value;
+                elements.orderTypeInput.value = selectedType;
+
+                if (selectedType === 'dine_in') {
+                    elements.dineInField.classList.add('show');
+                }
+            }
+
             // Check customer by phone number
-            function checkCustomerByPhone(phone) {
+            async function checkCustomerByPhone(phone) {
                 if (!phone || phone.length < 10) {
                     hideRecentOrders();
                     setNewOrderMode();
                     return;
                 }
 
-                console.log('Checking customer with phone:', phone);
-
-                // Show loading state
                 showPhoneFeedback('Checking customer...', 'info');
 
-                fetch('{{ route('check.customer.by.phone') }}', {
+                try {
+                    const response = await fetch('{{ route('check.customer.by.phone') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1589,93 +1573,65 @@
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify({
-                            phone: phone
+                            phone
                         })
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Customer check response:', data);
+                    });
 
-                        if (data.exists && data.customer) {
-                            // Auto-fill customer name
-                            customerNameField.value = data.customer.name || '';
-                            customerNameInput.value = data.customer.name || '';
+                    const data = await response.json();
 
-                            showPhoneFeedback('Customer found! Name auto-filled.', 'success');
-
-                            // Fetch recent orders for this customer
-                            fetchRecentOrders(data.customer.id);
-                        } else {
-                            // Clear customer name for new customer
-                            customerNameField.value = '';
-                            customerNameInput.value = '';
-                            showPhoneFeedback('New customer. Please enter name.', 'info');
-                            hideRecentOrders();
-                            setNewOrderMode();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error checking customer:', error);
-                        showPhoneFeedback('Error checking customer. Please try again.', 'error');
+                    if (data.exists && data.customer) {
+                        elements.customerNameField.value = data.customer.name || '';
+                        elements.customerNameInput.value = data.customer.name || '';
+                        showPhoneFeedback('Customer found! Name auto-filled.', 'success');
+                        fetchRecentOrders(data.customer.id);
+                    } else {
+                        elements.customerNameField.value = '';
+                        elements.customerNameInput.value = '';
+                        showPhoneFeedback('New customer. Please enter name.', 'info');
                         hideRecentOrders();
                         setNewOrderMode();
-                    });
+                    }
+                } catch (error) {
+                    console.error('Error checking customer:', error);
+                    showPhoneFeedback('Error checking customer. Please try again.', 'error');
+                    hideRecentOrders();
+                    setNewOrderMode();
+                }
             }
 
             // Fetch recent orders for customer
-            function fetchRecentOrders(customerId) {
+            async function fetchRecentOrders(customerId) {
                 if (!customerId) {
                     hideRecentOrders();
                     setNewOrderMode();
                     return;
                 }
 
-                console.log('Fetching recent orders for customer:', customerId);
+                try {
+                    const response = await fetch(`/api/customers/${customerId}/recent-orders`);
+                    const data = await response.json();
+                    displayRecentOrders(data);
 
-                fetch(`/api/customers/${customerId}/recent-orders`, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Recent orders received:', data);
-                        displayRecentOrders(data);
+                    // Check for incomplete orders
+                    if (data && data.length > 0) {
+                        const incompleteOrder = data.find(order =>
+                            order.status === 'pending' || order.status === 'confirmed' || order.status ===
+                            'accepted'
+                        );
 
-                        // Check if there are incomplete orders and set update mode
-                        if (data && data.length > 0) {
-                            // For simplicity, we'll update the first incomplete order
-                            const incompleteOrder = data.find(order =>
-                                order.status === 'pending' || order.status === 'confirmed' || order.status ===
-                                'accepted'
-                            );
-
-                            if (incompleteOrder) {
-                                setUpdateMode(incompleteOrder.id);
-                            } else {
-                                setNewOrderMode();
-                            }
+                        if (incompleteOrder) {
+                            setUpdateMode(incompleteOrder.id);
                         } else {
                             setNewOrderMode();
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching recent orders:', error);
-                        hideRecentOrders();
+                    } else {
                         setNewOrderMode();
-                    });
+                    }
+                } catch (error) {
+                    console.error('Error fetching recent orders:', error);
+                    hideRecentOrders();
+                    setNewOrderMode();
+                }
             }
 
             // Display recent orders
@@ -1683,28 +1639,28 @@
                 createRecentOrdersContainer();
 
                 if (!orders || orders.length === 0) {
-                    recentOrdersContainer.innerHTML =
+                    state.recentOrdersContainer.innerHTML =
                         '<div class="text-center text-muted p-3">No recent orders found</div>';
-                    recentOrdersContainer.style.display = 'block';
-                    recentOrdersTotal = 0;
+                    state.recentOrdersContainer.style.display = 'block';
+                    state.recentOrdersTotal = 0;
                     updateRecentOrdersTotalDisplay();
                     return;
                 }
 
                 let html = `
-            <div class="recent-orders-header">
+            <div class="new-order-recent-orders-header">
                 <h6><i class="fas fa-history me-2"></i>Recent Orders</h6>
-                <span class="recent-orders-count">${orders.length} orders</span>
+                <span class="new-order-recent-orders-count">${orders.length} orders</span>
             </div>
         `;
 
-                recentOrdersTotal = 0;
+                state.recentOrdersTotal = 0;
 
                 orders.forEach(order => {
                     const statusClass = getStatusClass(order.status);
                     const orderTime = new Date(order.order_time).toLocaleString();
                     const orderTotal = order.grand_total || order.calculated_total || 0;
-                    recentOrdersTotal += orderTotal;
+                    state.recentOrdersTotal += orderTotal;
 
                     html += `
                 <div class="order-item">
@@ -1730,76 +1686,68 @@
             `;
                 });
 
-                recentOrdersContainer.innerHTML = html;
-                recentOrdersContainer.style.display = 'block';
+                state.recentOrdersContainer.innerHTML = html;
+                state.recentOrdersContainer.style.display = 'block';
                 updateRecentOrdersTotalDisplay();
             }
 
-            // Update recent orders total display
-            function updateRecentOrdersTotalDisplay() {
-                if (recentOrdersTotal > 0) {
-                    recentOrdersTotalValue.textContent = `Rs ${recentOrdersTotal.toFixed(2)}`;
-                    recentOrdersTotalDisplay.style.display = 'block';
-                    recentOrdersTotalInput.value = recentOrdersTotal;
-                    updateCombinedTotal();
-                } else {
-                    recentOrdersTotalDisplay.style.display = 'none';
-                    combinedTotalDisplay.style.display = 'none';
-                    recentOrdersTotalInput.value = 0;
-                }
-            }
-
-            // Update combined total display
-            function updateCombinedTotal() {
-                const currentOrderTotal = parseFloat(cartTotal.textContent.replace('Rs ', '')) || 0;
-                const combinedTotal = currentOrderTotal + recentOrdersTotal;
-
-                combinedTotalValue.textContent = `Rs ${combinedTotal.toFixed(2)}`;
-                combinedTotalDisplay.style.display = 'block';
-            }
-
-            // Create recent orders container if it doesn't exist
+            // Create recent orders container
             function createRecentOrdersContainer() {
-                if (!recentOrdersContainer) {
-                    recentOrdersContainer = document.createElement('div');
-                    recentOrdersContainer.className = 'recent-orders';
-                    recentOrdersContainer.style.cssText = `
-                max-height: 200px;
-                overflow-y: auto;
-                padding: 16px;
-                background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
-                border-radius: 12px;
-                margin: 16px 0;
-                border: 1px solid #e1e5ff;
-                box-shadow: 0 2px 8px rgba(13, 110, 253, 0.08);
-                display: none;
-            `;
+                if (!state.recentOrdersContainer) {
+                    state.recentOrdersContainer = document.createElement('div');
+                    state.recentOrdersContainer.className = 'new-order-recent-orders';
 
-                    // Insert after customer name field
-                    const customerNameGroup = customerNameField.closest('.form-group');
-                    customerNameGroup.parentNode.insertBefore(recentOrdersContainer, customerNameGroup.nextSibling);
+                    const customerNameGroup = elements.customerNameField.closest('.new-order-form-group');
+                    customerNameGroup.parentNode.insertBefore(state.recentOrdersContainer, customerNameGroup
+                        .nextSibling);
                 }
             }
 
             // Hide recent orders
             function hideRecentOrders() {
-                if (recentOrdersContainer) {
-                    recentOrdersContainer.style.display = 'none';
-                    recentOrdersContainer.innerHTML = '';
+                if (state.recentOrdersContainer) {
+                    state.recentOrdersContainer.style.display = 'none';
+                    state.recentOrdersContainer.innerHTML = '';
                 }
-                recentOrdersTotal = 0;
+                state.recentOrdersTotal = 0;
                 updateRecentOrdersTotalDisplay();
             }
 
-            // Set form to UPDATE mode - FIXED VERSION
+            // Update recent orders total display
+            function updateRecentOrdersTotalDisplay() {
+                const recentOrdersTotalDisplay = document.getElementById('new-order-recent-orders-total');
+                const combinedTotalDisplay = document.getElementById('new-order-combined-total');
+
+                if (state.recentOrdersTotal > 0) {
+                    elements.recentOrdersTotalValue.textContent = `Rs ${state.recentOrdersTotal.toFixed(2)}`;
+                    recentOrdersTotalDisplay.style.display = 'block';
+                    elements.recentOrdersTotalInput.value = state.recentOrdersTotal;
+                    updateCombinedTotal();
+                } else {
+                    recentOrdersTotalDisplay.style.display = 'none';
+                    combinedTotalDisplay.style.display = 'none';
+                    elements.recentOrdersTotalInput.value = 0;
+                }
+            }
+
+            // Update combined total display
+            function updateCombinedTotal() {
+                const combinedTotalDisplay = document.getElementById('new-order-combined-total');
+                const currentOrderTotal = parseFloat(elements.cartTotal.textContent.replace('Rs ', '')) || 0;
+                const combinedTotal = currentOrderTotal + state.recentOrdersTotal;
+
+                elements.combinedTotalValue.textContent = `Rs ${combinedTotal.toFixed(2)}`;
+                combinedTotalDisplay.style.display = 'block';
+            }
+
+            // Set form to UPDATE mode
             function setUpdateMode(orderId) {
-                isUpdateMode = true;
-                existingOrderId = orderId;
+                state.isUpdateMode = true;
+                state.existingOrderId = orderId;
 
-                // Update form action and method
-                const checkoutForm = document.getElementById('checkout-form');
+                const checkoutForm = document.getElementById('new-order-checkout-form');
 
-                // Store the original action for new orders
+                // Store original action
                 if (!checkoutForm.dataset.originalAction) {
                     checkoutForm.dataset.originalAction = checkoutForm.action;
                 }
@@ -1807,62 +1755,509 @@
                 // Set update action
                 checkoutForm.action = '{{ route('orders.menus.update') }}';
 
-                // Create hidden input for order_id if it doesn't exist
-                let orderIdInput = document.getElementById('order_id_input');
+                // Add order_id input
+                let orderIdInput = document.getElementById('new-order-order-id-input');
                 if (!orderIdInput) {
                     orderIdInput = document.createElement('input');
                     orderIdInput.type = 'hidden';
                     orderIdInput.name = 'order_id';
-                    orderIdInput.id = 'order_id_input';
+                    orderIdInput.id = 'new-order-order-id-input';
                     checkoutForm.appendChild(orderIdInput);
                 }
                 orderIdInput.value = orderId;
 
-                // Update UI text
+                // Update UI
                 const checkoutBtn = checkoutForm.querySelector('button[type="submit"]');
                 checkoutBtn.innerHTML = '<i class="fas fa-sync-alt me-2"></i> Update Order';
-                checkoutBtn.classList.remove('checkout-btn');
-                checkoutBtn.classList.add('btn', 'btn-warning');
+                checkoutBtn.classList.remove('new-order-checkout-btn');
+                checkoutBtn.classList.add('new-order-update-btn');
 
-                // Show update mode notification
                 showNotification('UPDATE MODE: Adding items to existing order #' + orderId, 'warning');
-
-                console.log('Switched to UPDATE mode for order:', orderId);
-                console.log('Form action set to:', checkoutForm.action);
             }
 
-            // Set form to NEW ORDER mode - FIXED VERSION
+            // Set form to NEW ORDER mode
             function setNewOrderMode() {
-                isUpdateMode = false;
-                existingOrderId = null;
+                state.isUpdateMode = false;
+                state.existingOrderId = null;
 
-                // Reset form action and method
-                const checkoutForm = document.getElementById('checkout-form');
+                const checkoutForm = document.getElementById('new-order-checkout-form');
 
-                // Restore original action for new orders
+                // Restore original action
                 if (checkoutForm.dataset.originalAction) {
                     checkoutForm.action = checkoutForm.dataset.originalAction;
-                } else {
-                    checkoutForm.action = '{{ route('orders.menus.store') }}';
                 }
 
-                // Remove order_id input if exists
-                const orderIdInput = document.getElementById('order_id_input');
-                if (orderIdInput) {
-                    orderIdInput.remove();
-                }
+                // Remove order_id input
+                const orderIdInput = document.getElementById('new-order-order-id-input');
+                if (orderIdInput) orderIdInput.remove();
 
-                // Update UI text
+                // Update UI
                 const checkoutBtn = checkoutForm.querySelector('button[type="submit"]');
                 checkoutBtn.innerHTML = 'Place Order';
-                checkoutBtn.classList.remove('btn-warning');
-                checkoutBtn.classList.add('checkout-btn');
-
-                console.log('Switched to NEW ORDER mode');
-                console.log('Form action set to:', checkoutForm.action);
+                checkoutBtn.classList.remove('new-order-update-btn');
+                checkoutBtn.classList.add('new-order-checkout-btn');
             }
 
-            // Helper function to get status class
+            // Handle card quantity click
+            function handleCardQtyClick(e) {
+                const btn = e.target.closest('.new-order-qty-btn');
+                if (!btn) return;
+
+                const id = btn.dataset.id;
+                const input = document.getElementById(`new-order-qty-${id}`);
+                let value = parseInt(input.value);
+
+                if (btn.classList.contains('plus')) {
+                    value++;
+                } else if (btn.classList.contains('minus') && value > 1) {
+                    value--;
+                }
+
+                input.value = value;
+            }
+
+            // Handle add to cart from card
+            function handleAddToCartFromCard(e) {
+                e.stopPropagation(); // Prevent triggering the card click event
+
+                const btn = e.target.closest('.new-order-add-to-cart-btn');
+                if (!btn) return;
+
+                const id = btn.dataset.id;
+                const name = btn.dataset.name;
+                const price = parseFloat(btn.dataset.price);
+                const qtyInput = document.getElementById(`new-order-qty-${id}`);
+                const qty = Math.max(1, parseInt(qtyInput.value || 1, 10));
+
+                // Check if item has variants
+                const variants = variantsData[id];
+                if (variants && variants.length > 0) {
+                    // Item has variants, open modal for variant selection
+                    const card = btn.closest('.new-order-menu-item');
+                    const description = card.querySelector('.new-order-card-text').textContent;
+                    const imageSrc = card.querySelector('.new-order-item-image').src;
+                    openModal(id, name, price, description, imageSrc);
+                } else {
+                    // Item has no variants, add directly to cart
+                    addToCart(id, name, price, qty);
+                    qtyInput.value = 1;
+                    showNotification(`${name} added to cart!`);
+                }
+            }
+
+            // Handle open modal click
+            // Handle open modal click - UPDATE THIS FUNCTION (around line 385-395)
+            function handleOpenModalClick(e) {
+                e.stopPropagation(); // ADD THIS LINE - prevents event from bubbling up
+
+                // Don't open modal if clicking on quantity controls or add button
+                if (e.target.closest('.new-order-qty-control') ||
+                    e.target.closest('.new-order-add-to-cart-btn') ||
+                    e.target.closest('.new-order-qty-btn')) {
+                    return;
+                }
+
+                const card = e.target.closest('.new-order-menu-item');
+                const img = card.querySelector('.new-order-item-image');
+                const id = img.dataset.id;
+                const name = img.dataset.name;
+                const price = parseFloat(img.dataset.price);
+                const description = card.querySelector('.new-order-card-text').textContent;
+                const imageSrc = img.src;
+
+                // Check if item has variants
+                const variants = variantsData[id];
+                if (variants && variants.length > 0) {
+                    // Item has variants, open modal for variant selection
+                    openModal(id, name, price, description, imageSrc);
+                } else {
+                    // Item has no variants, get quantity and add directly to cart
+                    const qtyInput = document.getElementById(`new-order-qty-${id}`);
+                    const qty = Math.max(1, parseInt(qtyInput.value || 1, 10));
+
+                    addToCart(id, name, price, qty);
+                    showNotification(`${name} added to cart!`);
+
+                    // Reset quantity input to 1
+                    qtyInput.value = 1; // ADD THIS LINE
+                }
+            }
+
+            // Open modal
+            function openModal(id, name, price, description, imageSrc) {
+                state.currentModalItem = {
+                    id,
+                    name,
+                    basePrice: price,
+                    price,
+                    description,
+                    imageSrc
+                };
+
+                elements.modalImage.src = imageSrc;
+                elements.modalItemName.textContent = name;
+                elements.modalItemPrice.textContent = `Rs ${price.toFixed(2)}`;
+                elements.modalItemDescription.textContent = description;
+                elements.modalQtyInput.value = 1;
+
+                const variants = variantsData[id];
+                if (variants && variants.length > 0) {
+                    elements.variantsSection.style.display = 'block';
+                    renderVariants(variants);
+
+                    if (variants.length > 0) {
+                        const firstVariantPrice = variants[0].price;
+                        state.currentModalItem.price = firstVariantPrice;
+                        elements.modalItemPrice.textContent = `Rs ${firstVariantPrice.toFixed(2)}`;
+                    }
+                } else {
+                    elements.variantsSection.style.display = 'none';
+                }
+
+                elements.modalOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Render variants in modal
+            function renderVariants(variants) {
+                elements.variantsContainer.innerHTML = '';
+
+                variants.forEach((variant, index) => {
+                    const variantOption = document.createElement('div');
+                    variantOption.className = 'new-order-variant-option';
+                    const inputId = `new-order-variant-${variant.id}`;
+
+                    variantOption.innerHTML = `
+                <input type="radio" id="${inputId}" name="new-order-variant" value="${variant.id}" data-price="${variant.price}" ${index === 0 ? 'checked' : ''}>
+                <label for="${inputId}">${variant.name} (Rs ${variant.price.toFixed(2)})</label>
+            `;
+
+                    elements.variantsContainer.appendChild(variantOption);
+                });
+
+                document.querySelectorAll('input[name="new-order-variant"]').forEach(radio => {
+                    radio.addEventListener('change', updateModalPrice);
+                });
+
+                updateModalPrice();
+            }
+
+            // Update modal price
+            function updateModalPrice() {
+                const selectedVariant = document.querySelector('input[name="new-order-variant"]:checked');
+                if (selectedVariant) {
+                    const variantPrice = parseFloat(selectedVariant.dataset.price);
+                    state.currentModalItem.price = variantPrice;
+                    elements.modalItemPrice.textContent = `Rs ${variantPrice.toFixed(2)}`;
+                }
+            }
+
+            // Close modal
+            function closeModal() {
+                elements.modalOverlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                state.currentModalItem = null;
+            }
+
+            // Handle modal minus
+            function handleModalMinus() {
+                let value = parseInt(elements.modalQtyInput.value);
+                if (value > 1) {
+                    value--;
+                    elements.modalQtyInput.value = value;
+                }
+            }
+
+            // Handle modal plus
+            function handleModalPlus() {
+                let value = parseInt(elements.modalQtyInput.value);
+                value++;
+                elements.modalQtyInput.value = value;
+            }
+
+            // Handle modal add to cart
+            function handleModalAddToCart() {
+                if (!state.currentModalItem) return;
+
+                const qty = parseInt(elements.modalQtyInput.value);
+                let price = state.currentModalItem.price;
+                let name = state.currentModalItem.name;
+                let variantId = null;
+
+                const selectedVariant = document.querySelector('input[name="new-order-variant"]:checked');
+                if (selectedVariant) {
+                    const variantPrice = parseFloat(selectedVariant.dataset.price);
+                    price = variantPrice;
+                    name += ` (${selectedVariant.nextElementSibling.textContent.split(' (Rs')[0]})`;
+                    variantId = selectedVariant.value;
+                }
+
+                addToCart(state.currentModalItem.id, name, price, qty, variantId);
+                showNotification(`${name} added to cart!`);
+                closeModal();
+            }
+
+            // Add to cart
+            function addToCart(id, name, price, qty, variantId = null) {
+                const cartItemId = variantId ? `${id}-${variantId}` : id.toString();
+                const existing = state.cart.find(c => c.cartItemId === cartItemId);
+
+                if (existing) {
+                    existing.qty += qty;
+                } else {
+                    state.cart.push({
+                        id: id,
+                        name: name,
+                        price: price,
+                        qty: qty,
+                        variantId: variantId,
+                        cartItemId: cartItemId
+                    });
+                }
+
+                renderCart();
+            }
+
+            // Calculate order totals
+            function calculateOrder() {
+                if (state.cart.length === 0) {
+                    return {
+                        subtotal: 0,
+                        discount: 0,
+                        vatAmount: 0,
+                        total: 0
+                    };
+                }
+
+                const subtotal = state.cart.reduce((sum, item) => sum + (item.qty * parseFloat(item.price)), 0);
+                const discountType = document.getElementById('discountType').value;
+                const discountValue = parseFloat(document.getElementById('discountValue').value) || 0;
+                let discount = 0;
+
+                if (discountType === 'flat') {
+                    discount = Math.min(discountValue, subtotal);
+                } else {
+                    discount = subtotal * (discountValue / 100);
+                }
+
+                const vatRate = parseFloat(document.getElementById('vat').value) || 0;
+                const vatAmount = (subtotal - discount) * (vatRate / 100);
+                const total = subtotal - discount + vatAmount;
+
+                return {
+                    subtotal,
+                    discount,
+                    vatAmount,
+                    total
+                };
+            }
+
+            // Render cart
+            function renderCart() {
+                if (state.cart.length === 0) {
+                    elements.cartItemsList.innerHTML = `
+                <div class="new-order-empty-cart">
+                    <div class="new-order-empty-cart-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <p>Your cart is empty</p>
+                    <small class="text-muted">Add items to create an order</small>
+                </div>`;
+                    elements.cartCount.textContent = '0 items';
+                    elements.cartSubtotal.textContent = 'Rs 0.00';
+                    elements.cartDiscount.textContent = 'Rs 0.00';
+                    elements.cartVat.textContent = 'Rs 0.00';
+                    elements.cartTotal.textContent = 'Rs 0.00';
+                    elements.orderItemsInput.value = '';
+
+                    document.getElementById('new-order-combined-total').style.display = 'none';
+                    return;
+                }
+
+                const totalItems = state.cart.reduce((sum, item) => sum + item.qty, 0);
+                elements.cartCount.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
+
+                const {
+                    subtotal,
+                    discount,
+                    vatAmount,
+                    total
+                } = calculateOrder();
+
+                elements.cartItemsList.innerHTML = '';
+
+                state.cart.forEach((item, idx) => {
+                    const itemTotal = item.qty * parseFloat(item.price);
+
+                    const div = document.createElement('div');
+                    div.className = 'new-order-cart-item';
+                    div.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="new-order-cart-item-name">${item.name}</div>
+                        <div class="new-order-cart-item-details">Rs ${parseFloat(item.price).toFixed(2)} × ${item.qty} = Rs ${itemTotal.toFixed(2)}</div>
+                    </div>
+                    <div class="new-order-cart-controls">
+                        <button class="new-order-cart-qty-btn minus" data-idx="${idx}">-</button>
+                        <span class="mx-1" style="font-size: 0.8rem;">${item.qty}</span>
+                        <button class="new-order-cart-qty-btn plus" data-idx="${idx}">+</button>
+                        <button class="new-order-remove-btn ms-2" data-idx="${idx}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+                    elements.cartItemsList.appendChild(div);
+                });
+
+                elements.cartSubtotal.textContent = 'Rs ' + subtotal.toFixed(2);
+                elements.cartDiscount.textContent = 'Rs ' + discount.toFixed(2);
+                elements.cartVat.textContent = 'Rs ' + vatAmount.toFixed(2);
+                elements.cartTotal.textContent = 'Rs ' + total.toFixed(2);
+
+                elements.orderItemsInput.value = JSON.stringify(state.cart.map(i => ({
+                    menu_id: i.id,
+                    name: i.name,
+                    price: i.price,
+                    qty: i.qty,
+                    variation_id: i.variantId,
+                    item_total: (i.price * i.qty)
+                })));
+
+                if (state.recentOrdersTotal > 0) {
+                    updateCombinedTotal();
+                }
+            }
+
+            // Handle cart item click
+            function handleCartItemClick(e) {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+
+                const idx = btn.dataset.idx;
+                if (typeof idx === 'undefined') return;
+
+                if (btn.closest('.new-order-remove-btn')) {
+                    state.cart.splice(idx, 1);
+                    renderCart();
+                    showNotification('Item removed from cart');
+                } else if (btn.closest('.minus')) {
+                    if (state.cart[idx].qty > 1) {
+                        state.cart[idx].qty--;
+                        renderCart();
+                    }
+                } else if (btn.closest('.plus')) {
+                    state.cart[idx].qty++;
+                    renderCart();
+                }
+            }
+
+            // Handle category filter
+            function handleCategoryFilter(e) {
+                e.preventDefault();
+                const link = e.target.closest('.nav-link');
+                if (!link) return;
+
+                document.querySelectorAll('.new-order-category-nav .nav-link').forEach(l => l.classList.remove(
+                    'active'));
+                link.classList.add('active');
+
+                const categoryId = link.dataset.category;
+                document.querySelectorAll('.new-order-menu-item').forEach(card => {
+                    card.style.display = (categoryId === 'all' || card.dataset.category === categoryId) ?
+                        'block' : 'none';
+                });
+            }
+
+            // Handle search
+            function handleSearch(e) {
+                const query = e.target.value.trim().toLowerCase();
+                document.querySelectorAll('.new-order-menu-item').forEach(card => {
+                    const name = card.dataset.name || '';
+                    card.style.display = name.includes(query) ? 'block' : 'none';
+                });
+            }
+
+            // Handle form submission
+            async function handleFormSubmit(e) {
+                e.preventDefault();
+                const form = e.target;
+
+                // Validate cart
+                if (state.cart.length === 0) {
+                    showNotification('Please add at least one item to the cart', 'error');
+                    return false;
+                }
+
+                // Validate based on order type
+                const orderType = elements.orderTypeInput.value;
+
+                if (orderType === 'office') {
+                    if (!elements.officeIdInput.value) {
+                        showNotification('Please select an office for office orders', 'error');
+                        return false;
+                    }
+                    elements.customerNameInput.value = '';
+                    elements.customerPhoneInput.value = '';
+                    elements.tableNumberInput.value = '';
+                } else {
+                    if (!elements.customerNameField.value.trim() || !elements.customerPhoneField.value.trim()) {
+                        showNotification('Please enter customer name and phone number', 'error');
+                        return false;
+                    }
+
+                    if (orderType === 'dine_in' && !elements.tableNumberInput.value) {
+                        showNotification('Please select a table for dine-in orders', 'error');
+                        return false;
+                    }
+                    elements.officeIdInput.value = '';
+                }
+
+                try {
+                    const formData = new FormData(form);
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content'),
+                            'Accept': 'application/json',
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const successMessage = state.isUpdateMode ? 'Order updated successfully!' :
+                            'Order placed successfully!';
+                        showNotification(successMessage, 'success');
+
+                        setTimeout(() => {
+                            window.location.href = '{{ route('orders.index') }}';
+                        }, 1500);
+                    } else {
+                        showNotification(data.message || 'An error occurred', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('An error occurred while processing your order', 'error');
+                }
+            }
+
+            // Helper function: debounce
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // Helper function: get status class
             function getStatusClass(status) {
                 const statusMap = {
                     'pending': 'status-pending',
@@ -1875,22 +2270,15 @@
                 return statusMap[status] || 'status-pending';
             }
 
-            // Show phone feedback message
+            // Helper function: show phone feedback
             function showPhoneFeedback(message, type) {
-                // Remove existing feedback
-                const existingFeedback = document.getElementById('phone-feedback');
-                if (existingFeedback) {
-                    existingFeedback.remove();
-                }
+                const existingFeedback = document.getElementById('new-order-phone-feedback');
+                if (existingFeedback) existingFeedback.remove();
 
                 const feedback = document.createElement('div');
-                feedback.id = 'phone-feedback';
-                feedback.style.cssText = `
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 6px;
-        `;
+                feedback.id = 'new-order-phone-feedback';
+                feedback.style.cssText =
+                    'font-size: 0.85rem; margin-top: 0.5rem; padding: 0.5rem; border-radius: 6px;';
 
                 const colors = {
                     info: {
@@ -1918,498 +2306,17 @@
                 const color = colors[type] || colors.info;
                 feedback.style.backgroundColor = color.bg;
                 feedback.style.color = color.text;
+                feedback.innerHTML = `<i class="fas ${color.icon} me-2"></i>${message}`;
 
-                feedback.innerHTML = `
-            <i class="fas ${color.icon} me-2"></i>
-            ${message}
-        `;
+                elements.customerPhoneField.parentNode.appendChild(feedback);
 
-                customerPhoneField.parentNode.appendChild(feedback);
-
-                // Auto-remove after 5 seconds
                 setTimeout(() => {
-                    if (feedback.parentNode) {
-                        feedback.remove();
-                    }
+                    if (feedback.parentNode) feedback.remove();
                 }, 5000);
             }
 
-            // Debounce function for phone input
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
-            }
-
-            // Order type change handler
-            document.querySelectorAll('input[name="orderType"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    const selectedType = this.value;
-                    handleOrderTypeChange(selectedType);
-                });
-            });
-
-            // Office selection handler
-            officeSelect.addEventListener('change', function() {
-                officeIdInput.value = this.value;
-            });
-
-            // Table number selection handler
-            tableNumberSelect.addEventListener('change', function() {
-                tableNumberInput.value = this.value;
-            });
-
-            // Phone input handler with debounce
-            const debouncedCheckCustomer = debounce(checkCustomerByPhone, 800);
-            customerPhoneField.addEventListener('input', function() {
-                const phone = this.value.trim();
-                customerPhoneInput.value = phone;
-
-                if (phone.length >= 10) {
-                    debouncedCheckCustomer(phone);
-                } else {
-                    hideRecentOrders();
-                    setNewOrderMode();
-                    showPhoneFeedback('Enter phone number to check customer', 'info');
-                }
-            });
-
-            // Customer name input handler
-            customerNameField.addEventListener('input', function() {
-                customerNameInput.value = this.value;
-            });
-
-            // Initialize order type and offices
-            function initializeOrderType() {
-                const selectedType = document.querySelector('input[name="orderType"]:checked').value;
-                handleOrderTypeChange(selectedType);
-
-                // Make sure dine-in field is visible
-                if (selectedType === 'dineIn') {
-                    dineInField.classList.add('show');
-                }
-            }
-
-            // Initialize on page load
-            initializeOrderType();
-            populateOffices();
-
-            // Quantity controls for card items
-            document.querySelectorAll('.qty-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.dataset.id;
-                    const input = document.getElementById(`qty-${id}`);
-                    let value = parseInt(input.value);
-
-                    if (this.classList.contains('plus')) {
-                        value++;
-                    } else if (this.classList.contains('minus') && value > 1) {
-                        value--;
-                    }
-
-                    input.value = value;
-                });
-            });
-
-            // Add to cart from card
-            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = this.dataset.id;
-                    const name = this.dataset.name;
-                    const price = parseFloat(this.dataset.price);
-                    const qtyInput = document.getElementById(`qty-${id}`);
-                    const qty = Math.max(1, parseInt(qtyInput.value || 1, 10));
-
-                    // Check if item has variants
-                    const variants = variantsData[id];
-                    if (variants && variants.length > 0) {
-                        // If item has variants, open modal instead of adding directly
-                        const card = this.closest('.menu-item');
-                        const description = card.querySelector('.card-text').textContent;
-                        const imageSrc = card.querySelector('.item-image').src;
-                        openModal(id, name, price, description, imageSrc);
-                    } else {
-                        // If no variants, add directly to cart
-                        addToCart(id, name, price, qty);
-
-                        // Reset quantity input to 1
-                        qtyInput.value = 1;
-
-                        // Show notification
-                        showNotification(`${name} added to cart!`);
-                    }
-                });
-            });
-
-            // Open modal when clicking on item image or card
-            document.querySelectorAll('.item-image, .menu-item .card').forEach(element => {
-                element.addEventListener('click', function(e) {
-                    // Don't open modal if clicking on quantity controls or add button
-                    if (e.target.closest('.qty-control') || e.target.closest('.add-to-cart-btn')) {
-                        return;
-                    }
-
-                    const card = this.closest('.menu-item');
-                    const id = this.dataset.id || card.querySelector('.add-to-cart-btn').dataset.id;
-                    const name = card.querySelector('.card-title').textContent;
-                    const price = parseFloat(card.querySelector('.add-to-cart-btn').dataset.price);
-                    const description = card.querySelector('.card-text').textContent;
-                    const imageSrc = card.querySelector('.item-image').src;
-
-                    openModal(id, name, price, description, imageSrc);
-                });
-            });
-
-            // Open modal function
-            function openModal(id, name, price, description, imageSrc) {
-                currentModalItem = {
-                    id,
-                    name,
-                    basePrice: price, // Store base price separately
-                    price, // This will be updated if variants exist
-                    description,
-                    imageSrc
-                };
-
-                // Set modal content
-                modalImage.src = imageSrc;
-                modalItemName.textContent = name;
-                modalItemPrice.textContent = `Rs ${price.toFixed(2)}`;
-                modalItemDescription.textContent = description;
-                modalQtyInput.value = 1;
-
-                // Check if item has variants
-                const variants = variantsData[id];
-                if (variants && variants.length > 0) {
-                    variantsSection.style.display = 'block';
-                    renderVariants(variants);
-
-                    // Set initial price to first variant's price
-                    if (variants.length > 0) {
-                        const firstVariantPrice = variants[0].price;
-                        currentModalItem.price = firstVariantPrice;
-                        modalItemPrice.textContent = `Rs ${firstVariantPrice.toFixed(2)}`;
-                    }
-                } else {
-                    variantsSection.style.display = 'none';
-                }
-
-                // Show modal
-                modalOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-
-            // Render variants in modal
-            function renderVariants(variants) {
-                variantsContainer.innerHTML = '';
-
-                variants.forEach((variant, index) => {
-                    const variantOption = document.createElement('div');
-                    variantOption.className = 'variant-option';
-
-                    const inputId = `variant-${variant.id}`;
-
-                    variantOption.innerHTML = `
-                <input type="radio" id="${inputId}" name="variant" value="${variant.id}" data-price="${variant.price}" ${index === 0 ? 'checked' : ''}>
-                <label for="${inputId}">${variant.name} (Rs ${variant.price.toFixed(2)})</label>
-            `;
-
-                    variantsContainer.appendChild(variantOption);
-                });
-
-                // Add event listeners to variant options
-                document.querySelectorAll('input[name="variant"]').forEach(radio => {
-                    radio.addEventListener('change', function() {
-                        updateModalPrice();
-                    });
-                });
-
-                updateModalPrice();
-            }
-
-            // Update price in modal based on selected variant
-            function updateModalPrice() {
-                const selectedVariant = document.querySelector('input[name="variant"]:checked');
-                if (selectedVariant) {
-                    const variantPrice = parseFloat(selectedVariant.dataset.price);
-                    // Use only the variant price, don't add to base price
-                    currentModalItem.price = variantPrice;
-                    modalItemPrice.textContent = `Rs ${variantPrice.toFixed(2)}`;
-                }
-            }
-
-            // Close modal
-            closeModalBtn.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', function(e) {
-                if (e.target === modalOverlay) {
-                    closeModal();
-                }
-            });
-
-            // Modal quantity controls
-            modalMinusBtn.addEventListener('click', function() {
-                let value = parseInt(modalQtyInput.value);
-                if (value > 1) {
-                    value--;
-                    modalQtyInput.value = value;
-                }
-            });
-
-            modalPlusBtn.addEventListener('click', function() {
-                let value = parseInt(modalQtyInput.value);
-                value++;
-                modalQtyInput.value = value;
-            });
-
-            // Add to cart from modal
-            modalAddToCartBtn.addEventListener('click', function() {
-                if (!currentModalItem) return;
-
-                const qty = parseInt(modalQtyInput.value);
-                let price = currentModalItem.price;
-                let name = currentModalItem.name;
-                let variantId = null;
-
-                // Check if a variant is selected
-                const selectedVariant = document.querySelector('input[name="variant"]:checked');
-                if (selectedVariant) {
-                    const variantPrice = parseFloat(selectedVariant.dataset.price);
-                    price = variantPrice;
-                    name += ` (${selectedVariant.nextElementSibling.textContent.split(' (Rs')[0]})`;
-                    variantId = selectedVariant.value;
-                }
-
-                // Include variant ID in cart item if present
-                addToCart(currentModalItem.id, name, price, qty, variantId);
-                showNotification(`${name} added to cart!`);
-                closeModal();
-            });
-
-            function closeModal() {
-                modalOverlay.classList.remove('active');
-                document.body.style.overflow = 'auto';
-                currentModalItem = null;
-            }
-
-            // Add to cart function (updated to include variantId)
-            function addToCart(id, name, price, qty, variantId = null) {
-                const cartItemId = variantId ? `${id}-${variantId}` : id.toString();
-                const existing = cart.find(c => c.cartItemId === cartItemId);
-
-                if (existing) {
-                    existing.qty += qty;
-                } else {
-                    cart.push({
-                        id: id,
-                        name: name,
-                        price: price,
-                        qty: qty,
-                        variantId: variantId,
-                        cartItemId: cartItemId
-                    });
-                }
-
-                renderCart();
-            }
-
-            function calculateOrder() {
-                if (cart.length === 0) {
-                    return {
-                        subtotal: 0,
-                        discount: 0,
-                        vatAmount: 0,
-                        total: 0
-                    };
-                }
-
-                // Calculate subtotal
-                const subtotal = cart.reduce((sum, item) => sum + (item.qty * parseFloat(item.price)), 0);
-
-                // Calculate discount
-                const discountType = document.getElementById('discountType').value;
-                const discountValue = parseFloat(document.getElementById('discountValue').value) || 0;
-                let discount = 0;
-
-                if (discountType === 'flat') {
-                    discount = Math.min(discountValue, subtotal);
-                } else {
-                    discount = subtotal * (discountValue / 100);
-                }
-
-                // Calculate VAT
-                const vatRate = parseFloat(document.getElementById('vat').value) || 0;
-                const vatAmount = (subtotal - discount) * (vatRate / 100);
-
-                // Calculate total
-                const total = subtotal - discount + vatAmount;
-
-                return {
-                    subtotal,
-                    discount,
-                    vatAmount,
-                    total
-                };
-            }
-
-            function renderCart() {
-                if (cart.length === 0) {
-                    cartItemsList.innerHTML = `
-                <div class="empty-cart">
-                    <div class="empty-cart-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <p>Your cart is empty</p>
-                    <small class="text-muted">Add items to create an order</small>
-                </div>`;
-                    cartCount.textContent = '0 items';
-                    cartSubtotal.textContent = 'Rs 0.00';
-                    cartDiscount.textContent = 'Rs 0.00';
-                    cartVat.textContent = 'Rs 0.00';
-                    cartTotal.textContent = 'Rs 0.00';
-                    orderItemsInput.value = '';
-
-                    // Hide combined total if cart is empty
-                    combinedTotalDisplay.style.display = 'none';
-                    return;
-                }
-
-                const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-                cartCount.textContent = totalItems + (totalItems === 1 ? ' item' : ' items');
-
-                const {
-                    subtotal,
-                    discount,
-                    vatAmount,
-                    total
-                } = calculateOrder();
-
-                cartItemsList.innerHTML = '';
-
-                cart.forEach((item, idx) => {
-                    const itemTotal = item.qty * parseFloat(item.price);
-
-                    const div = document.createElement('div');
-                    div.className = 'cart-item';
-                    div.innerHTML = `
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-details">Rs ${parseFloat(item.price).toFixed(2)} × ${item.qty} = Rs ${itemTotal.toFixed(2)}</div>
-                    </div>
-                    <div class="cart-controls">
-                        <button class="cart-qty-btn minus" data-idx="${idx}">-</button>
-                        <span class="mx-1" style="font-size: 0.8rem;">${item.qty}</span>
-                        <button class="cart-qty-btn plus" data-idx="${idx}">+</button>
-                        <button class="remove-btn ms-2" data-idx="${idx}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-                    cartItemsList.appendChild(div);
-                });
-
-                cartSubtotal.textContent = 'Rs ' + subtotal.toFixed(2);
-                cartDiscount.textContent = 'Rs ' + discount.toFixed(2);
-                cartVat.textContent = 'Rs ' + vatAmount.toFixed(2);
-                cartTotal.textContent = 'Rs ' + total.toFixed(2);
-
-                // Update order items input with ALL necessary information including PRICE
-                orderItemsInput.value = JSON.stringify(cart.map(i => ({
-                    menu_id: i.id,
-                    name: i.name,
-                    price: i.price,
-                    qty: i.qty,
-                    variation_id: i.variantId,
-                    item_total: (i.price * i.qty)
-                })));
-
-                // Update combined total if recent orders exist
-                if (recentOrdersTotal > 0) {
-                    updateCombinedTotal();
-                }
-            }
-
-            // Cart item controls
-            cartItemsList.addEventListener('click', function(e) {
-                const idx = e.target.closest('button')?.dataset.idx;
-                if (typeof idx === 'undefined') return;
-
-                if (e.target.closest('.remove-btn')) {
-                    cart.splice(idx, 1);
-                    renderCart();
-                    showNotification('Item removed from cart');
-                } else if (e.target.closest('.minus')) {
-                    if (cart[idx].qty > 1) {
-                        cart[idx].qty--;
-                        renderCart();
-                    }
-                } else if (e.target.closest('.plus')) {
-                    cart[idx].qty++;
-                    renderCart();
-                }
-            });
-
-            // Category filter
-            document.querySelectorAll('.category-nav .nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.querySelectorAll('.category-nav .nav-link').forEach(l => l.classList
-                        .remove('active'));
-                    this.classList.add('active');
-
-                    const categoryId = this.dataset.category;
-                    document.querySelectorAll('.menu-item').forEach(card => {
-                        if (categoryId === 'all' || card.dataset.category === categoryId) {
-                            card.style.display = 'block';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-                });
-            });
-
-            // Search functionality
-            document.getElementById('search-input').addEventListener('input', function() {
-                const query = this.value.trim().toLowerCase();
-                document.querySelectorAll('.menu-item').forEach(card => {
-                    const name = card.dataset.name || '';
-                    if (name.includes(query)) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
-
-            // Discount controls
-            document.getElementById('discountType').addEventListener('change', function() {
-                discountTypeInput.value = this.value;
-                renderCart();
-            });
-
-            document.getElementById('discountValue').addEventListener('input', function() {
-                discountValueInput.value = this.value;
-                renderCart();
-            });
-
-            // VAT control
-            document.getElementById('vat').addEventListener('input', function() {
-                const vatValue = parseFloat(this.value) || 0;
-                vatInput.value = vatValue;
-                vatPercent.textContent = vatValue;
-                renderCart();
-            });
-
-            // Notification function
+            // Helper function: show notification
             function showNotification(message, type = 'success') {
-                // Create notification element
                 const notification = document.createElement('div');
                 notification.className = `alert alert-${type} position-fixed`;
                 notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 250px;';
@@ -2422,95 +2329,21 @@
 
                 document.body.appendChild(notification);
 
-                // Remove after 3 seconds
                 setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
-                    }
+                    if (notification.parentNode) notification.remove();
                 }, 3000);
             }
 
-            // Form submission handler - FIXED VERSION
-            document.getElementById('checkout-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                // Get current form action to determine if we're in update mode
-                const isUpdate = this.action.includes('update');
-                console.log('Form submission - Update mode:', isUpdate);
-                console.log('Form action:', this.action);
-
-                // Validate based on order type
-                const orderType = orderTypeInput.value;
-
-                if (orderType === 'office') {
-                    // For office orders, only validate office selection
-                    if (!officeIdInput.value) {
-                        showNotification('Please select an office for office orders', 'error');
-                        return false;
-                    }
-                } else {
-                    // For dineIn and takeAway, validate customer details
-                    if (!customerNameField.value || !customerPhoneField.value) {
-                        showNotification('Please enter customer name and phone number', 'error');
-                        return false;
-                    }
-
-                    // Additional validation for dineIn
-                    if (orderType === 'dineIn' && !tableNumberInput.value) {
-                        showNotification('Please enter table number for dine-in orders', 'error');
-                        return false;
-                    }
-                }
-
-                // Validate cart has items
-                if (cart.length === 0) {
-                    showNotification('Please add at least one item to the cart', 'error');
-                    return false;
-                }
-
-                // Prepare form data
-                const formData = new FormData(this);
-
-                // For AJAX submission
-                fetch(this.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                'content'),
-                            'Accept': 'application/json',
-                        },
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            const successMessage = isUpdate ? 'Order updated successfully!' :
-                                'Order placed successfully!';
-                            showNotification(successMessage, 'success');
-
-                            // Redirect to orders page
-                            setTimeout(() => {
-                                window.location.href = '{{ route('orders.index') }}';
-                            }, 1500);
-                        } else {
-                            showNotification(data.message || 'An error occurred', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('An error occurred while processing your order', 'error');
-                    });
-            });
-
-            // Initialize
-            renderCart();
-            setNewOrderMode(); // Start in new order mode
+            // Public API
+            return {
+                init: init
+            };
         })();
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            NewOrderApp.init();
+        });
     </script>
 
 @endsection

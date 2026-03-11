@@ -108,7 +108,8 @@
                                                   <td class="text-center">#RCO000{{ $res->id }}</td>
                                                   <td class="text-center">{{ $res->customer['name'] ?? 'N/A' }}</td>
 
-                                                  <td class="text-center">{{ $res->customer['phone']?? 'N/A' }}</td>
+                                            
+                                                  <td class="text-center">{{ $res->customer['phone'] ?? 'N/A' }}</td>
                                                   <td class="text-center">
                                                       <b>Iteams:</b>
                                                       <table>
