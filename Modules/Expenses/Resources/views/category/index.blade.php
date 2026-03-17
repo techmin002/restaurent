@@ -15,12 +15,12 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1>Expenses</h1>
+                        <h1>Expenses category</h1>
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                            <li class="breadcrumb-item active">Expenses</li>
+                            <li class="breadcrumb-item active">Expenses category</li>
                         </ol>
                     </div>
                 </div>
@@ -36,10 +36,9 @@
                         <!-- /.card -->
                         <div class="card">
                             <div class="card-header">
-                                @can('create_expense')
-                                    <h3 class="card-title float-right"><a class="btn btn-primary text-white" data-toggle="modal"
-                                            data-target="#exampleModalCenter"><i class="fa fa-plus"></i> Create</a> </h3>
-                                @endcan
+                                <h3 class="card-title float-right"><a class="btn btn-primary text-white" data-toggle="modal"
+                                        data-target="#exampleModalCenter"><i class="fa fa-plus"></i> Create</a> </h3>
+
                                 @include('expenses::category.create')
                             </div>
                             <!-- /.card-header -->
@@ -60,7 +59,13 @@
                                             <tr>
                                                 <td class="text-center">{{ $loop->iteration }}</td>
                                                 <td class="text-center">{{ $exp->title }}</td>
-                                                <td class="text-center">{{ $exp->branch->name }}</td>
+                                                <td class="text-center">
+                                                    @foreach ($branches as $branch)
+                                                        @if ($branch->id == $exp->branch_id)
+                                                            {{ $branch->company_name }}
+                                                        @endif
+                                                    @endforeach
+                                                </td>
                                                 <td class="text-center">
                                                     <img src="{{ asset('upload/images/expenses-category/' . $exp->image) }}"
                                                         alt="" height="100px">
@@ -75,12 +80,12 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    @can('edit_expense')
-                                                        <a data-toggle="modal" data-target="#editCategory{{ $exp->id }}"
-                                                            class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
-                                                    @endcan
+
+                                                    <a data-toggle="modal" data-target="#editCategory{{ $exp->id }}"
+                                                        class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
+
                                                     @include('expenses::category.edit')
-                                                    @can('delete_expense')
+
                                                     <button id="delete" class="btn btn-danger btn-sm"
                                                         onclick="
         event.preventDefault();
@@ -96,7 +101,7 @@
                                                             @method('delete')
                                                         </form>
                                                     </button>
-                                                    @endcan
+
                                                 </td>
                                             </tr>
                                         @endforeach

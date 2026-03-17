@@ -48,11 +48,11 @@
                                 <input type="file" class="form-contro" name="receipt">
                             </div>
                             <div class="mt-3 col-lg-12" data-select2-id="select2-data-5-a5wr">
-                                <label class="form-label12">Branch</label>
+                                <label class="form-label12">Supplier</label>
                                 <select class="form-control" name="branchId">
-                                <option value="1" selected disabled>Select Branch</option>
+                                <option value="1" selected disabled>Select Supplier</option>
                                 @foreach ($branches as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                <option value="{{ $cat->id }}">{{ $cat->company_name }}</option>
                                 @endforeach
                                 </select>
                             </div>

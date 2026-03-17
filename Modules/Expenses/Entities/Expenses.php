@@ -5,6 +5,9 @@ namespace Modules\Expenses\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+// use Modules\Expenses\Models\ExpenseCategory;
+use Modules\Expenses\Entities\ExpenseProduct;
+
 
 
 class Expenses extends Model
@@ -32,4 +35,9 @@ class Expenses extends Model
     {
         return \Modules\Expenses\Database\factories\ExpensesFactory::new();
     }
+
+    public function expenseProducts()
+{
+    return $this->hasMany(ExpenseProduct::class, 'expense_id');
+}
 }

@@ -32,15 +32,12 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-12">
-
                         <!-- /.card -->
-
                         <div class="card">
                             <div class="card-header">
-                                @can('create_expense')
-                                    <h3 class="card-title float-right"><a class="btn btn-info text-white" data-toggle="modal"
-                                            data-target="#exampleModalCenter"><i class="fa fa-plus"></i> Create</a> </h3>
-                                @endcan
+                                <h3 class="card-title float-right"><a class="btn btn-info text-white" data-toggle="modal"
+                                        data-target="#exampleModalCenter"><i class="fa fa-plus"></i> Create</a> </h3>
+
                                 @include('expenses::expenses.create')
                             </div>
                             <!-- /.card-header -->
@@ -56,49 +53,56 @@
                                             <th class="text-center">Expense Type</th>
                                             <th class="text-center">Receipt</th>
                                             <th class="text-center">Action</th>
-
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($expenses as $key => $exp)
+                                        @forelse ($expenses as $expense)
                                             <tr>
                                                 <td class="text-center">{{ $loop->iteration }}</td>
-                                                <td class="text-center">{{ $exp->title }}</td>
-                                                <td class="text-center">{{ $exp->amount }}</td>
-                                                <td class="text-center">{{ $exp->date }}</td>
-                                                <td class="text-center">{{ $exp->mode }}</td>
-                                                <td class="text-center">{{ $exp->category['title'] }}</td>
+                                                <td class="text-center">{{ $expense->title }}</td>
+                                                <td class="text-center">{{ $expense->amount }}</td>
+                                                <td class="text-center">{{ $expense->date }}</td>
+                                                <td class="text-center">{{ $expense->mode }}</td>
+                                                <td class="text-center">{{ $expense->category->title ?? 'N/A' }}</td>
                                                 <td class="text-center">
-                                                    <a href="{{ asset('upload/images/expenses-receipt/' . $exp->receipt) }}"
-                                                        target="_blank" alt="">View Receipt</a>
+                                                    @if ($expense->receipt)
+                                                        <a href="{{ asset('upload/images/expenses-receipt/' . $expense->receipt) }}" target="_blank">
+                                                            <img class="img-thumbnail" height="100px" width="100px" src="{{ asset('upload/images/expenses-receipt/' . $expense->receipt) }}" alt="">
+                                                        </a>
+                                                    @else
+                                                        N/A
+                                                    @endif
                                                 </td>
-                                                <td>
-                                                    @can('edit_expense')
-                                                        <a data-toggle="modal" data-target="#editCategory{{ $exp->id }}"
-                                                            class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
-                                                    @endcan
-                                                    @include('expenses::expenses.edit')
-                                                    @can('delete_expense')
-                                                        <button id="delete" class="btn btn-danger btn-sm"
-                                                            onclick="
-        event.preventDefault();
-        if (confirm('Are you sure? It will delete the data permanently!')) {
-            document.getElementById('destroy{{ $exp->id }}').submit()
-        }
-        ">
+                                                <td class="text-center">
+                                                    <!-- Edit icon with route to edit page -->
+                                                    <a href="{{ route('expenses.edit', $expense->id) }}" 
+                                                       class="btn btn-info btn-sm" 
+                                                       title="Edit">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+
+                                                    <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST" style="display: inline-block;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Are you sure you want to delete this expense?');"
+                                                            title="Delete">
                                                             <i class="fa fa-trash"></i>
-                                                            <form id="destroy{{ $exp->id }}" class="d-none"
-                                                                action="{{ route('expenses.destroy', $exp->id) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                @method('delete')
-                                                            </form>
                                                         </button>
-                                                    @endcan
+                                                    </form>
+
+                                                    <a href="{{ route('expenses.show', $expense->id) }}" 
+                                                       class="btn btn-primary btn-sm" 
+                                                       title="View">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
                                                 </td>
                                             </tr>
-                                        @endforeach
-
+                                        @empty
+                                            <tr>
+                                                <td colspan="8" class="text-center">No Expenses Found</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                     <tfoot>
                                         <tr>
@@ -126,5 +130,4 @@
         </section>
         <!-- /.content -->
     </div>
-
 @endsection

@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use Modules\Branch\Entities\Branch;
 use Modules\Expenses\Entities\ExpenseCategory;
 use Illuminate\Support\Str;
+use Modules\Restaurent\Models\Supplier;
 
 
 class ExpenseCategoryController extends Controller
@@ -19,7 +20,8 @@ class ExpenseCategoryController extends Controller
     public function index()
     {
         $expenses = ExpenseCategory::orderBy('created_at','DESC')->with('branch')->get();
-        $branches = Branch::where('status','on')->get();
+        $branches = Supplier::where('status','active')->get();
+        // dd($branches);
         return view('expenses::category.index', compact('expenses','branches'));
     }
   

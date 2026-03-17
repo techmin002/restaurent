@@ -23,4 +23,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('expenseCategory/status/{id}', [ExpenseCategoryController::class, 'status'])->name('expenseCategory.status');
     Route::get('get-expenses', [ExpensesController::class,'getExpense'])->name('getExpenses');
 
+    Route::POST('expenses/product/store', [ExpensesController::class,'storeExpenseProduct'])->name('expense-products.store');
+
 });

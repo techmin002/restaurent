@@ -5,6 +5,7 @@ namespace Modules\Expenses\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Branch\Entities\Branch;
+use Modules\Restaurent\Models\Supplier;
 
 class ExpenseCategory extends Model
 {
@@ -22,6 +23,11 @@ class ExpenseCategory extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+
+    public function supplier()
+    {
+        return $this->hasMany(Supplier::class);
     }
     protected static function newFactory()
     {

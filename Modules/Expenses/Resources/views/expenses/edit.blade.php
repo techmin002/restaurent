@@ -1,83 +1,196 @@
-<div class="modal fade" id="editCategory{{ $exp->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content" style="border-radius: 8px;">
-            <div class="modal-header justify-content-center" style="background-color: #08A4A4; color: #ffff;">
-                <h1 class="modal-title fs-5" id="staticBackdropLabel">Edit Expenses </h1>
-            </div>
-            <form action="{{ route('expenses.update',$exp->id) }}" id="expenseForm" method="post" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row gy-3">
+<!-- expenses::expenses.edit.blade.php -->
+@extends('setting::layouts.master')
 
+@section('title', 'Edit Expense')
+@section('breadcrumb')
+    <ol class="breadcrumb border-0 m-0">
+        <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('expenses.index') }}">Expenses</a></li>
+        <li class="breadcrumb-item active">Edit Expense</li>
+    </ol>
+@endsection
 
-                            <div class="mt-3 col-lg-6">
-                                <label class="form-label12">Title</label>
-                                <input class="form-control" placeholder="Enter Title" value="{{ $exp->title }}" type="text" name="title" id="title">
-                            </div>
-                            <div class="mt-3 col-lg-6">
-                                <label class="form-label12">Amount (INR)</label>
-                                <input class="form-control" placeholder="" type="text" value="{{ $exp->amount }}" name="amount">
-                            </div>
-                            <div class="mt-3 col-lg-6">
-                                <label class="form-label12">Date</label>
-                                <input class="form-control" placeholder="" type="date" value="{{ old('date', $exp->date) }}" name="date" id="date">
-                            </div>
-
-                            <div class="mt-3 col-lg-6">
-                                <label class="form-label12">Mode of Payment</label>
-                                <select class="form-control" name="mode">
-                                    <option value="" selected disabled>Select Payment Mode</option>
-                                    <option value="petty cash" {{ old('mode', $exp->mode) == 'petty cash' ? 'selected' : '' }}>Petty Cash</option>
-                                    <option value="online" {{ old('mode', $exp->mode) == 'online' ? 'selected' : '' }}>Online</option>
-                                    <option value="cheque" {{ old('mode', $exp->mode) == 'cheque' ? 'selected' : '' }}>Cheque</option>
-                                </select>
-                            </div>
-
-                            <div class="mt-3 col-lg-6">
-                                <label class="form-label12">Expense Type</label>
-                                <select class="form-control" name="categoryId">
-                                    <option value="" selected disabled>Select Expense Category</option>
-                                    @foreach ($categories as $cat)
-                                        <option value="{{ $cat->id }}" {{ old('categoryId', $exp->expense_category_id) == $cat->id ? 'selected' : '' }}>
-                                            {{ $cat->title }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="mt-3 col-lg-6" data-select2-id="select2-data-5-a5wr">
-                                <label class="form-label12">Receipt <small>(Optional)</small></label>
-                                <input type="file" class="form-contro" name="receipt">
-                                <img src="{{ asset('upload/images/expenses-receipt/'.$exp->receipt) }}" style="width: 100px" alt="">
-                            </div>
-                            <div class="mt-3 col-lg-12">
-                                <label class="form-label12">Branch </label>
-                                <select class="form-control" name="branchId">
-                                    <option value="" selected disabled>Select Branch</option>
-                                    @foreach ($branches as $cat)
-                                        <option value="{{ $cat->id }}" {{ old('branchId', $exp->branch_id) == $cat->id ? 'selected' : '' }}>
-                                            {{ $cat->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mt-3 col-lg-12">
-                                <label class="form-label12">Description <small>(Optional)</small></label>
-                                <textarea name="description" class="form-control" id="">{{ $exp->description }}</textarea>
-                            </div>
-                        </div>
+@section('content')
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Edit Expense</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('expenses.index') }}">Expenses</a></li>
+                            <li class="breadcrumb-item active">Edit Expense</li>
+                        </ol>
                     </div>
                 </div>
-                <div class="modal-footer justify-content-start">
+            </div><!-- /.container-fluid -->
+        </section>
 
-                    <button type="submit" name="submit" id="btnSubmit" class="btn btn-success">Save Item</button>
-
-                    <button type="cancel" data-dismiss="modal" class="btn btn-danger">Cancel</button>
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Edit Expense Details</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body">
+                                <form action="{{ route('expenses.update', $expense->id) }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PUT')
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="title">Title <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="title" name="title" 
+                                                       value="{{ old('title', $expense->title) }}" required>
+                                                @error('title')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="amount">Amount (INR) <span class="text-danger">*</span></label>
+                                                <input type="number" step="0.01" class="form-control" id="amount" name="amount" 
+                                                       value="{{ old('amount', $expense->amount) }}" required>
+                                                @error('amount')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="date">Date <span class="text-danger">*</span></label>
+                                                <input type="date" class="form-control" id="date" name="date" 
+                                                       value="{{ old('date', $expense->date) }}" required>
+                                                @error('date')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="mode">Mode of Payment <span class="text-danger">*</span></label>
+                                                <select class="form-control" id="mode" name="mode" required>
+                                                    <option value="">Select Payment Mode</option>
+                                                    <option value="petty cash" {{ old('mode', $expense->mode) == 'petty cash' ? 'selected' : '' }}>Petty Cash</option>
+                                                    <option value="online" {{ old('mode', $expense->mode) == 'online' ? 'selected' : '' }}>Online</option>
+                                                    <option value="cheque" {{ old('mode', $expense->mode) == 'cheque' ? 'selected' : '' }}>Cheque</option>
+                                                </select>
+                                                @error('mode')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="categoryId">Expense Type <span class="text-danger">*</span></label>
+                                                <select class="form-control" id="categoryId" name="categoryId" required>
+                                                    <option value="">Select Category</option>
+                                                    @foreach ($categories as $cat)
+                                                        <option value="{{ $cat->id }}" {{ old('categoryId', $expense->expense_category_id ?? $expense->category_id) == $cat->id ? 'selected' : '' }}>
+                                                            {{ $cat->title }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('categoryId')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="branchId">Supplier <span class="text-danger">*</span></label>
+                                                <select class="form-control" id="branchId" name="branchId" required>
+                                                    <option value="">Select Supplier</option>
+                                                    @foreach ($branches as $branch)
+                                                        <option value="{{ $branch->id }}" {{ old('branchId', $expense->branch_id) == $branch->id ? 'selected' : '' }}>
+                                                            {{ $branch->company_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('branchId')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="receipt">Receipt (Optional)</label>
+                                                <div class="custom-file">
+                                                    <input type="file" class="custom-file-input" id="receipt" name="receipt" accept="image/*,.pdf">
+                                                    <label class="custom-file-label" for="receipt">
+                                                        @if($expense->receipt)
+                                                            {{ $expense->receipt }} (Current file)
+                                                        @else
+                                                            Choose file
+                                                        @endif
+                                                    </label>
+                                                </div>
+                                                @if($expense->receipt)
+                                                    <small class="form-text text-muted">
+                                                        Current file: 
+                                                        <a href="{{ asset('upload/images/expenses-receipt/' . $expense->receipt) }}" target="_blank">
+                                                            View receipt
+                                                        </a>
+                                                    </small>
+                                                @endif
+                                                @error('receipt')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="description">Description (Optional)</label>
+                                                <textarea class="form-control" id="description" name="description" rows="3">{{ old('description', $expense->description) }}</textarea>
+                                                @error('description')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary">Update Expense</button>
+                                        <a href="{{ route('expenses.index') }}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                    <!-- /.col -->
                 </div>
-            </form>
-            <span id="output"></span>
-        </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+        </section>
+        <!-- /.content -->
     </div>
-  </div>
+@endsection
+
+@push('scripts')
+<script>
+    // Initialize file input
+    $(document).ready(function() {
+        bsCustomFileInput.init();
+    });
+</script>
+@endpush

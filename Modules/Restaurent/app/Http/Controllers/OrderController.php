@@ -97,6 +97,7 @@ class OrderController extends Controller
      */
     public function officeOrder($id)
     {
+        dd("Debug stop at office order method");
         $office = OfficeRegister::findOrFail($id);
         $categories = Category::where('restaurent_id', $office->restaurent_id)->get();
         $menus = Menu::with('variations')->where('restaurent_id', $office->restaurent_id)->get();
@@ -151,7 +152,8 @@ class OrderController extends Controller
      */
     public function office_orders_submit(Request $request)
     {
-        $restaurant_id = auth()->user()->restaurent_id;
+        //  dd($request->all());
+        $restaurant_id = $request->restaurent_id;
 
         $request->validate([
             'office_id' => 'required|exists:office_registers,id',
@@ -187,16 +189,16 @@ class OrderController extends Controller
                 'customer_id'    => null, // Office orders don't need individual customer
                 'order_type'     => 'office',
                 'restaurent_id'  => $request->restaurent_id,
-                'created_by'     => auth()->user()->id,
+                'created_by'     => $request->restaurent_id,
                 'table_id'       => null,
                 'office_id'      => $request->office_id,
                 'order_time'     => now(),
-                'discount_type'  => $request->discount_type,
-                'discount_value' => $request->discount_value,
+                // 'discount_type'  => $request->discount_type,
+                'discount_value' => $request->discount_amount,
                 'discount_amount' => $discountAmount,
                 'sub_total'      => $subTotal,
                 'grand_total'    => $grandTotal,
-                'delivery_charge' => $request->delivery_charge ?? 0,
+                // 'delivery_charge' => $request->delivery_charge ?? 0,
                 'remarks'        => $request->remarks,
                 'status'         => 'pending',
                 'order_from'     => 'web_office',
@@ -228,8 +230,8 @@ class OrderController extends Controller
 
     public function office_orders_update(Request $request)
     {
-
-        $restaurant_id = auth()->user()->restaurent_id;
+        // dd($request->all());
+        $restaurant_id = $request->restaurent_id;
 
         $request->validate([
             'order_id' => 'required|exists:orders,id',
@@ -325,13 +327,14 @@ class OrderController extends Controller
         ]);
     }
 
-    public function getOfficeRecentOrders($officeId)
+    public function getOfficeRecentOrders($officeId, $restaurantId)
     {
+        $restaurant_id = $restaurantId;
         try {
             $orders = Order::with(['items.menu', 'items.variation'])
                 ->where('office_id', $officeId)
-                ->where('restaurent_id', auth()->user()->restaurent_id)
-                ->where('created_at', '>=', now()->subDays(1)) // 1 day
+                ->where('restaurent_id', $restaurant_id)
+                ->where('created_at', '>=', now()->subDays(1))
                 ->whereIn('status', ['pending', 'accepted', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
                 ->orderBy('order_time', 'DESC')
                 ->limit(5)
@@ -353,7 +356,7 @@ class OrderController extends Controller
                             $price = $item->variation->price ?? $item->menu->price ?? 0;
                             return [
                                 'item_name' => $item->menu->name ?? 'Unknown Item',
-                                'variation_name' => $item->variation->name ?? '',
+                                'variation_name' => $item->variation->name ?? null,
                                 'qty' => $item->qty,
                                 'price' => $price
                             ];
@@ -364,13 +367,13 @@ class OrderController extends Controller
             return response()->json($orders);
         } catch (\Exception $e) {
             \Log::error('Error fetching office recent orders: ' . $e->getMessage());
-            return response()->json([], 500);
+            return response()->json(['error' => 'Failed to fetch recent orders'], 500);
         }
     }
 
     public function table_orders_submit(Request $request)
     {
-        $restaurant_id = auth()->user()->restaurent_id;
+        $restaurant_id = $request->restaurent_id;
 
         $request->validate([
             'orderType' => 'required|in:dinein,takeaway,office',
@@ -391,7 +394,7 @@ class OrderController extends Controller
                     'name' => $request->customer_name,
                     'phone' => $request->customer_phone,
                     'email' => $request->customer_email,
-                    'restaurent_id' => auth()->user()->restaurent_id,
+                    'restaurent_id' => $request->restaurent_id,
                 ]);
             }
 
@@ -415,7 +418,7 @@ class OrderController extends Controller
                 'customer_id'    => $customer->id,
                 'order_type'     => $request->orderType,
                 'restaurent_id'  => $request->restaurent_id,
-                'created_by'     => auth()->user()->id,
+                'created_by'     => $request->created_by,
                 'table_id'       => $request->table_id,
                 'office_id'      => $request->office_id,
                 'order_time'     => now(),
@@ -450,7 +453,7 @@ class OrderController extends Controller
 
     public function table_orders_update(Request $request)
     {
-        $restaurant_id = auth()->user()->restaurent_id;
+        $restaurant_id = $request->restaurent_id;
 
         $request->validate([
             'order_id' => 'required|exists:orders,id',
@@ -488,7 +491,7 @@ class OrderController extends Controller
                     'name' => $request->customer_name,
                     'phone' => $request->customer_phone,
                     'email' => $request->customer_email,
-                    'restaurent_id' => auth()->user()->restaurent_id,
+                    'restaurent_id' => $request->restaurent_id,
                 ]);
                 \Log::info('UPDATE ORDER - Created new customer:', ['customer_id' => $customer->id]);
             } else {
@@ -822,50 +825,6 @@ class OrderController extends Controller
     /**
      * Get customer recent orders
      */
-    public function getCustomerRecentOrders($customerId)
-    {
-        try {
-            $orders = Order::with(['table', 'items.menu', 'items.variation'])
-                ->where('customer_id', $customerId)
-                ->where('restaurent_id', auth()->user()->restaurent_id)
-                ->where('created_at', '>=', now()->subDays(1)) // 1 day
-                ->whereIn('status', ['pending', 'accepted', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
-                ->orderBy('order_time', 'DESC')
-                ->limit(5)
-                ->get()
-                ->map(function ($order) {
-                    // Calculate total from items
-                    $calculatedTotal = $order->items->sum(function ($item) {
-                        $price = $item->variation->price ?? $item->menu->price ?? 0;
-                        return $price * $item->qty;
-                    });
-
-                    return [
-                        'id' => $order->id,
-                        'status' => $order->status,
-                        'order_time' => $order->order_time,
-                        'grand_total' => $order->grand_total, // From database
-                        'calculated_total' => $calculatedTotal, // Calculated from items
-                        'table_number' => optional($order->table)->table_number,
-                        'items' => $order->items->map(function ($item) {
-                            $price = $item->variation->price ?? $item->menu->price ?? 0;
-                            return [
-                                'item_name' => $item->menu->name ?? 'Unknown Item',
-                                'variation_name' => $item->variation->name ?? '',
-                                'qty' => $item->qty,
-                                'price' => $price
-                            ];
-                        })->toArray(),
-                    ];
-                });
-
-            return response()->json($orders);
-        } catch (\Exception $e) {
-            \Log::error('Error fetching recent orders: ' . $e->getMessage());
-            return response()->json([], 500);
-        }
-    }
-
     /**
      * Check customer by phone number
      */
@@ -876,11 +835,18 @@ class OrderController extends Controller
         ]);
 
         try {
+            \Log::info('Checking customer by phone:', [
+                'phone' => $request->phone,
+                'restaurant_id' => $request->restaurant_id
+            ]);
+
             $customer = Customer::where('phone', $request->phone)
-                ->where('restaurent_id', auth()->user()->restaurent_id)
+                ->where('restaurent_id', $request->restaurant_id)
                 ->first();
 
             if ($customer) {
+                \Log::info('Customer found:', ['id' => $customer->id, 'name' => $customer->name]);
+
                 return response()->json([
                     'exists' => true,
                     'customer' => [
@@ -892,6 +858,8 @@ class OrderController extends Controller
                 ]);
             }
 
+            \Log::info('Customer not found for phone: ' . $request->phone);
+
             return response()->json([
                 'exists' => false,
                 'message' => 'Customer not found'
@@ -901,6 +869,59 @@ class OrderController extends Controller
             return response()->json([
                 'error' => 'Failed to check customer'
             ], 500);
+        }
+    }
+
+    /**
+     * Get customer recent orders
+     */
+    public function getCustomerRecentOrders($customerId, $restaurantId)
+    {
+        try {
+            \Log::info('Fetching recent orders for customer:', [
+                'customer_id' => $customerId,
+                'restaurant_id' => $restaurantId
+            ]);
+
+            $orders = Order::with(['table', 'items.menu', 'items.variation'])
+                ->where('customer_id', $customerId)
+                ->where('restaurent_id', $restaurantId)
+                ->where('created_at', '>=', now()->subDays(1))
+                ->whereIn('status', ['pending', 'accepted', 'sent to kitchen', 'serve', 'unknown', 'cooking'])
+                ->orderBy('order_time', 'DESC')
+                ->limit(5)
+                ->get()
+                ->map(function ($order) {
+                    $calculatedTotal = $order->items->sum(function ($item) {
+                        $price = $item->variation->price ?? $item->menu->price ?? 0;
+                        return $price * $item->qty;
+                    });
+
+                    return [
+                        'id' => $order->id,
+                        'status' => $order->status,
+                        'order_time' => $order->order_time,
+                        'grand_total' => $order->grand_total,
+                        'calculated_total' => $calculatedTotal,
+                        'table_number' => optional($order->table)->table_number,
+                        'items' => $order->items->map(function ($item) {
+                            $price = $item->variation->price ?? $item->menu->price ?? 0;
+                            return [
+                                'item_name' => $item->menu->name ?? 'Unknown Item',
+                                'variation_name' => $item->variation->name ?? null,
+                                'qty' => $item->qty,
+                                'price' => $price
+                            ];
+                        })->toArray(),
+                    ];
+                });
+
+            \Log::info('Found ' . $orders->count() . ' recent orders for customer');
+
+            return response()->json($orders);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching recent orders: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch recent orders'], 500);
         }
     }
 
@@ -974,6 +995,7 @@ class OrderController extends Controller
     {
 
         $orders = Order::with(['items', 'customer'])
+            ->where('restaurent_id', auth()->user()->restaurent_id)
             ->whereIn('status', ['Sent to Kitchen', 'Cooking'])
             ->orderBy('created_at', 'asc') //
             ->get();
@@ -1412,7 +1434,8 @@ class OrderController extends Controller
         $start = Carbon::now('Asia/Kathmandu')->startOfDay();
         $end   = Carbon::now('Asia/Kathmandu')->endOfDay();
 
-        $query = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office')
+
+        $query = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office',)
             ->where('restaurent_id', auth()->user()->restaurent_id)
             ->where('order_source', 'Reception')
             ->whereBetween('created_at', [$start, $end])

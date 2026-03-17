@@ -16,6 +16,10 @@ use Modules\Employee\Http\Controllers\PayrollController;
 use Modules\Setting\Http\Controllers\CompanyProfileController;
 use Modules\Setting\Http\Controllers\PopUpController;
 use Modules\Setting\Http\Controllers\CounterController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ProductController;
+use Modules\Setting\Http\Controllers\AVideoController;
+use Modules\Setting\Http\Controllers\ExpenseController;
 
 Route::prefix('setting')->group(function () {
     Route::get('/', 'SettingController@index');
@@ -24,6 +28,55 @@ Route::prefix('setting')->group(function () {
 Route::group(['middleware' => 'auth'], function () {
     Route::resource('company', 'CompanyProfileController');
     Route::get('why/us', [CompanyProfileController::class, 'whyUs'])->name('whyus.index');
+     Route::get('/features', [CompanyProfileController::class, 'features'])->name('features');
+    Route::get('/plans', [CompanyProfileController::class, 'plans'])->name('plans');
+    Route::get('/askedQuestions', [CompanyProfileController::class, 'askedQuestions'])->name('askedQuestions');
+    Route::get('/customerSays', [CompanyProfileController::class, 'customerSays'])->name('customerSays');
+    Route::get('/Interface', [CompanyProfileController::class, 'Interface'])->name('Interface');
+    Route::get('/Videos', [CompanyProfileController::class, 'Video'])->name('Video');
+    // Route::get('/videos', [VideosssController::class, 'Video'])->name('Video');
+
+    Route::post('whyus/store', [CompanyProfileController::class, 'WhyUsStore'])->name('whyus.store');
+    Route::put('whyus/update/{id}', [CompanyProfileController::class, 'WhyUsUpdate'])->name('whyus.update');
+    Route::get('whyus/delete/{id}', [CompanyProfileController::class, 'WhyUsDelete'])->name('whyus.delete');
+
+    Route::post('features/store', [CompanyProfileController::class, 'featuresStore'])->name('features.store');
+    Route::put('features/update/{id}', [CompanyProfileController::class, 'featuresUpdate'])->name('features.update');
+    Route::get('features/delete/{id}', [CompanyProfileController::class, 'featuresDelete'])->name('features.delete');
+
+    Route::post('plans/store', [CompanyProfileController::class, 'plansStore'])->name('plans.store');
+    Route::put('plans/update/{id}', [CompanyProfileController::class, 'plansUpdate'])->name('plans.update');
+    Route::get('plans/delete/{id}', [CompanyProfileController::class, 'plansDelete'])->name('plans.delete');
+
+    Route::post('askedQuestions/store', [CompanyProfileController::class, 'askedQuestionsStore'])->name('askedQuestions.store');
+    Route::put('askedQuestions/update/{id}', [CompanyProfileController::class, 'askedQuestionsUpdate'])->name('askedQuestions.update');
+    Route::get('askedQuestions/delete/{id}', [CompanyProfileController::class, 'askedQuestionsDelete'])->name('askedQuestions.delete');
+
+    Route::post('customerSays/store', [CompanyProfileController::class, 'customerSaysStore'])->name('customerSays.store');
+    Route::put('customerSays/update/{id}', [CompanyProfileController::class, 'customerSaysUpdate'])->name('customerSays.update');
+    Route::get('customerSays/delete/{id}', [CompanyProfileController::class, 'customerSaysDelete'])->name('customerSays.delete');
+
+    Route::post('Interface/store', [CompanyProfileController::class, 'InterfaceStore'])->name('interfaces.store');
+    Route::put('Interface/update/{id}', [CompanyProfileController::class, 'InterfaceUpdate'])->name('interfaces.update');
+    Route::get('Interface/delete/{id}', [CompanyProfileController::class, 'InterfaceDelete'])->name('interfaces.delete');
+    // Route::get('customerSays/status', [CompanyProfileController::class, 'customerSaysst'])->name('customerSays.delete');
+
+    // Counter Module Routes
+    Route::post('/open-counter', [CounterController::class, 'open'])->name('openCounter');
+    Route::post('/close-counter', [CounterController::class, 'close'])->name('closeCounter');
+    Route::get('/counter/today-state', [CounterController::class, 'getTodayCounter'])->name('todayCounterState');
+
+
+
+   Route::get('company-profile/videos', [CompanyProfileController::class, 'Video'])
+    ->name('company-profile.videos');
+
+// Store new video (from modal/form)
+Route::post('company-profile/videos/store', [CompanyProfileController::class, 'VideoStore'])
+    ->name('company-profile.videos.store');
+
+    Route::post('admin/company-profile/videos/{id}/delete', [CompanyProfileController::class,'VideoDelete'])->name('company-profile.videos.delete');
+
     Route::get('setsalary', [PayrollController::class, 'index'])->name('setsalary.index');
     Route::get('payslip', [PayrollController::class, 'payslip'])->name('setsalary.payslip.index');
     Route::get('/payslip/fetch', [PayrollController::class, 'fetchPayslip'])->name('payslip.fetch');
@@ -63,4 +116,34 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/open-counter', [CounterController::class, 'open'])->name('openCounter');
     Route::post('/close-counter', [CounterController::class, 'close'])->name('closeCounter');
     Route::get('/counter/today-state', [CounterController::class, 'getTodayCounter'])->name('getTodayCounter');
+
+    // Supplier Module Routes
+     Route::get('/suppliers', [SupplierController::class, 'index'])
+        ->name('suppliers.index');
+    Route::get('/suppliers/create', [SupplierController::class, 'create'])
+        ->name('suppliers.create');
+    Route::post('/suppliers/store', [SupplierController::class, 'store'])
+        ->name('suppliers.store');
+    Route::get('/suppliers/edit/{id}', [SupplierController::class, 'edit'])
+        ->name('suppliers.edit');
+    Route::put('/suppliers/update/{id}', [SupplierController::class, 'update'])
+        ->name('suppliers.update');
+    Route::delete('/suppliers/delete/{id}', [SupplierController::class, 'destroy'])
+        ->name('suppliers.delete');
+    Route::get('/suppliers/show/{id}', [SupplierController::class, 'show'])
+        ->name('supplier.show');
+
+    // Expense products Module Routes
+    Route::get('/products', [ProductController::class, 'index'])
+        ->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])
+        ->name('expenseproducts.create');
+    Route::post('/products/store', [ProductController::class, 'store'])
+        ->name('expenseproducts.store');
+    Route::get('/products/edit/{id}', [ProductController::class, 'edit'])
+        ->name('expenseproducts.edit');
+    Route::put('/products/update/{id}', [ProductController::class, 'update'])
+        ->name('expenseproducts.update');
+    Route::delete('/products/delete/{id}', [ProductController::class, 'destroy'])
+        ->name('expenseproducts.delete');
 });

@@ -60,8 +60,10 @@
                                     <tbody>
                                         @foreach ($offices as $key => $office)
                                             @php
-                                                $url = route("office.order", $office->id);
-
+                                                $url = route('office.order', [
+                                                    'id' => $office->id,
+                                                    'resturant_id' => auth()->user()->restaurent_id, // Parameter name with 'e' to match route
+                                                ]);
                                             @endphp
                                             <tr>
                                                 <td class="text-center">{{ $loop->iteration }}</td>
@@ -92,7 +94,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                             <th class="text-center">S.N</th>
+                                            <th class="text-center">S.N</th>
                                             <th class="text-center">Name</th>
                                             <th class="text-center">Contact</th>
                                             <th class="text-center">QR Code</th>

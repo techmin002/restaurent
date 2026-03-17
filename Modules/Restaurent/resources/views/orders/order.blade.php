@@ -16,6 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
+        /* Your existing styles remain exactly the same */
         :root {
             --primary: #0d6efd;
             --primary-dark: #0b5ed7;
@@ -45,6 +46,7 @@
             --gradient-danger: linear-gradient(135deg, var(--danger), #c82333);
         }
 
+        /* Keep all your existing styles from here... */
         * {
             box-sizing: border-box;
         }
@@ -1321,8 +1323,8 @@
             <form id="orderForm" action="{{ route('tables.orders.submit') }}" method="post">
                 @csrf
                 <input type="hidden" name="office_id" value="{{ $table->id ?? '' }}">
-                <input type="hidden" name="restaurent_id" value="{{ auth()->user()->restaurent_id ?? '' }}">
-                <input type="hidden" name="created_by" value="{{ auth()->id() ?? 1 }}">
+               <input type="hidden" name="restaurent_id" value="{{ $restaurent_id }}">
+                <input type="hidden" name="created_by" value="{{ $restaurent_id }}">
                 <input type="hidden" name="order_from" value="web">
                 <input type="hidden" name="order_time" value="{{ now() }}">
                 <input type="hidden" name="table_id" value="{{ $restaurent_table->table_number ?? '' }}">
@@ -1649,7 +1651,7 @@
 
     <script>
         // Enhanced Restaurant Order Management System
-        let userRestaurantId = "{{ auth()->user()->restaurent_id ?? '' }}";
+        let userRestaurantId = "{{ $restaurent_id }}";
         let recentOrdersTotal = 0;
         let existingOrderId = null;
         let isUpdateMode = false;
@@ -1694,17 +1696,28 @@
                 return;
             }
 
-            const formData = new FormData();
-            formData.append('_token', '{{ csrf_token() }}');
-            formData.append('phone', phone);
+            let restaurantId = userRestaurantId;
+
+            console.log('Checking customer by phone:', phone, 'restaurant:', restaurantId);
+
+            // Show loading state
+            $('#phone-feedback').html('<span class="text-info"><i class="fas fa-spinner fa-spin me-1"></i>Checking customer...</span>');
 
             fetch('{{ route('check.customer.by.phone') }}', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        restaurant_id: restaurantId
+                    })
                 })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
@@ -1712,13 +1725,15 @@
                     console.log('Customer check response:', data);
 
                     if (data.exists && data.customer) {
+                        // Customer exists
                         $('#customer_name').val(data.customer.name || '');
                         $('#customer_email').val(data.customer.email || '');
 
                         if (data.customer.id) {
                             $('#customer_id').val(data.customer.id);
                             console.log('Customer ID set to:', data.customer.id);
-                            fetchRecentOrders(data.customer.id);
+                            // Fetch customer's recent orders
+                            fetchCustomerRecentOrders(data.customer.id, restaurantId);
                         } else {
                             console.warn('Customer ID not found in response');
                             $('#customer_id').val('');
@@ -1730,18 +1745,33 @@
                             '<span class="text-success"><i class="fas fa-check-circle"></i> Customer found! Name auto-filled.</span>'
                         );
                         $('#clearPhone').removeClass('d-none');
-                        setTimeout(() => $('#phone-feedback').html(''), 3000);
+
+                        // Clear success message after 3 seconds
+                        setTimeout(() => {
+                            if ($('#phone-feedback').text().includes('Customer found')) {
+                                $('#phone-feedback').html('');
+                            }
+                        }, 3000);
                     } else {
+                        // New customer
                         $('#customer_id').val('');
                         $('#customer_name').val('');
                         $('#customer_email').val('');
+
                         $('#phone-feedback').html(
                             '<span class="text-info"><i class="fas fa-info-circle"></i> New customer. Please enter details.</span>'
                         );
                         $('#clearPhone').removeClass('d-none');
+
                         hideRecentOrders();
                         setNewOrderMode();
-                        setTimeout(() => $('#phone-feedback').html(''), 3000);
+
+                        // Clear info message after 3 seconds
+                        setTimeout(() => {
+                            if ($('#phone-feedback').text().includes('New customer')) {
+                                $('#phone-feedback').html('');
+                            }
+                        }, 3000);
                     }
                 })
                 .catch(error => {
@@ -1749,23 +1779,33 @@
                     $('#phone-feedback').html(
                         '<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Error checking customer.</span>'
                     );
-                    setTimeout(() => $('#phone-feedback').html(''), 3000);
+
+                    // Clear error message after 3 seconds
+                    setTimeout(() => {
+                        if ($('#phone-feedback').text().includes('Error')) {
+                            $('#phone-feedback').html('');
+                        }
+                    }, 3000);
+
                     hideRecentOrders();
                     setNewOrderMode();
                 });
         }
 
-        // Function to fetch recent orders for a customer
-        function fetchRecentOrders(customerId) {
+        // Function to fetch customer's recent orders
+        function fetchCustomerRecentOrders(customerId, restaurantId) {
             if (!customerId) {
                 hideRecentOrders();
                 setNewOrderMode();
                 return;
             }
 
-            console.log('Fetching recent orders for customer:', customerId);
+            console.log('Fetching recent orders for customer:', customerId, 'restaurant:', restaurantId);
 
-            fetch(`/api/customers/${customerId}/recent-orders`, {
+            // Show loading in recent orders container
+            $('#recentOrdersContainer').html('<div class="text-center p-3"><i class="fas fa-spinner fa-spin me-2"></i>Loading recent orders...</div>').show();
+
+            fetch(`/api/customers/${customerId}/${restaurantId}/recent-orders`, {
                     method: 'GET',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -1784,9 +1824,9 @@
                     displayRecentOrders(data);
 
                     if (data && data.length > 0) {
+                        // Check for incomplete orders
                         const incompleteOrder = data.find(order =>
-                            order.status === 'pending' || order.status === 'confirmed' || order.status ===
-                            'preparing' || order.status === 'accepted'
+                            ['pending', 'accepted', 'confirmed', 'preparing', 'sent to kitchen', 'cooking'].includes(order.status)
                         );
 
                         if (incompleteOrder) {
@@ -1800,7 +1840,10 @@
                 })
                 .catch(error => {
                     console.error('Error fetching recent orders:', error);
-                    hideRecentOrders();
+                    $('#recentOrdersContainer').html('<div class="text-center text-danger p-3"><i class="fas fa-exclamation-circle me-2"></i>Error loading recent orders</div>').show();
+                    recentOrdersTotal = 0;
+                    updateRecentOrdersTotalDisplay();
+                    updateOverallTotal();
                     setNewOrderMode();
                 });
         }
@@ -1827,37 +1870,47 @@
                 recentOrdersTotal += orderTotal;
 
                 html += `
-                        <div class="order-item">
-                            <div class="order-header">
-                                <span>Order #${order.id}</span>
-                                <span class="order-status ${statusClass}">${order.status}</span>
-                            </div>
-                            <div class="order-time small text-muted mb-2">
-                                <i class="fas fa-clock me-1"></i>${orderTime}
-                            </div>
-                            <div class="order-items">
-                                ${order.items && order.items.length > 0 
-                                    ? order.items.map(item => 
-                                        `${item.qty}x ${item.item_name} ${item.variation_name ? '(' + item.variation_name + ')' : ''}`
-                                      ).join(', ')
-                                    : 'No items'
-                                }
-                            </div>
-                            <div class="order-total small text-muted mt-2">
-                                <strong>Order Total: Rs. ${orderTotal.toFixed(2)}</strong>
-                            </div>
-                            ${order.table_number ? `
-                                                                                                                                <div class="order-location small text-muted mt-1">
-                                                                                                                                    <i class="fas fa-table me-1"></i>Table: ${order.table_number}
-                                                                                                                                </div>
-                                                                                                                            ` : ''}
-                            ${order.order_type ? `
-                                                                                                                                <div class="order-type small text-muted mt-1">
-                                                                                                                                    <span class="badge order-type-badge bg-secondary">${order.order_type}</span>
-                                                                                                                                </div>
-                                                                                                                            ` : ''}
+                    <div class="order-item">
+                        <div class="order-header">
+                            <span><strong>Order #${order.id}</strong></span>
+                            <span class="order-status ${statusClass}">${order.status}</span>
                         </div>
-                    `;
+                        <div class="order-time small text-muted mb-2">
+                            <i class="fas fa-clock me-1"></i>${orderTime}
+                        </div>
+                        <div class="order-items">
+                            ${order.items && order.items.length > 0
+                                ? order.items.map(item => {
+                                    const variantText = item.variation_name ? ` (${item.variation_name})` : '';
+                                    return `<div class="mb-1">• ${item.qty}x ${item.item_name}${variantText} - Rs ${(item.price * item.qty).toFixed(2)}</div>`;
+                                  }).join('')
+                                : '<div class="text-muted">No items</div>'
+                            }
+                        </div>
+                        <div class="order-total mt-2 pt-1 border-top">
+                            <div class="d-flex justify-content-between">
+                                <span>Subtotal:</span>
+                                <span>Rs ${order.calculated_total ? order.calculated_total.toFixed(2) : '0.00'}</span>
+                            </div>
+                            ${order.grand_total ? `
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Grand Total:</span>
+                                <span>Rs ${order.grand_total.toFixed(2)}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ${order.table_number ? `
+                        <div class="order-location small text-muted mt-1">
+                            <i class="fas fa-table me-1"></i>Table: ${order.table_number}
+                        </div>
+                        ` : ''}
+                        ${order.order_type ? `
+                        <div class="order-type small text-muted mt-1">
+                            <span class="badge order-type-badge bg-secondary">${order.order_type}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
             });
 
             container.html(html).show();
@@ -1877,14 +1930,15 @@
         function updateRecentOrdersTotalDisplay() {
             const recentOrdersTotalValue = $('#recent-orders-total-value');
             const recentOrdersTotalDisplay = $('#recent-orders-total');
+            const recentOrdersTotalInput = $('#recentOrdersTotalInput');
 
             if (recentOrdersTotal > 0) {
                 recentOrdersTotalValue.text(`Rs ${recentOrdersTotal.toFixed(2)}`);
                 recentOrdersTotalDisplay.show();
-                $('#recentOrdersTotalInput').val(recentOrdersTotal);
+                recentOrdersTotalInput.val(recentOrdersTotal);
             } else {
                 recentOrdersTotalDisplay.hide();
-                $('#recentOrdersTotalInput').val(0);
+                recentOrdersTotalInput.val(0);
             }
         }
 
@@ -1893,7 +1947,6 @@
             const currentOrderTotal = parseFloat($('#totalAmount').text()) || 0;
             const overallTotal = currentOrderTotal + recentOrdersTotal;
 
-            $('#grandTotal').text(overallTotal.toFixed(2));
             $('#grandTotalInput').val(overallTotal.toFixed(2));
 
             const combinedTotalValue = $('#combined-total-value');
@@ -1950,12 +2003,16 @@
                 'accepted': 'status-accepted',
                 'confirmed': 'status-preparing',
                 'preparing': 'status-preparing',
+                'sent to kitchen': 'status-preparing',
+                'cooking': 'status-preparing',
                 'ready': 'status-ready',
+                'serve': 'status-ready',
                 'completed': 'status-completed'
             };
             return statusMap[status] || 'status-pending';
         }
 
+        // Debounce function to limit API calls
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -1967,6 +2024,7 @@
                 timeout = setTimeout(later, wait);
             };
         }
+
         const debouncedCheckCustomer = debounce(checkCustomerByPhone, 500);
 
         // Open modal function
@@ -2019,9 +2077,9 @@
                 const inputId = `variant-${variant.id}`;
 
                 variantOption.innerHTML = `
-                        <input type="radio" id="${inputId}" name="variant" value="${variant.id}" data-price="${variant.price}" ${index === 0 ? 'checked' : ''}>
-                        <label for="${inputId}">${variant.name} (Rs ${variant.price.toFixed(2)})</label>
-                    `;
+                    <input type="radio" id="${inputId}" name="variant" value="${variant.id}" data-price="${variant.price}" ${index === 0 ? 'checked' : ''}>
+                    <label for="${inputId}">${variant.name} (Rs ${variant.price.toFixed(2)})</label>
+                `;
 
                 variantsContainer.appendChild(variantOption);
             });
@@ -2104,14 +2162,14 @@
 
             if (cart.length === 0) {
                 cartItemsList.html(`
-                        <div class="empty-cart">
-                            <div class="empty-cart-icon">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                            <p>Your cart is empty</p>
-                            <small class="text-muted">Add items to create an order</small>
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">
+                            <i class="fas fa-shopping-cart"></i>
                         </div>
-                    `);
+                        <p>Your cart is empty</p>
+                        <small class="text-muted">Add items to create an order</small>
+                    </div>
+                `);
                 cartCount.text('0 items');
                 cartSubtotal.text('Rs 0.00');
                 cartTotalElement.text('Rs 0.00');
@@ -2127,23 +2185,23 @@
                 subtotal += itemTotal;
 
                 html += `
-                        <div class="cart-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <div class="cart-item-name">${item.name}</div>
-                                    <div class="cart-item-details">Rs ${item.price.toFixed(2)} × ${item.qty} = Rs ${itemTotal.toFixed(2)}</div>
-                                </div>
-                                <div class="cart-controls">
-                                    <button class="cart-qty-btn minus" data-index="${index}">-</button>
-                                    <span class="mx-1" style="font-size: 0.8rem;">${item.qty}</span>
-                                    <button class="cart-qty-btn plus" data-index="${index}">+</button>
-                                    <button class="remove-btn ms-2" data-index="${index}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                    <div class="cart-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-details">Rs ${item.price.toFixed(2)} × ${item.qty} = Rs ${itemTotal.toFixed(2)}</div>
+                            </div>
+                            <div class="cart-controls">
+                                <button class="cart-qty-btn minus" data-index="${index}">-</button>
+                                <span class="mx-1" style="font-size: 0.8rem;">${item.qty}</span>
+                                <button class="cart-qty-btn plus" data-index="${index}">+</button>
+                                <button class="remove-btn ms-2" data-index="${index}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
-                    `;
+                    </div>
+                `;
             });
 
             const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -2223,7 +2281,6 @@
         }
 
         // Handle image click event
-        // Update the handleImageClick function (around line 1689) to:
         function handleImageClick(e) {
             e.stopPropagation(); // ADD THIS LINE - prevents event from bubbling up
 
@@ -2382,13 +2439,13 @@
                 type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
 
             const notification = $(`
-                    <div class="notification alert alert-${type}">
-                        <div class="d-flex align-items-center">
-                            <i class="fas ${icon} me-2"></i>
-                            <span>${message}</span>
-                        </div>
+                <div class="notification alert alert-${type}">
+                    <div class="d-flex align-items-center">
+                        <i class="fas ${icon} me-2"></i>
+                        <span>${message}</span>
                     </div>
-                `);
+                </div>
+            `);
 
             $('body').append(notification);
 
@@ -2424,6 +2481,8 @@
         $('#clearPhone').on('click', function() {
             $('#customer_phone').val('').trigger('input').focus();
             $('#customer_id').val('');
+            $('#customer_name').val('');
+            $('#customer_email').val('');
             $(this).addClass('d-none');
             hideRecentOrders();
             setNewOrderMode();
@@ -2499,9 +2558,14 @@
             formData.append('name', name);
             formData.append('phone', phone);
             formData.append('email', email);
+            formData.append('restaurent_id', userRestaurantId);
 
             fetch('{{ route('customers.store') }}', {
                     method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
                     body: formData
                 })
                 .then(response => response.json())
@@ -2513,9 +2577,13 @@
                         $('#customer_email').val(email);
                         if (data.customer && data.customer.id) {
                             $('#customer_id').val(data.customer.id);
+                            // Fetch recent orders for the new customer
+                            fetchCustomerRecentOrders(data.customer.id, userRestaurantId);
                         }
                         $('#addCustomerModal').modal('hide');
-                        $('#addCustomerForm')[0].reset();
+                        $('#newCustomerName').val('');
+                        $('#newCustomerPhone').val('');
+                        $('#newCustomerEmail').val('');
                     } else {
                         showNotification('Failed to add customer.', 'error');
                     }
@@ -2583,7 +2651,6 @@
             console.log('Form validation passed, submitting...');
         });
     </script>
-
 </body>
 
 </html>

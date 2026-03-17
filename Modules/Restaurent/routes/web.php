@@ -14,11 +14,6 @@ use Modules\Restaurent\Http\Controllers\KitchenController;
 use Modules\Restaurent\Http\Controllers\DueOrderController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-
-    // Customer Management Routes
-    Route::post('/check-customer-by-phone', [OrderController::class, 'checkCustomerByPhone'])->name('check.customer.by.phone');
-    Route::get('/api/customers/{customerId}/recent-orders', [OrderController::class, 'getCustomerRecentOrders']);
-
     // Resource Routes
     Route::resource('restaurents', RestaurentController::class)->names('restaurent');
     Route::resource('sections', SectionController::class)->names('sections');
@@ -56,15 +51,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Specific Order Pages
     Route::get('create/orders', [OrderController::class, 'createNewOrder'])->name('createorders');
-    Route::get('tab/order/{id}', [RestaurentController::class, 'table_order'])->name('tab.order');
-    Route::get('office/order/{id}', [RestaurentController::class, 'office_order'])->name('office.order');
-
-    // Specific Order Submission Routes (Legacy)
-    Route::post('office/orders/submit', [OrderController::class, 'office_orders_submit'])->name('office.orders.submit');
-    Route::post('tables/orders/submit', [OrderController::class, 'table_orders_submit'])->name('tables.orders.submit');
-    Route::post('/tables/orders/update', [OrderController::class, 'table_orders_update'])->name('tables.orders.update');
-    Route::post('/office/orders/update', [OrderController::class, 'office_orders_update'])->name('office.orders.update');
-    Route::get('/api/office/{officeId}/recent-orders', [OrderController::class, 'getOfficeRecentOrders'])->name('office.recent.orders');
 
     // API Routes
     Route::get('api/tables', [OrderController::class, 'getTables']);
@@ -101,10 +87,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/check-notification', [OrderController::class, 'check']);
     Route::post('/reset-notification', [OrderController::class, 'reset']);
 
-    Route::get('/notify/{table_number}', [OrderController::class, 'setNotification']);
     Route::post('/reset-single-notification', [OrderController::class, 'resetSingleNotification']);
 
     // check kitchen order notification
     Route::get('/check-kitchen', [KitchenController::class, 'checkKitchen'])->name('check.kitchen');
     Route::post('/orders/serve/{id}', [KitchenController::class, 'serveOrdertocustomer'])->name('orders.serve');
 });
+
+ Route::get('tab/order/{id}/{restaurent_id}', [RestaurentController::class, 'table_order'])->name('tab.order');
+  Route::get('/notify/{table_number}', [OrderController::class, 'setNotification']);
+
+   // Customer Management Routes
+    Route::post('/check-customer-by-phone', [OrderController::class, 'checkCustomerByPhone'])->name('check.customer.by.phone');
+    Route::get('/api/customers/{customerId}/{restaurantId}/recent-orders', [OrderController::class, 'getCustomerRecentOrders']);
+
+        // Specific Order Submission Routes (Legacy)
+         Route::get('office/order/{id}/{resturant_id}', [RestaurentController::class, 'office_order'])->name('office.order');
+    Route::post('office/orders/submit', [OrderController::class, 'office_orders_submit'])->name('office.orders.submit');
+    Route::post('tables/orders/submit', [OrderController::class, 'table_orders_submit'])->name('tables.orders.submit');
+    Route::post('/tables/orders/update', [OrderController::class, 'table_orders_update'])->name('tables.orders.update');
+    Route::post('/office/orders/update', [OrderController::class, 'office_orders_update'])->name('office.orders.update');
+Route::get('/api/office/{officeId}/recent-orders/{restaurantId}', [OrderController::class, 'getOfficeRecentOrders'])->name('office.recent.orders');

@@ -203,21 +203,24 @@ class RestaurentController extends Controller
         return response()->json(['success' => true, 'message' => 'Order status updated to Completed', 'status' => 'Completed']);
     }
 
-    public function table_order($id)
+    public function table_order($id, $restaurent_id)
     {
-        $categories = Category::where('restaurent_id', auth()->user()->restaurent_id)->get();
 
-        $menus = Menu::with('variations')->where('restaurent_id', auth()->user()->restaurent_id)->get();
+        // dd($restaurent_id);
+
+        $categories = Category::where('restaurent_id', $restaurent_id)->get();
+
+        $menus = Menu::with('variations')->where('restaurent_id', $restaurent_id)->get();
         $restaurent_table = RestaurentTable::where('id', $id)->first();
         // dd($restaurent_table);
         $orders = Order::with('items', 'table', 'office', 'customer')->get();
-        return view('restaurent::orders.order', compact('id', 'orders', 'restaurent_table', 'categories', 'menus'));
+        return view('restaurent::orders.order', compact('id', 'orders', 'restaurent_table', 'categories', 'menus', 'restaurent_id'));
     }
 
     public function checkCustomerByPhone(Request $request)
     {
         $phone = $request->phone;
-        $restaurant_id = auth()->user()->restaurent_id;
+        $restaurant_id = $request->restaurent_id;
 
         $customer = Customer::where('phone', $phone)
             ->where('restaurent_id', $restaurant_id)
@@ -231,7 +234,7 @@ class RestaurentController extends Controller
 
     public function getRestaurantProducts(Request $request)
     {
-        $restaurant_id = auth()->user()->restaurent_id;
+        $restaurant_id = $request->restaurent_id;
         $query = $request->query('query', '');
 
         $products = Product::where('restaurent_id', $restaurant_id)
@@ -270,15 +273,17 @@ class RestaurentController extends Controller
 
         return response()->json($customer);
     }
-    public function office_order(Request $request, $id)
+    public function office_order(Request $request, $id, $restaurent_id  )
     {
-        $categories = Category::where('restaurent_id', auth()->user()->restaurent_id)->get();
+        $restaurant_id = $restaurent_id;
+        // dd("Debug stop at office order method");
+        $categories = Category::where('restaurent_id', $restaurant_id)->get();
         $office = OfficeRegister::where('id', $id)->first();
-        $menus = Menu::with('variations')->where('restaurent_id', auth()->user()->restaurent_id)->get();
+        $menus = Menu::with('variations')->where('restaurent_id', $restaurant_id)->get();
         $restaurent_table = RestaurentTable::where('id', $id)->first();
-        $customers = Customer::where('restaurent_id', auth()->user()->restaurent_id)->get();
+        $customers = Customer::where('restaurent_id', $restaurant_id)->get();
         // dd($restaurent_table);
         $orders = Order::with('items', 'table', 'office', 'customer')->get();
-        return view('restaurent::orders.office_order', compact('id', 'orders', 'office', 'categories', 'menus', 'customers'));
+        return view('restaurent::orders.office_order', compact('id', 'orders', 'office', 'categories', 'menus', 'customers', 'restaurant_id'));
     }
 }

@@ -121,9 +121,9 @@
                                             <label for="restaurent_id">Branch <span class="text-danger">*</span></label>
                                             <select class="form-control" name="restaurent_id" id="restaurent_id" required>
                                                 <option value="" selected disabled>Select Branch</option>
-                                                @foreach ($branches as $branch)
-                                                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                                                @endforeach
+                                                {{-- @foreach ($branches as $branch) --}}
+                                                    {{-- <option value="{{ $branch->id }}">{{ $branch->name }}</option> --}}
+                                                {{-- @endforeach --}}
 
                                             </select>
                                         </div>

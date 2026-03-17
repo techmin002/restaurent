@@ -1524,10 +1524,14 @@
         const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
 
         // Function to fetch recent orders for office
+        // Function to fetch recent orders for office
         function fetchRecentOrders() {
-            console.log('Fetching recent orders for office: {{ $office->id ?? '' }}');
+            let officeId = "{{ $office->id ?? '' }}";
+            let restaurantId = "{{ $office->restaurent_id ?? '' }}";
 
-            fetch(`/api/office/{{ $office->id ?? '' }}/recent-orders`, {
+            console.log('Fetching recent orders for office:', officeId, 'restaurant:', restaurantId);
+
+            fetch(`/api/office/${officeId}/recent-orders/${restaurantId}`, {
                     method: 'GET',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -1546,9 +1550,9 @@
                     displayRecentOrders(data);
 
                     if (data && data.length > 0) {
-                        const incompleteOrder = data.find(order =>
-                            order.status === 'pending' || order.status === 'confirmed' || order.status ===
-                            'preparing' || order.status === 'accepted'
+                        // Check for incomplete orders
+                        const incompleteOrder = data.find(order => ['pending', 'accepted', 'sent to kitchen', 'cooking']
+                            .includes(order.status)
                         );
 
                         if (incompleteOrder) {
@@ -1568,6 +1572,7 @@
         }
 
         // Function to display recent orders with totals
+        // Function to display recent orders with totals
         function displayRecentOrders(orders) {
             const container = $('#recentOrdersContainer');
 
@@ -1579,7 +1584,7 @@
                 return;
             }
 
-            let html = '<h6 class="mb-3"><i class="fas fa-history me-2"></i>Recent Office Orders</h6>';
+            let html = '<h6 class="mb-3"><i class="fas fa-history me-2"></i>Recent Office Orders (Last 24 Hours)</h6>';
             recentOrdersTotal = 0;
 
             orders.forEach(order => {
@@ -1589,27 +1594,37 @@
                 recentOrdersTotal += orderTotal;
 
                 html += `
-                    <div class="order-item">
-                        <div class="order-header">
-                            <span>Order #${order.id}</span>
-                            <span class="order-status ${statusClass}">${order.status}</span>
-                        </div>
-                        <div class="order-time small text-muted mb-2">
-                            <i class="fas fa-clock me-1"></i>${orderTime}
-                        </div>
-                        <div class="order-items">
-                            ${order.items && order.items.length > 0 
-                                ? order.items.map(item => 
-                                    `${item.qty}x ${item.item_name} ${item.variation_name ? '(' + item.variation_name + ')' : ''}`
-                                  ).join(', ')
-                                : 'No items'
-                            }
-                        </div>
-                        <div class="order-total small text-muted mt-2">
-                            <strong>Order Total: Rs. ${orderTotal.toFixed(2)}</strong>
-                        </div>
+            <div class="order-item">
+                <div class="order-header">
+                    <span><strong>Order #${order.id}</strong></span>
+                    <span class="order-status ${statusClass}">${order.status}</span>
+                </div>
+                <div class="order-time small text-muted mb-2">
+                    <i class="fas fa-clock me-1"></i>${orderTime}
+                </div>
+                <div class="order-items">
+                    ${order.items && order.items.length > 0
+                        ? order.items.map(item => {
+                            const variantText = item.variation_name ? ` (${item.variation_name})` : '';
+                            return `<div class="mb-1">• ${item.qty}x ${item.item_name}${variantText} - Rs ${(item.price * item.qty).toFixed(2)}</div>`;
+                          }).join('')
+                        : '<div class="text-muted">No items</div>'
+                    }
+                </div>
+                <div class="order-total mt-2 pt-1 border-top">
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal:</span>
+                        <span>Rs ${order.calculated_total ? order.calculated_total.toFixed(2) : '0.00'}</span>
                     </div>
-                `;
+                    ${order.grand_total ? `
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Grand Total:</span>
+                                <span>Rs ${order.grand_total.toFixed(2)}</span>
+                            </div>
+                            ` : ''}
+                </div>
+            </div>
+        `;
             });
 
             container.html(html).show();
@@ -1696,13 +1711,17 @@
         }
 
         // Helper function to get status class
+        // Helper function to get status class
         function getStatusClass(status) {
             const statusMap = {
                 'pending': 'status-pending',
-                'confirmed': 'status-preparing',
-                'preparing': 'status-preparing',
+                'accepted': 'status-preparing',
+                'sent to kitchen': 'status-preparing',
+                'cooking': 'status-preparing',
                 'ready': 'status-ready',
-                'completed': 'status-completed'
+                'serve': 'status-ready',
+                'completed': 'status-completed',
+                'unknown': 'status-pending'
             };
             return statusMap[status] || 'status-pending';
         }

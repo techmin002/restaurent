@@ -16,6 +16,11 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
+    public function login()
+    {
+        return view('auth.login');
+    }
+
     public function index()
     {
 
@@ -39,11 +44,14 @@ class HomeController extends Controller
 
         $servingOrdersCount = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'serve')
+            ->wheredate('created_at', $today)
             ->limit(5)
             ->count();
 
         $completedOrdersCount = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'completed')
+             ->orwhere('status', 'Due')
+            ->wheredate('created_at', $today)
             ->count();
 
         // --- Orders Lists ---
