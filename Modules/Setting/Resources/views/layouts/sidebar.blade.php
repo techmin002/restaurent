@@ -204,12 +204,14 @@
                                     </a>
                                 </li>
                                 {{-- Only include if routes exist --}}
+                                @can('kitchen_managemet')
                                 <li class="nav-item">
                                     <a href="{{ route('kitchenorders') }}"
                                         class="nav-link {{ request()->routeIs('kitchenorders') ? 'active' : '' }}">
                                         <p>Kitchen Order</p>
                                     </a>
                                 </li>
+                                @endcan
                                 <li class="nav-item">
                                     <a href="{{ route('receptionorders') }}"
                                         class="nav-link {{ request()->routeIs('receptionorders') ? 'active' : '' }}">

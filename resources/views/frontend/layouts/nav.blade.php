@@ -8,8 +8,8 @@
             <button class="navbar-toggler p-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="staticBackdrop">
                 <i class="fa fa-bars" aria-hidden="true"></i>
             </button>
-            <a href="" class="header-logo">
-            <img src="{{ asset('upload/images/settings/' . $profile->logo) }}"
+            <a href="" style="margin-left: 100px;">
+            <img width="100" height="60" style="border-radius: 50px;" src="{{ asset('upload/images/settings/' . $profile->logo) }}"
      alt="Company Logo"
      class="header-logo">
             </a>

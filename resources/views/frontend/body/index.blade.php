@@ -84,7 +84,7 @@
                     <div class="text-center service-card"
                          style="background: #ECEFFF">
                         <div class="image">
-                            <img src="{{ asset('upload/images/features/'.$feature->image) }}"
+                            <img width="150" height="100" src="{{ asset('upload/images/features/'.$feature->image) }}"
                                  alt="{{ $feature->title }}" class="img-fluid">
                         </div>
                         <div class="service-content mt-2">

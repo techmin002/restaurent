@@ -40,6 +40,7 @@ class HomeController extends Controller
 
         $kitchenOrdersCount = Order::where('restaurent_id', $restaurant_id)
             ->where('status', 'sent to kitchen')
+            ->orwhere('status', 'preparing')
             ->count();
 
         $servingOrdersCount = Order::where('restaurent_id', $restaurant_id)

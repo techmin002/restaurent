@@ -1110,16 +1110,20 @@
                                     </div>
                                 </div>
 
+                                <!-- Add this hidden input field -->
+                                <input type="hidden" id="restaurant_id" name="restaurant_id"
+                                    value="{{ auth()->user()->restaurent_id ?? '' }}">
+
                                 <!-- Dine In Table Number Field -->
                                 <div class="new-order-form-group new-order-type-field show" id="dineInField">
                                     <label for="tableNumber" class="new-order-form-label">Select Table</label>
                                     <select class="form-control" id="tableNumber" name="table_number">
                                         <option value="">-- Select Table --</option>
                                         @foreach ($tables as $table)
-                                            @if ($table->booking_status === 'no')
-                                                <option value="{{ $table->table_number }}">Table
-                                                    {{ $table->table_number }}</option>
-                                            @endif
+                                            {{-- @if ($table->booking_status === 'no') --}}
+                                            <option value="{{ $table->table_number }}">Table
+                                                {{ $table->table_number }}</option>
+                                            {{-- @endif --}}
                                         @endforeach
                                     </select>
                                     @if (!$tables->where('booking_status', 'no')->count())
@@ -1565,6 +1569,10 @@
                 showPhoneFeedback('Checking customer...', 'info');
 
                 try {
+                    // Get restaurant ID
+                    const restaurantId = document.getElementById('restaurant_id')?.value ||
+                        {{ auth()->user()->restaurent_id ?? 'null' }};
+
                     const response = await fetch('{{ route('check.customer.by.phone') }}', {
                         method: 'POST',
                         headers: {
@@ -1573,7 +1581,8 @@
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify({
-                            phone
+                            phone: phone,
+                            restaurant_id: restaurantId // Add this!
                         })
                     });
 
@@ -1583,7 +1592,7 @@
                         elements.customerNameField.value = data.customer.name || '';
                         elements.customerNameInput.value = data.customer.name || '';
                         showPhoneFeedback('Customer found! Name auto-filled.', 'success');
-                        fetchRecentOrders(data.customer.id);
+                        fetchRecentOrders(data.customer.id); // This will now use the restaurant ID
                     } else {
                         elements.customerNameField.value = '';
                         elements.customerNameInput.value = '';
@@ -1600,6 +1609,7 @@
             }
 
             // Fetch recent orders for customer
+            // Fetch recent orders for customer
             async function fetchRecentOrders(customerId) {
                 if (!customerId) {
                     hideRecentOrders();
@@ -1608,15 +1618,36 @@
                 }
 
                 try {
-                    const response = await fetch(`/api/customers/${customerId}/recent-orders`);
+                    // Get restaurant ID - you need to pass this from your backend
+                    // Option 1: Add a hidden input field in your HTML
+                    const restaurantId = document.getElementById('restaurant_id')?.value ||
+                        {{ auth()->user()->restaurent_id ?? 'null' }};
+
+                    // FIXED: Include restaurantId in the URL
+                    const response = await fetch(`/api/customers/${customerId}/${restaurantId}/recent-orders`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const data = await response.json();
                     displayRecentOrders(data);
 
                     // Check for incomplete orders
                     if (data && data.length > 0) {
                         const incompleteOrder = data.find(order =>
-                            order.status === 'pending' || order.status === 'confirmed' || order.status ===
-                            'accepted'
+                            order.status === 'pending' ||
+                            order.status === 'confirmed' ||
+                            order.status === 'accepted' ||
+                            order.status === 'sent to kitchen' ||
+                            order.status === 'cooking'
                         );
 
                         if (incompleteOrder) {
@@ -1672,8 +1703,8 @@
                         <i class="fas fa-clock me-1"></i>${orderTime}
                     </div>
                     <div class="order-items">
-                        ${order.items && order.items.length > 0 
-                            ? order.items.map(item => 
+                        ${order.items && order.items.length > 0
+                            ? order.items.map(item =>
                                 `${item.qty}x ${item.item_name} ${item.variation_name ? '(' + item.variation_name + ')' : ''}`
                               ).join(', ')
                             : 'No items'

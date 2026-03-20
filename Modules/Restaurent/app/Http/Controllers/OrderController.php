@@ -23,33 +23,51 @@ class OrderController extends Controller
 {
 
 
-    public function index()
+    public function index(Request $request)
     {
-        // All orders (overall)
-        $allOrdersCount = Order::count();
+        $restaurant_id = auth()->user()->restaurent_id;
+        $selectedDate = $request->get('date', now()->toDateString()); // default today
 
-        // All reception orders (overall)
-        $receptionOrdersCount = Order::where('order_source', 'Reception')
-            ->where('status', 'pending') // or adjust your desired status
+        // Base query with restaurant filter
+        $baseQuery = Order::where('restaurent_id', $restaurant_id);
+
+        // Apply date filter if a date is selected
+        if ($selectedDate) {
+            $baseQuery->whereDate('created_at', $selectedDate);
+        }
+
+        // All orders count (filtered by date)
+        $allOrdersCount = (clone $baseQuery)->count();
+
+        // Reception orders count (pending + reception)
+        $receptionOrdersCount = (clone $baseQuery)
+            ->where('order_source', 'Reception')
+            ->where('status', 'pending')
             ->count();
 
-        // All kitchen orders (overall)
-        $kitchenOrdersCount = Order::whereIn('status', ['Sent to Kitchen', 'Cooking'])
+        // Kitchen orders count (Sent to Kitchen / Cooking)
+        $kitchenOrdersCount = (clone $baseQuery)
+            ->whereIn('status', ['Sent to Kitchen', 'Cooking'])
             ->count();
 
-        // All completed orders (overall)
-        $completedOrdersCount = Order::where('status', 'Completed')
+        // Completed orders count
+        $completedOrdersCount = (clone $baseQuery)
+            ->where('status', 'Completed')
             ->count();
 
-        // Fetch all orders with relations (overall)
-        $orders = Order::with('items', 'customer')->get();
+        // Fetch orders for the table, sorted by time (latest first)
+        $orders = (clone $baseQuery)
+            ->with('items', 'customer')
+            ->orderBy('created_at', 'desc')  // sort by time
+            ->get();
 
         return view('restaurent::orders.index', compact(
             'allOrdersCount',
             'receptionOrdersCount',
             'kitchenOrdersCount',
             'completedOrdersCount',
-            'orders'
+            'orders',
+            'selectedDate'
         ));
     }
 
@@ -110,7 +128,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd('hello');
         $request->validate([
             'orderType' => 'required|in:dinein,takeaway,office',
             'menu_id' => 'required|array',
@@ -1011,6 +1029,7 @@ class OrderController extends Controller
      */
     public function storeMenuOrder(Request $request)
     {
+        // dd('Debug stop at the beginning of storeMenuOrder');
         $restaurant_id = auth()->user()->restaurent_id;
 
         // Validate common fields
@@ -1102,13 +1121,6 @@ class OrderController extends Controller
                     return response()->json([
                         'success' => false,
                         'message' => 'Selected table does not exist'
-                    ], 422);
-                }
-
-                if ($table->booking_status === 'yes') {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Selected table is already occupied'
                     ], 422);
                 }
 
@@ -1431,14 +1443,16 @@ class OrderController extends Controller
 
     public function completedOrders()
     {
-        $start = Carbon::now('Asia/Kathmandu')->startOfDay();
-        $end   = Carbon::now('Asia/Kathmandu')->endOfDay();
+        // dd('Debug stop at the beginning of completedOrders');
+        $restaurant_id = auth()->user()->restaurent_id;
+        // $start = Carbon::now('Asia/Kathmandu')->startOfDay();
+        // $end   = Carbon::now('Asia/Kathmandu')->endOfDay();
 
-
+        // dd($restaurant_id);
         $query = Order::with('items.menu', 'items.variation', 'table', 'customer', 'office',)
-            ->where('restaurent_id', auth()->user()->restaurent_id)
-            ->where('order_source', 'Reception')
-            ->whereBetween('created_at', [$start, $end])
+            ->where('restaurent_id', $restaurant_id)
+            // ->where('order_source', 'Reception')
+            // ->whereBetween('created_at', [$start, $end])
             ->where('status', 'Completed')
             ->orWhere('status', 'Due');
 

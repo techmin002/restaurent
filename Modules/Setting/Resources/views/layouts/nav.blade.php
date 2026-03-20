@@ -37,7 +37,7 @@
                 <i class="fas fa-th-large"></i>
             </a>
         </li>
-        @can('access_counter_management')
+        {{-- @can('access_counter_management')
             <button id="counterBtn" class="counter-custom-btn" data-state="open">
                 <i class="fa-solid fa-toggle-on counter-btn-icon"></i>
                 <span class="counter-btn-text">Open Counter</span>
@@ -75,7 +75,7 @@
             <audio id="counterNotificationSound" preload="auto">
                 <source src="{{ asset('sounds/notification.mp3') }}" type="audio/mpeg">
             </audio>
-        @endcan
+        @endcan --}}
 
         @guest
             @if (Route::has('login'))
@@ -1296,7 +1296,7 @@
                             <span class="counter-badge bg-primary">Total Revenue: Rs. ${parseFloat(summary.total_revenue || 0).toFixed(2)}</span>
                         </div>
                     </div>
-                    
+
                     <div class="counter-table-container">
                         <table class="counter-orders-table">
                             <thead>
@@ -1305,7 +1305,7 @@
                                     <th>Time</th>
                                     <th>Type</th>
                                     <th>Customer/Office</th>
-                                  
+
                                     <th>Items</th>
                                     <th>Total Qty</th>
                                     <th>Subtotal</th>
@@ -1344,7 +1344,7 @@
                                 ${customerContact ? `<div class="counter-customer-contact"><i class="fas fa-phone"></i> ${customerContact}</div>` : ''}
                             </div>
                         </td>
-                      
+
                         <td class="counter-table-cell counter-items-cell">
                             <div class="counter-items-list">
                                 ${itemsList}
@@ -1356,7 +1356,7 @@
                         <td class="counter-table-cell counter-amount-cell">
                             Rs. ${parseFloat(order.sub_total || 0).toFixed(2)}
                         </td>
-                      
+
                         <td class="counter-table-cell counter-total-cell">
                             <strong class="counter-grand-total">Rs. ${parseFloat(order.grand_total || 0).toFixed(2)}</strong>
                         </td>
@@ -1515,11 +1515,11 @@
                     </div>
                     ${modalContent}
                     <script>
-                        document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
+                        document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
                         });
                         window.print();
                     <\/script>
@@ -1580,20 +1580,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Get modal element
             var kitchenModalEl = document.getElementById('kitchenModal');
-            
+
             // Check if Bootstrap modal is available
             if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
                 console.error('Bootstrap JavaScript not loaded properly');
                 return;
             }
-            
+
             // Initialize modal with proper options
             var kitchenModal = new bootstrap.Modal(kitchenModalEl, {
                 backdrop: true,
                 keyboard: true,
                 focus: true
             });
-            
+
             var modalShown = false;
             var alertSound = document.getElementById('kitchenAlertSound');
 
@@ -1605,8 +1605,8 @@
 
             // Add manual close event listener to Close button
             document.addEventListener('click', function(e) {
-                if (e.target && e.target.classList.contains('btn-secondary') && 
-                    e.target.closest('#kitchenModal') && 
+                if (e.target && e.target.classList.contains('btn-secondary') &&
+                    e.target.closest('#kitchenModal') &&
                     e.target.getAttribute('data-bs-dismiss') === 'modal') {
                     closeModalManually();
                 }
@@ -1691,7 +1691,7 @@
 
             // Initial check
             checkOrders();
-            
+
             // Set up interval for checking orders
             setInterval(checkOrders, 10000);
 
@@ -1704,7 +1704,7 @@
             kitchenModalEl.addEventListener('hide.bs.modal', function() {
                 console.log('Modal hide event triggered');
             });
-            
+
             kitchenModalEl.addEventListener('show.bs.modal', function() {
                 console.log('Modal show event triggered');
             });
